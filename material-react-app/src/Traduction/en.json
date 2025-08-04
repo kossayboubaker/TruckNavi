@@ -1,0 +1,496 @@
+{
+  "truckManagement": "Truck Management",
+  "searchPlaceholder": "Search...",
+  "addTruck": "Add Truck",
+  "editTruck": "Edit Truck",
+  "add": "Add",
+  "update": "Update",
+  "brand": "Brand",
+  "capacity": "Capacity",
+  "mileage": "Mileage",
+  "registration": "Registration",
+  "status": "Status",
+  "inService": "🟢 In Service",
+  "outOfService": "🔴 Out of Service",
+  "underMaintenance": "🛠️ Under Maintenance",
+  "cancel": "Cancel",
+  "deleteConfirmTitle": "Are you sure you want to delete this truck?",
+  "delete": "Delete",
+  "errorLoading": "Error loading data.",
+  "errorDeleting": "Error deleting truck.",
+  "errorSaving": "Error saving truck.",
+  "truckDeleted": "Truck deleted successfully.",
+  "truckAdded": "Truck added successfully.",
+  "truckUpdated": "Truck updated successfully.",
+  
+
+   "accountSettings": "Account Settings",
+  "personalInfo": "Personal Info",
+  "updateProfile": "Update Profile",
+  "security": "Security",
+  "userDetails": "User Details",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "email": "Email",
+  "phoneNumber": "Phone Number",
+  "country": "Country",
+  "post": "Post",
+  "status": "Status",
+  "available": "Available",
+  "onRoute": "On Route",
+  "offDuty": "Off Duty",
+  "changePassword": "Change Password",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmNewPassword": "Confirm New Password",
+  "updateSuccess": "Profile updated successfully.",
+  "updateError": "Error updating profile.",
+  "avatarSuccess": "Avatar updated successfully.",
+  "avatarError": "Error updating avatar.",
+  "passwordSuccess": "Password updated successfully!",
+  "passwordError": "Error updating password.",
+
+  
+  "companyProfile": "Company Profile",
+  "avatarSuccess": "Image updated successfully.",
+  "avatarError": "Error while updating image.",
+  "updateSuccess": "Profile updated successfully.",
+  "updateError": "Error while updating profile.",
+  "companyInfo": "Company Info",
+  "updateCompany": "Update Company",
+  "companyDetails": "Company Details",
+  "companyName": "Company Name",
+  "companyEmail": "Company Email",
+  "vatCode": "VAT Code",
+  "address": "Address",
+  "phone": "Phone Number",
+  "legalRep": "Legal Representative",
+
+
+  "usersTable": "Users Table",
+  "search": "Search...",
+  "createUser": "Create User",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "email": "Email",
+  "role": "Role",
+  "phone": "Phone",
+  "country": "Country",
+  "post": "Post",
+  "companyName": "Company Name",
+  "vatCode": "VAT Code",
+  "status": "Status",
+  "active": "Active",
+  "inactive": "Inactive",
+  "createdAt": "Created At",
+  "actions": "Actions",
+  "tooltipDisabled": "Action not allowed for Super Admin",
+  "viewUserInfo": "View User Info",
+  "assignDriver": "Assign a driver to this manager",
+  "confirmDelete": "Confirm Delete",
+  "confirmDeleteText": "Are you sure you want to delete this user?",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "loading": "Loading...",
+  "manager": "Manager",
+  "driver": "Driver",
+  "assignDialogTitle": "Assign a driver to a manager",
+  "searchDriver": "Search for a driver",
+  "selectDriver": "Driver",
+  "selectPlaceholder": "-- Select a driver --",
+  "page": "Page",
+  "assign": "Assign",
+
+  
+  "trip": {
+    "management": "Trip Management",
+    "startPoint": "Start Point",
+    "destination": "Destination",
+    "date": "Departure Date",
+    "time": "Departure Time",
+    "truck": "Truck",
+    "driver": "Driver",
+    "actions": "Actions",
+    "addTrip": "Add Trip",
+    "editTrip": "Edit Trip",
+    "newTrip": "New Trip",
+    "save": "Save",
+    "cancel": "Cancel",
+    "deleteConfirm": "Are you sure you want to delete this trip?",
+    "delete": "Delete",
+    "dateInvalid": "Departure date must be in the future.",
+    "tripDeleted": "Trip deleted successfully.",
+    "deleteError": "Error deleting trip.",
+    "tripSaved": "Trip created successfully.",
+    "tripUpdated": "Trip updated successfully.",
+    "serverError": "Server error."
+  },
+  
+  "typing": "{{name}} is typing...",
+  "writeMessage": "Write a message...",
+  "showMore": "Show more",
+  "file": "📎 File",
+  "send": "Send",
+  "cancel": "Cancel",
+  
+  "searchUser": "Search for a user",
+  "selectConversation": "Select a conversation",
+  
+  "driverList": "Driver List",
+  "addDriver": "Add Driver",
+  "addNewDriver": "Add New Driver",
+  "driverEmail": "Driver Email",
+  "submitRequest": "Submit Request",
+  "cancel": "Cancel",
+  "firstName": "First Name",
+  "lastName": "Last Name",
+  "email": "Email",
+  "country": "Country",
+  "phone": "Phone",
+  "status": "Status",
+  "active": "Active",
+  "yes": "Active",
+  "no": "Inactive",
+  "createdAt": "Created At",
+  "actions": "Actions",
+  "deleteConfirm": "Are you sure you want to delete this driver?",
+  "toggleTooltip": "Enable/Disable",
+  "deleteTooltip": "Delete",
+  "infoTooltip": "View Info",
+
+  
+ 
+  "tripManagement": "Trip Management",
+  "addTrip": "Add Trip",
+  "start": "Start",
+  "destination": "Destination",
+  "date": "Date",
+  "time": "Time",
+  "truck": "Truck",
+  "driver": "Driver",
+  "status": "Status",
+  "actions": "Actions",
+  "editTrip": "Edit Trip",
+  "newTrip": "New Trip",
+  "startPoint": "Starting Point",
+  "departureDate": "Departure Date",
+  "departureTime": "Departure Time",
+  "save": "Save",
+  "cancel": "Cancel",
+  "confirmDelete": "Are you sure you want to delete this trip?",
+  "delete": "Delete",
+  "departureDateError": "Departure date must be later than today.",
+  "tripUpdated": "Trip updated.",
+  "tripAdded": "Trip added.",
+  "tripDeleted": "Trip deleted successfully.",
+  "tripDeleteFailed": "Failed to delete trip.",
+  "serverError": "Server error.",
+
+  
+  "leaveManagement": "Leave Management",
+  "addLeave": "Add Leave",
+  "today": "Today",
+  "previous": "Previous",
+  "next": "Next",
+  "month": "Month",
+  "week": "Week",
+  "day": "Day",
+  "agenda": "Agenda",
+  "noEventsInRange": "No events in this range",
+  "detailsTitle": "Leave Details",
+  "from": "From",
+  "to": "To",
+  "leaveType": "Leave Type",
+  "reason": "Reason",
+  "status": "Status",
+  "delete": "Delete",
+  "edit": "Edit",
+  "editLeave": "Edit Leave",
+  "newLeave": "New Leave",
+  "startDate": "Start Date",
+  "endDate": "End Date",
+  "uploadJustification": "Upload Justification",
+  "save": "Save",
+  "confirmDelete": "Are you sure you want to delete this leave?",
+  "fetchError": "Error while fetching leaves.",
+  "fileTypeError": "Unsupported file type. Allowed formats: PDF, JPG, PNG.",
+  "leaveSaved": "Leave saved successfully.",
+  "saveError": "Error while saving leave.",
+  "leaveDeleted": "Leave deleted.",
+  "deleteError": "Error while deleting leave.",
+  
+  "calendar2": {
+    "title": "Unified Calendar (Trips & Leaves)",
+    "filterLabel": "Filter by",
+    "filters": {
+      "all": "All",
+      "trips": "Trips",
+      "leaves": "Leaves"
+    },
+    "addLeave": "Add Leave",
+    "today": "Today",
+    "previous": "Previous",
+    "next": "Next",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "agenda": "Agenda",
+    "noEvents": "No events in this range",
+    "trip": "Trip",
+    "leave": "Leave"
+  },
+  "modal": {
+    "tripTitle": "Trip",
+    "leaveTitle": "Leave",
+    "date": "Date",
+    "time": "Time",
+    "from": "From",
+    "to": "To",
+    "truck": "Truck",
+    "start": "From",
+    "end": "To",
+    "type": "Type",
+    "reason": "Reason",
+    "status": "Status",
+    "delete": "Delete",
+    "edit": "Edit",
+    "confirmDelete": "Confirm leave deletion?"
+  },
+  "form2": {
+    "editTitle": "Edit Leave",
+    "newTitle": "New Leave",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "type": "Leave Type",
+    "types": {
+      "maladie": "Sick Leave",
+      "mariage": "Marriage Leave",
+      "vacance": "Vacation",
+      "autre": "Other"
+    },
+    "reason": "Reason",
+    "upload": "Attach a justification (PDF/Image)",
+    "edit": "Edit",
+    "save": "Save",
+    "fileTypeError": "Only PDF, JPG or PNG files are allowed"
+  },
+  "snackbar": {
+    "loadError": "Failed to load data",
+    "saved": "Leave saved successfully",
+    "saveError": "Error saving leave",
+    "deleted": "Leave deleted",
+    "deleteError": "Error deleting leave"
+  },
+
+  
+  "signIn": "Sign in",
+  "email": "Email",
+  "password": "Password",
+  "forgotPassword": "Forgot your password?",
+  "rememberMe": "Remember me",
+  "dontHaveAccount": "Don't have an account?",
+  "signUp": "Sign up",
+  "loginError": "Login error.",
+  "unknownRole": "Unrecognized role."
+, 
+
+  "register": {
+    "title": "Create Super Admin Account",
+    "step1": "Enter your personal info",
+    "step2": "Enter your company info"
+  },
+  "form1": {
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "password": "Password",
+    "phoneNumber": "Phone Number",
+    "selectCity": "Select your city",
+    "agreePrefix": "I agree to the",
+    "terms": "Terms and Conditions",
+    "company_name": "Company Name",
+    "campany_email": "Company Email",
+    "code_tva": "TVA Code",
+    "Campany_adress": "Company Address",
+    "num_campany": "Company Phone Number",
+    "representant_legal": "Legal Representative",
+     "alreadyAccount": "Already have an account?",
+    "signIn": "Sign in"
+  },
+  "validation": {
+    "firstNameRequired": "First name is required",
+    "lastNameRequired": "Last name is required",
+    "onlyLetters": "Must contain only letters",
+    "emailRequired": "Email is required",
+    "invalidEmail": "Invalid email format",
+    "passwordRequired": "Password is required",
+    "passwordLength": "Password must be at least 8 characters",
+    "phoneRequired": "Phone number is required",
+    "onlyNumbers": "Must contain only numbers",
+    "cityRequired": "City is required",
+    "agreeRequired": "You must agree to the terms",
+    "companyNameRequired": "Company name is required",
+    "companyEmailRequired": "Company email is required",
+    "tvaCodeRequired": "TVA code is required",
+    "companyAddressRequired": "Company address is required",
+    "companyPhoneRequired": "Company phone number is required",
+    "legalRepresentativeRequired": "Legal representative is required"
+  },
+  "buttons1": {
+    "next": "Next",
+    "signUp": "Sign Up"
+  },
+  
+  "forgot": {
+    "title": "Reset Password",
+    "subtitle": "You will receive an e-mail in maximum 60 seconds",
+    "validation": {
+      "invalidEmail": "The email must be valid.",
+      "serverError": "An error occurred while sending the reset email."
+    },
+    "successMessage": "Please check your email to reset your password.",
+    "demoMessage": "You can't update the password in the demo version"
+  },
+  "form": {
+    "email": "Email"
+  },
+  "buttons": {
+    "reset": "Reset"
+  }
+,
+  
+  "menu": {
+    "dashboard": "Dashboard",
+    "companyProfile": "Company Profile",
+    "userProfile": "User Profile",
+    "userManagement": "User Management",
+    "vehiculeManagement": "Vehicle Management",
+    "tripManagement": "Trip Management",
+    "driverManagement": "Driver Management",
+    "tripManagerManagement": "Trip Manager Management",
+    "calendar": "Calendar",
+    "leaveCalendar": "Leave Calendar",
+    "infosByUser": "Info by User",
+    "chat": "Chat",
+    "Maps":"Maps"
+  },
+  
+  "searchHere": "Search here",
+  "noNotification": "No notification",
+  "logout": "Log Out",
+  "accept": "Accept",
+  "reject": "Reject",
+  "driverAccepted": "Driver accepted.",
+  "driverRejected": "Driver rejected.",
+  "tripAccepted": "Trip accepted successfully.",
+  "tripRejected": "Trip rejected successfully.",
+  "tripError": "Error processing the trip.",
+  "leaveAccepted": "Leave request accepted.",
+  "leaveRejected": "Leave request rejected.",
+  "leaveError": "Error processing the leave request.",
+  "french": "Français",
+  "english": "English",
+
+
+  "leaveTitle": "Leave",
+  "tripTitle": "Trip",
+  "errorLoadingData": "Error loading data",
+  "leaveDetails": "Leave Details",
+  "tripDetails": "Trip Details",
+  "startDate": "Start Date:",
+  "endDate": "End Date:",
+  "type": "Type:",
+  "reason": "Reason:",
+  "notSpecified": "Not specified",
+  "status": "Status:",
+  "employee": "Employee:",
+  "departure": "Departure:",
+  "destination": "Destination:",
+  "date": "Date:",
+  "time": "Time:",
+  "driver": "Driver:",
+  "truck": "Truck:",
+  "noDetails": "No details available",
+  "globalView": "Global Overview – Leaves & Trips",
+  "filterBy": "Filter by",
+  "all": "All",
+  "leaves": "Leaves",
+  "trips": "Trips",
+  "calendar": {
+    "today": "Today",
+    "previous": "Previous",
+    "next": "Next",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "agenda": "Agenda",
+    "noEventsInRange": "No events in this range",
+    "more": "more"
+  },
+  
+  "resetPasswordTitle": "Reset Your Password",
+  "resetPasswordSubtitle": "Enter your new password and confirm it",
+  "newPassword": "New Password",
+  "confirmPassword": "Confirm Password",
+  "passwordTooShort": "Password must be at least 8 characters long.",
+  "passwordsDoNotMatch": "Passwords do not match.",
+  "passwordResetSuccess": "Password reset successfully.",
+  "passwordResetError": "An error occurred while resetting the password.",
+  "processing": "Processing...",
+  "resetPassword": "Reset Password",
+  "alreadyHaveAccount": "Already have an account?",
+  "signIn": "Sign in",
+  "form3": {
+    "signIn": "Sign In",
+    "email": "Email",
+    "password": "Password"},
+    "layout": {
+      "title": "Log in",
+      "helper1": "You can log in with",
+      "helper2": "Username admin@jsonapi.com with password secret"
+    },
+    
+  "truckId": "Truck ID",
+  "truckType": "Truck type",
+  "weight": "Weight (kg)",
+  "height": "Height (m)",
+  "width": "Width (m)",
+  "length": "Length (m)",
+  "axleCount": "Axle count",
+  "fuelType": "Fuel type",
+  "fuelConsumption": "Fuel consumption (L/100km)",
+  "emissionRate": "Emission rate (g/km)",
+  "ecoMode": "Eco mode enabled",
+  "hazardousCargo": "Carrying hazardous cargo",
+  "maxAllowedSpeed": "Max allowed speed (km/h)"
+
+
+
+  
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+}
+

@@ -1,0 +1,189 @@
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --border: 214.3 31.8% 91.4%;
+  --primary: 222.2 47.4% 11.2%;
+  --border-radius: 0.5rem;
+}
+
+/* Reset et styles de base */
+.delivery-app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: hsl(var(--background));
+}
+
+.app-header {
+  padding: 1rem;
+  background: hsl(var(--primary));
+  color: white;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Layout Normal (Desktop) */
+.normal-layout .list-column {
+  flex: 0 0 400px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid hsl(var(--border));
+  overflow: hidden;
+}
+
+.normal-layout .map-column {
+  flex: 1;
+  position: relative;
+  background: hsl(var(--muted));
+}
+
+/* Layout Compact (Mobile) */
+.compact-layout .main-content {
+  flex-direction: column;
+}
+
+.compact-layout .map-column {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.compact-layout .mobile-list-container {
+  flex: 0 0 50vh;
+  overflow-y: auto;
+  background: hsl(var(--background));
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* Styles Responsives */
+@media (max-width: 768px) {
+  .compact-layout .mobile-list-container {
+    flex-basis: 40vh;
+  }
+}
+
+@media (max-height: 600px) {
+  .compact-layout .mobile-list-container {
+    flex-basis: 30vh;
+  }
+}
+
+/* Styles pour la carte */
+.map-container {
+  flex: 1;
+  min-height: 200px;
+  background: hsl(var(--muted));
+  position: relative;
+}
+
+/* Personnalisation de la liste */
+.deliveries-list-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Optimisation des cartes */
+.delivery-card {
+  margin: 0.5rem;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  transition: all 0.2s ease;
+}
+
+.delivery-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Barre de recherche */
+.search-container {
+  padding: 1rem;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem 0.5rem;
+  border-radius: var(--border-radius);
+  border: 1px solid hsl(var(--border));
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  gap: 0.5rem;
+  background: hsl(var(--background));
+  border-top: 1px solid hsl(var(--border));
+}
+
+.pagination button {
+  padding: 0.5rem 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--border-radius);
+  background: hsl(var(--background));
+  cursor: pointer;
+}
+
+.pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* Définition des médias queries */
+@media (max-width: 200px) {
+  /* Styles pour les écrans très petits */
+  .map-container {
+    width: 100%;
+    height: 200px;
+  }
+}
+
+@media (max-width: 250px) {
+  /* Styles pour les écrans petits */
+  .map-container {
+    width: 100%;
+    height: 250px;
+  }
+}
+
+@media (max-width: 320px) {
+  /* Styles pour les écrans moyens */
+  .map-container {
+    width: 100%;
+    height: 300px;
+  }
+}
+
+@media (max-width: 400px) {
+  /* Styles pour les écrans grands */
+  .map-container {
+    width: 100%;
+    height: 400px;
+  }
+}
+
+@media (min-width: 101px) {
+  /* Styles pour les écrans très grands */
+  .map-container {
+    width: 100%;
+    height: 600px;
+  }
+  
+}
+
+

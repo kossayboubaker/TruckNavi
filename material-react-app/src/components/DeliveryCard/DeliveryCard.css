@@ -1,0 +1,121 @@
+.delivery-card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background-color: white;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+  word-break: break-word;
+  min-height: 140px;
+  /* Augmenté à 140px pour réduire l'espacement avec la pagination */
+}
+
+/* Header avec badge éco et ID */
+.delivery-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Badge éco */
+.eco-badge {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.eco-on {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.eco-off {
+  background-color: #e5e7eb;
+  color: #4b5563;
+}
+
+/* ID livraison */
+.delivery-id {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1976d2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  text-align: right;
+  margin-left: 8px;
+}
+
+/* Info véhicule */
+.delivery-card-vehicle-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.truck-icon {
+  width: 20px;
+  height: 20px;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vehicle-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.vehicle-name {
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vehicle-fuel {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+/* Barre de vitesse */
+.delivery-card-speed-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.progress-text {
+  font-weight: 600;
+}
+
+.progress-bar-bg {
+  height: 5px;
+  background-color: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease;
+  background-color: #1976d2;
+}

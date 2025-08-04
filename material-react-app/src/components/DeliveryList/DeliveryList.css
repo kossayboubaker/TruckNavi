@@ -1,0 +1,167 @@
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --border: 214.3 31.8% 91.4%;
+  --primary: 222.2 47.4% 11.2%;
+  --border-radius: 0.5rem;
+}
+
+.list-column {
+  flex: 0 0 400px;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-height: calc(100vh - 60px);
+  border-right: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  overflow: hidden;
+}
+
+.search-container {
+  padding: 0.8rem;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid hsl(var(--border));
+  flex-shrink: 0;
+}
+
+.search-container input {
+  flex: 1;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  border-radius: var(--border-radius);
+  border: 1px solid hsl(var(--border));
+  outline: none;
+}
+
+.deliveries-list-container {
+  flex: 1;
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: hsl(var(--background));
+  min-height: 0;
+}
+
+.delivery-card {
+  width: 92%;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--border-radius);
+  padding: 0.8rem;
+  margin-bottom: 0.4rem;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.delivery-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  border-top: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  flex-shrink: 0;
+}
+
+.pagination button {
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--border-radius);
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Scrollbar personnalisée (très discrète) */
+.deliveries-list-container::-webkit-scrollbar {
+  width: 2px;
+}
+
+.deliveries-list-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.deliveries-list-container::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.1);
+  border-radius: 1px;
+}
+
+.deliveries-list-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.2);
+}
+
+/* Support pour Firefox */
+.deliveries-list-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.1) transparent;
+}
+
+/* Responsive (mobile/tablette) */
+@media (max-width: 768px) {
+  .list-column {
+    flex: none;
+    width: 100%;
+    height: 45vh;
+    max-height: 45vh;
+    border-right: none;
+    border-top: 1px solid hsl(var(--border));
+  }
+
+  .search-container {
+    padding: 0.6rem;
+  }
+
+  .deliveries-list-container {
+    padding: 0;
+    overflow-y: auto;
+  }
+
+  .delivery-card {
+    width: 95%;
+    padding: 0.6rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .pagination {
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .list-column {
+    height: 40vh;
+    max-height: 40vh;
+  }
+
+  .search-container {
+    padding: 0.5rem;
+  }
+
+  .search-container input {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .delivery-card {
+    width: 97%;
+    padding: 0.5rem;
+    margin-bottom: 0.2rem;
+  }
+}

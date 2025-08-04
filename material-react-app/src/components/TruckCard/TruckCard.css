@@ -1,0 +1,103 @@
+/* TruckCard.css */
+.truck-card {
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.truck-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.truck-card.selected {
+  transform: translateY(-2px);
+}
+
+.truck-card-alert-urgent {
+  animation: alertPulse 2s infinite;
+}
+
+@keyframes alertPulse {
+  0%, 100% { 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  50% { 
+    box-shadow: 0 8px 25px rgba(239, 68, 68, 0.25);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1; 
+  }
+  50% { 
+    opacity: 0.5; 
+  }
+}
+
+.truck-card-progress-bar {
+  overflow: hidden;
+  position: relative;
+}
+
+.truck-card-progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .truck-card {
+    margin: 2px 0 !important;
+    border-radius: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .truck-card {
+    padding: 12px !important;
+    border-radius: 10px !important;
+  }
+  
+  .truck-card-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* Smooth scrolling for containers */
+.truck-card-container {
+  scroll-behavior: smooth;
+}
+
+/* Focus states for accessibility */
+.truck-card:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .truck-card {
+    border-width: 2px !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .truck-card,
+  .truck-card-progress-bar::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
