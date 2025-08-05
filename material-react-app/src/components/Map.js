@@ -219,12 +219,12 @@ const Map = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <h2 className="text-xl font-semibold text-foreground">Chargement des camions...</h2>
           <p className="text-muted-foreground mt-2">
-            Connexion: {connectionStatus}
+            Récupération depuis l'API backend...
           </p>
           {error && (
             <div className="mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
               <p className="text-destructive text-sm">{error}</p>
-              <button 
+              <button
                 onClick={fetchTrucksFromAPI}
                 className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90"
               >
