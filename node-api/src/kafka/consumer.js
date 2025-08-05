@@ -9,6 +9,9 @@ const kafka = new Kafka({
 
 const consumer = kafka.consumer({ groupId: 'truck-iot-group' });
 
+// Variable pour stocker la référence Socket.IO
+let socketInstance = null;
+
 const runConsumer = async (io) => {
   try {
     await consumer.connect();
