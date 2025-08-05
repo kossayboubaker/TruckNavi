@@ -357,7 +357,6 @@ const Map = () => {
             loading={loading}
             error={error}
             onRefresh={fetchTrucksFromAPI}
-            connectionStatus={connectionStatus}
           />
         </aside>
 
