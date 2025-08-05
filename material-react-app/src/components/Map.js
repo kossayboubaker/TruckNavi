@@ -78,10 +78,20 @@ const Map = () => {
 
     try {
       console.log('📡 Récupération camions depuis l\'API...');
+      console.log('🔗 URL API:', `${API_BASE_URL}/api/trucks/active-trucks`);
+
+      // Vérifier si l'API_BASE_URL est définie
+      if (!API_BASE_URL || API_BASE_URL === 'undefined') {
+        throw new Error('URL de l\'API non configurée. Vérifiez REACT_APP_API_URL dans .env');
+      }
 
       const response = await axios.get(`${API_BASE_URL}/api/trucks/active-trucks`, {
         withCredentials: true,
-        timeout: 10000
+        timeout: 10000,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
       });
 
       if (response.data.success && response.data.trucks) {
