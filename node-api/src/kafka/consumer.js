@@ -89,8 +89,10 @@ const runConsumer = async (io) => {
               { upsert: true, new: true }
             );
 
+            // Diffuser vers tous les clients connectés
             io.emit('truckUpdate', truckData);
-            console.log(`truckUpdate for ${truckData.id} at [${latitude.toFixed(4)}, ${longitude.toFixed(4)}]`);
+            io.to('truck_updates').emit('truck_update', truckData);
+            console.log(`🚛 truckUpdate diffusé pour ${truckData.id} à [${latitude.toFixed(4)}, ${longitude.toFixed(4)}]`);
 
             simulateTruckStops(truckData, io);
             optimizeCarbon(truckData, io);
