@@ -67,7 +67,8 @@ console.log("📤 Envoi à", receiverSocket.socketId, "pour receiverId =", recei
     socket.on("disconnect", () => {
       console.log("❌ Déconnexion du client :", socket.id);
       onlineUsers = onlineUsers.filter((u) => u.socketId !== socket.id);
-      console.log("🧹 onlineUsers après déconnexion :", onlineUsers);
+      connectedClients.delete(socket.id);
+      console.log("🧹 onlineUsers après déconnexion :", onlineUsers.length);
     });
   });
 
