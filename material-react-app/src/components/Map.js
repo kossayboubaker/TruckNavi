@@ -208,10 +208,7 @@ const Map = () => {
       }
     }
 
-    // S'abonner aux mises à jour spécifiques
-    if (socket && delivery.truck_id) {
-      socket.emit('subscribe_truck', delivery.truck_id);
-    }
+    console.log(`🚛 Camion sélectionné: ${delivery.truck_id}`);
   };
 
   // Interface de chargement
