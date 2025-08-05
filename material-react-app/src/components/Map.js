@@ -133,82 +133,17 @@ const Map = () => {
     }
   };
 
-  // Gestionnaires des mises à jour Socket
-  const handleTruckUpdate = (truckData) => {
-    console.log('🚛 Mise à jour camion:', truckData.truck_id || truckData.id);
-    
-    setVisibleTrucks(prevTrucks => {
-      return prevTrucks.map(truck => {
-        const targetId = truckData.truck_id || truckData.id;
-        if (truck.truck_id === targetId || truck.id === targetId) {
-          return {
-            ...truck,
-            position: truckData.position || truckData.location ? [truckData.location.lat, truckData.location.lng] : truck.position,
-            speed: truckData.speed ?? truck.speed,
-            bearing: truckData.bearing ?? truck.bearing,
-            route_progress: truckData.route_progress ?? truckData.routeProgress ?? truck.route_progress,
-            state: truckData.state || truck.state,
-            route: truckData.route || truck.route,
-            last_update: new Date().toISOString()
-          };
-        }
-        return truck;
-      });
-    });
-    setLastUpdate(new Date());
-  };
+  // Chargement initial et rafraîchissement périodique
+  useEffect(() => {
+    fetchTrucksFromAPI();
 
-  const handleRouteUpdate = (routeData) => {
-    console.log('🛣️ Mise à jour route:', routeData.truck_id);
-    
-    setVisibleTrucks(prevTrucks => {
-      return prevTrucks.map(truck => {
-        if (truck.truck_id === routeData.truck_id) {
-          return {
-            ...truck,
-            route: routeData.route || truck.route,
-            destinationCoords: routeData.destination_coords || truck.destinationCoords
-          };
-        }
-        return truck;
-      });
-    });
-  };
+    // Rafraîchissement automatique toutes les 10 secondes
+    const interval = setInterval(() => {
+      fetchTrucksFromAPI();
+    }, 10000);
 
-  const handleTrucksListUpdate = (data) => {
-    console.log('📋 Liste camions mise à jour:', data.count);
-    if (data.trucks && Array.isArray(data.trucks)) {
-      setVisibleTrucks(data.trucks);
-      if (data.trucks.length > 0 && !selectedDelivery) {
-        setSelectedDelivery(data.trucks[0]);
-      }
-    }
-    setLastUpdate(new Date());
-  };
-
-  const handleTruckAlert = (alert) => {
-    console.log('🚨 Alerte reçue:', alert.title);
-    setAlerts(prev => [...prev, alert]);
-  };
-
-  // Gestionnaires legacy pour compatibilité
-  const handleLegacyTruckUpdate = (data) => {
-    console.log('🚛 Mise à jour legacy:', data.id);
-    handleTruckUpdate({
-      truck_id: data.id,
-      position: data.position,
-      speed: data.speed,
-      bearing: data.bearing,
-      route_progress: data.route_progress,
-      state: data.state,
-      route: data.route
-    });
-  };
-
-  const handleLegacyRouteUpdate = (data) => {
-    console.log('🛣️ Route legacy mise à jour:', data.truck_id);
-    handleRouteUpdate(data);
-  };
+    return () => clearInterval(interval);
+  }, []);
 
   // Récupération des camions depuis l'API
   const fetchTrucksFromAPI = async () => {
