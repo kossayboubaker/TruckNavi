@@ -67,7 +67,7 @@ const mockTrucks = [
     route_progress: 25, // En cours de route
     bearing: 1,
     route: [
-      { latitude: 36.8065, longitude: 10.1815 },
+      { latitude: 36.8065, longitude: 10.1815 }, 
       { latitude: 35.8256, longitude: 10.6369 }
     ],
     pickup: {
@@ -114,7 +114,7 @@ const mockTrucks = [
       city: 'Ariana, Tunisia',
       coordinates: [36.4098, 10.1398]
     },
-    destination: 'Kairouan Centre',
+    destination: 'route hammamet',
     destinationCoords: [35.6786, 10.0963],
     driver: {
       id: 'driver_003',
@@ -199,7 +199,7 @@ const mockTrucks = [
       name: 'Fatma Gharbi',
       company: 'MediTransport',
       contact: '+216 75 456 789',
-      avatar: '👩‍��️'
+      avatar: '👩‍⚕️'
     },
     last_update: new Date().toISOString(),
     estimatedArrival: new Date(Date.now() + 3600000 * 2).toISOString(),
@@ -523,7 +523,7 @@ const Map = () => {
       <div style={{
         position: 'fixed',
         top: '10px',
-        right: '100px',
+        right: '120px',
         zIndex: 3000,
         background: currentRole === 'conducteur' ? '#10b981' :
                    currentRole === 'admin' ? '#3b82f6' : '#8b5cf6',
@@ -568,21 +568,22 @@ const Map = () => {
       />
 
       <div className="flex w-full" style={{
-        height: isUltraCompact ? '100vh' : 'calc(100vh - 10px)',
-        maxHeight: isUltraCompact ? '100vh' : 'calc(100vh - 10px)',
+        height: isUltraCompact ? '100vh' : 'calc(100vh - 1px)',
+        maxHeight: isUltraCompact ? '100vh' : 'calc(100vh - 1px)',
         overflow: 'hidden'
       }}>
         <aside
-          className={`transition-all duration-300 bg-background border-r border-border flex-shrink-0 overflow-hidden`}
-          style={{
-            width: isAsideOpen ? (
-              isUltraCompact ? '120px' :
-              isSmallMobile ? '180px' :
-              isMobile ? '220px' : '280px'
-            ) : '0px',
-            display: 'block',
-            borderWidth: isUltraCompact ? '1px' : '2px'
-          }}
+         className={`transition-all duration-300 bg-background border-r border-border flex-shrink-0 overflow-hidden`}
+  style={{
+    width: isAsideOpen ? (
+      isUltraCompact ? '200px' :    // Mode ultra-compact
+      isSmallMobile ? '240px' :     // Petit mobile
+      isMobile ? '280px' :          // Mobile standard
+      '320px'                       // Desktop
+    ) : '0px',                     // Fermé
+    display: 'block',
+    borderWidth: isUltraCompact ? '2px' : '2px'
+  }}
         >
           <DeliveryList
             deliveries={visibleTrucks}
@@ -746,62 +747,7 @@ const Map = () => {
             </svg>
           </button>
 
-          {/* Bouton Alertes (rouge) */}
-          <button
-            onClick={() => setIsAlertsOpen(!isAlertsOpen)}
-            style={{
-              background: isAlertsOpen ?
-                'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' :
-                'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-              border: '2px solid rgba(255,255,255,0.3)',
-              borderRadius: '50%',
-              width: isUltraCompact ? '20px' : isMobile ? '32px' : '38px',
-              height: isUltraCompact ? '20px' : isMobile ? '32px' : '38px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 15px rgba(239, 68, 68, 0.3)',
-              backdropFilter: 'blur(10px)',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              touchAction: 'manipulation',
-              color: 'white',
-              position: 'relative'
-            }}
-            title={`${allAlerts.length} alertes`}
-          >
-            <svg
-              width={isUltraCompact ? '10' : '14'}
-              height={isUltraCompact ? '10' : '14'}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M14 3V2a1 1 0 0 0-1-1h-2a1 1 0 0 0-1 1v1a7 7 0 0 0-7 7v6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-6a7 7 0 0 0-7-7z"/>
-              <path d="M13 21a1 1 0 1 1-2 0"/>
-            </svg>
-            {allAlerts.length > 0 && (
-              <div style={{
-                position: 'absolute',
-                top: '-2px',
-                right: '-2px',
-                background: '#fbbf24',
-                borderRadius: '50%',
-                width: isUltraCompact ? '12px' : '16px',
-                height: isUltraCompact ? '12px' : '16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: isUltraCompact ? '6px' : '9px',
-                fontWeight: 'bold',
-                color: '#1f2937',
-                border: '1px solid white'
-              }}>
-                {allAlerts.length > 9 ? '9+' : allAlerts.length}
-              </div>
-            )}
-          </button>
+         
         </div>
       </div>
 
@@ -903,5 +849,4 @@ const Map = () => {
     </div>
   );
 };
-
 export default Map;

@@ -9,7 +9,11 @@ const PreventiveAlert = ({ alert, onClose }) => {
       'weatherRain': '🌧️',
       'maintenance': '🔧',
       'police': '👮',
-      'danger': '🚨'
+      'danger': '🚨',
+      'info': 'ℹ️',
+      'warning': '⚠️',
+      'default': '🔔',
+
     };
     return icons[type] || '⚠️';
   };

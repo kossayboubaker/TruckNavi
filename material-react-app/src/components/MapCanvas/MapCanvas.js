@@ -3,7 +3,6 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import routeGenerator from '../../services/routeGenerator';
 import roleManager from '../../services/roleManager';
-import preventiveAlertsService from '../../services/preventiveAlertsService';
 
 const WEATHER_API_KEY = '4437791bbdc183036e4e04dc15c92cb8';
 
@@ -194,8 +193,8 @@ const MapCanvas = ({
 
       switch (truck.truck_id) {
         case 'TN-001': // Tunis vers Sfax
-          startCoord = [36.8065, 10.1815];
-          endCoord = [34.7406, 10.7603];
+          startCoord = [36.770032, 10.23034];
+          endCoord = [36.785403, 10.190556];
           break;
         case 'TN-002': // Tunis vers Sousse
           startCoord = [36.8065, 10.1815];
@@ -274,11 +273,9 @@ const MapCanvas = ({
     const hasAlerts = alerts.filter(alert =>
       alert.affectedRoutes && alert.affectedRoutes.includes(truck.truck_id)
     ).length > 0;
-    const isPaused = routeGenerator.isTruckPaused(truck.truck_id);
 
     let primaryColor = '#6B7280';
-    if (isPaused) primaryColor = '#F59E0B'; // Orange pour pause
-    else if (isSelected) primaryColor = '#3B82F6';
+    if (isSelected) primaryColor = '#3B82F6';
     else if (state === 'En Route') primaryColor = '#10B981';
     else if (state === 'At Destination') primaryColor = '#8B5CF6';
     else if (state === 'Maintenance') primaryColor = '#F59E0B';
@@ -311,34 +308,15 @@ const MapCanvas = ({
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
             border: 3px solid white;
             ${hasAlerts ? 'animation: alertPulse 2s infinite;' : ''}
-            ${isPaused ? 'animation: pausePulse 1.5s infinite;' : ''}
             backdrop-filter: blur(10px);
           ">
-            ${isPaused ? `
-              <div style="
-                position: absolute;
-                top: -8px;
-                right: -8px;
-                background: #F59E0B;
-                border-radius: 50%;
-                width: 16px;
-                height: 16px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 10px;
-                border: 2px solid white;
-              ">⏸️</div>
-            ` : ''}
-            <div style="
-              font-size: 16px;
-              font-weight: bold;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            ">
-              🚛
-            </div>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+              <path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11"/>
+              <path d="M14 9h4l4 4v4c0 .6-.4 1-1 1h-2c-.6 0-1-.4-1-1v-3c0-.6-.4-1-1-1h-5z"/>
+              <circle cx="7" cy="18" r="2"/>
+              <path d="M15 18H9"/>
+              <circle cx="17" cy="18" r="2"/>
+            </svg>
           </div>
           ${speed > 0 && isSelected ? `
             <div style="
@@ -364,10 +342,6 @@ const MapCanvas = ({
           @keyframes alertPulse {
             0%, 100% { box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
             50% { box-shadow: 0 8px 25px rgba(239, 68, 68, 0.8); }
-          }
-          @keyframes pausePulse {
-            0%, 100% { box-shadow: 0 8px 25px rgba(0,0,0,0.3); }
-            50% { box-shadow: 0 8px 25px rgba(245, 158, 11, 0.8); }
           }
         </style>
       `,
@@ -508,9 +482,6 @@ const MapCanvas = ({
       zoom: 7,
       scrollWheelZoom: true,
       zoomControl: false,
-      zoomAnimation: false, // Désactiver animation zoom
-      fadeAnimation: false, // Désactiver fade animation
-      markerZoomAnimation: false, // Désactiver animation marqueurs
     });
 
     const tileLayers = {
@@ -527,9 +498,6 @@ const MapCanvas = ({
 
     tileLayers.standard.addTo(leafletMap);
     setMap(leafletMap);
-
-    // Initialiser les alertes préventives
-    preventiveAlertsService.initializeRouteAlerts();
 
     if (onMapReady) {
       onMapReady(leafletMap);
@@ -648,18 +616,6 @@ const MapCanvas = ({
         console.log(`🚛 Camion sélectionné: ${truck.truck_id} - Suivi activé: ${followTruck}`);
       });
 
-      // Suivi automatique du camion sélectionné si followTruck est activé
-      if (followTruck && selectedDelivery && selectedDelivery.truck_id === truck.truck_id) {
-        setTimeout(() => {
-          if (map && truck.position) {
-            map.setView(truck.position, Math.max(map.getZoom(), 14), {
-              animate: true,
-              duration: 0.5
-            });
-          }
-        }, 100);
-      }
-
       // ROUTES AMÉLIORÉES avec générateur de trajectoires réalistes
       if (showRoutes) {
         const routeInfo = routeGenerator.generateRouteWithProgress(
@@ -708,30 +664,16 @@ const MapCanvas = ({
 
             markers.forEach(markerInfo => {
               L.circleMarker(markerInfo.position, {
-                radius: markerInfo.type === 'waypoint' ? 3 : markerInfo.type === 'start' ? 6 : 8,
+                radius: markerInfo.type === 'waypoint' ? 6 : 8,
                 color: markerInfo.type === 'start' ? '#10B981' :
-                       markerInfo.type === 'end' ? '#EF4444' : '#6B7280',
+                       markerInfo.type === 'end' ? '#EF4444' : '#3B82F6',
                 fillColor: markerInfo.type === 'start' ? '#10B981' :
-                           markerInfo.type === 'end' ? '#EF4444' : '#9CA3AF',
-                fillOpacity: markerInfo.type === 'waypoint' ? 0.4 : 0.8,
-                weight: markerInfo.type === 'waypoint' ? 1 : 3,
-                stroke: true,
-                strokeColor: '#fff',
-              }).addTo(map).bindPopup(markerInfo.popup);
-            });
-
-            // Ajouter les points de pause pour le camion sélectionné
-            const breakMarkers = routeGenerator.getBreakPointMarkers(truck.truck_id);
-            breakMarkers.forEach(breakMarker => {
-              L.circleMarker(breakMarker.position, {
-                radius: 10,
-                color: '#f59e0b',
-                fillColor: '#fbbf24',
-                fillOpacity: 0.9,
+                           markerInfo.type === 'end' ? '#EF4444' : '#3B82F6',
+                fillOpacity: 0.8,
                 weight: 3,
                 stroke: true,
                 strokeColor: '#fff',
-              }).addTo(map).bindPopup(breakMarker.popup);
+              }).addTo(map).bindPopup(markerInfo.popup);
             });
           }
         }
@@ -820,22 +762,14 @@ const MapCanvas = ({
     }
   }, [showWeather, map, weatherLayer]);
 
-  // Animation des camions avec routes réalistes et vérification des pauses
+  // Animation des camions avec routes réalistes
   useEffect(() => {
     setTrucksData(deliveries);
 
     const interval = setInterval(() => {
-      const breakNotifications = []; // Collecter les notifications
-
       setTrucksData((prev) =>
         prev.map((truck) => {
           if (truck.state === 'En Route') {
-            // Vérifier si le camion est en pause
-            if (routeGenerator.isTruckPaused(truck.truck_id)) {
-              // Camion en pause - conserver position et progression actuelles
-              return truck;
-            }
-
             // Augmenter progressivement la progression
             const newProgress = Math.min(100, truck.route_progress + Math.random() * 1.2);
 
@@ -844,37 +778,6 @@ const MapCanvas = ({
               truck.truck_id,
               newProgress
             );
-
-            // Vérifier si une pause est requise (sans émettre d'événement ici)
-            const breakNotification = routeGenerator.generateBreakNotification(
-              truck.truck_id,
-              newProgress
-            );
-
-            if (breakNotification) {
-              breakNotifications.push(breakNotification);
-            }
-
-            // Vérifier les alertes préventives (1-2h à l'avance)
-            const routeInfo = routeGenerator.generateRouteWithProgress(truck.truck_id, newProgress);
-            if (routeInfo && routeInfo.fullRoute) {
-              const currentIndex = Math.floor((newProgress / 100) * (routeInfo.fullRoute.length - 1));
-              const preventiveAlerts = preventiveAlertsService.checkUpcomingAlerts(
-                truck.truck_id,
-                currentPosition,
-                routeInfo.fullRoute,
-                currentIndex
-              );
-
-              preventiveAlerts.forEach(alert => {
-                console.log(`🔔 Alerte préventive pour ${truck.truck_id}: ${alert.message}`);
-                setTimeout(() => {
-                  window.dispatchEvent(new CustomEvent('preventiveAlert', {
-                    detail: alert
-                  }));
-                }, 0);
-              });
-            }
 
             // Calculer la nouvelle orientation
             const newBearing = routeGenerator.calculateBearing(
@@ -896,16 +799,6 @@ const MapCanvas = ({
           return truck;
         })
       );
-
-      // Émettre les événements après la mise à jour d'état
-      breakNotifications.forEach(notification => {
-        console.log(`🚦 Pause requise pour ${notification.truckId} - ${notification.message}`);
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('breakRequired', {
-            detail: notification
-          }));
-        }, 0);
-      });
     }, 5000); // Animation toutes les 5 secondes
 
     return () => clearInterval(interval);

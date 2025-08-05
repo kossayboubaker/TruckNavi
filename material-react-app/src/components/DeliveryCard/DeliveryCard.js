@@ -61,7 +61,7 @@ const DeliveryCard = ({ delivery, isSelected = false, onSelect }) => {
 
           .delivery-card:hover {
             transform: translateY(-3px) scale(1.02) !important;
-            box-shadow: 0 12px 35px rgba(59, 130, 246, 0.35) !important;
+            box-shadow: 0 12px 35px rgba(9, 97, 239, 0.61) !important;
           }
 
           .delivery-card.selected::before {
@@ -71,11 +71,11 @@ const DeliveryCard = ({ delivery, isSelected = false, onSelect }) => {
             left: -2px;
             right: -2px;
             bottom: -2px;
-            background: linear-gradient(45deg, #3b82f6, #8b5cf6, #06b6d4, #10b981);
+            background: linear-gradient(90deg, #5e9df5ff);
             background-size: 400% 400%;
             border-radius: inherit;
             z-index: -2;
-            animation: gradientShift 3s ease infinite;
+            animation: gradientShift 2s ease infinite;
           }
 
           @keyframes gradientShift {
@@ -95,7 +95,7 @@ const DeliveryCard = ({ delivery, isSelected = false, onSelect }) => {
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            background: linear-gradient(90deg, transparent, rgba(172, 71, 71, 0.6), transparent);
             animation: ecoShine 2s infinite;
           }
 
@@ -118,7 +118,7 @@ const DeliveryCard = ({ delivery, isSelected = false, onSelect }) => {
         flexDirection: 'column',
         gap: responsive.gap,
         margin: responsive.textSize === '9px' ? '2px 4px' : responsive.textSize === '10px' ? '3px 6px' : '4px 8px',
-        width: 'calc(100% - 8px)',
+        width: 'calc(100% - 4px)',
         maxWidth: 'calc(100% - 8px)',
         minHeight: responsive.textSize === '9px' ? '60px' : responsive.textSize === '10px' ? '70px' : '80px',
         boxSizing: 'border-box',
@@ -151,7 +151,7 @@ const DeliveryCard = ({ delivery, isSelected = false, onSelect }) => {
             color: delivery.ecoMode ? '#065f46' : '#6b7280',
             whiteSpace: 'nowrap',
             lineHeight: 1,
-            border: delivery.ecoMode ? '1px solid #10b981' : '1px solid #d1d5db',
+            border: delivery.ecoMode ? '1px solid #137a2aff' : '1px solid #b3bbc8ff',
             boxShadow: delivery.ecoMode ? '0 2px 4px rgba(16, 185, 129, 0.2)' : 'none',
             display: 'flex',
             alignItems: 'center',
@@ -230,7 +230,7 @@ const DeliveryCard = ({ delivery, isSelected = false, onSelect }) => {
             <span
               style={{
                 fontSize: responsive.textSize,
-                color: '#6b7280',
+                color: '#393a3dff',
                 whiteSpace: 'nowrap',
               }}
             >
@@ -241,13 +241,14 @@ const DeliveryCard = ({ delivery, isSelected = false, onSelect }) => {
             <span
               style={{
                 fontSize: responsive.textSize,
-                color: '#6b7280',
+                color: '#1a1a1aff',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '2px',
+                fontWeight: '400',
               }}
             >
-              ⏱️ {delivery.speed || 0}km/h
+               {delivery.speed || 0}km/h
             </span>
             <div
               style={{
@@ -297,7 +298,7 @@ const DeliveryCard = ({ delivery, isSelected = false, onSelect }) => {
               <div
                 style={{
                   position: 'absolute',
-                  top: 0,
+                  top: 1,
                   left: 0,
                   right: 0,
                   bottom: 0,
@@ -329,10 +330,11 @@ const DeliveryCard = ({ delivery, isSelected = false, onSelect }) => {
             <div
               style={{
                 fontSize: responsive.textSize,
-                color: '#6b7280',
+                color: '#353639ff',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
+                fontWeight: '400',
               }}
             >
               {delivery.pickup.city}
@@ -340,12 +342,12 @@ const DeliveryCard = ({ delivery, isSelected = false, onSelect }) => {
           </div>
         </div>
         <div style={{ display: 'flex', gap: responsive.gap, alignItems: 'center' }}>
-          <span style={{ color: '#3b82f6' }}>🔵</span>
+          <span style={{ color: '#5387e0ff' }}>🔵</span>
           <div style={{ minWidth: 0 }}>
             <div
               style={{
                 fontSize: responsive.textSize,
-                fontWeight: '600',
+                fontWeight: '500',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -356,10 +358,11 @@ const DeliveryCard = ({ delivery, isSelected = false, onSelect }) => {
             <div
               style={{
                 fontSize: responsive.textSize,
-                color: '#6b7280',
+                color: '#404349ff',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
+                fontWeight: '400',
               }}
             >
               {typeof delivery.destination === 'string' ? 'Destination' : delivery.destination.city}
@@ -372,90 +375,105 @@ const DeliveryCard = ({ delivery, isSelected = false, onSelect }) => {
       <div
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'space-between ',
           alignItems: 'center',
-          borderTop: '1px solid #f1f5f9',
+          borderTop: '2.5px solid #cbd1d8ff',
           paddingTop: responsive.gap,
           gap: responsive.gap,
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: responsive.gap, minWidth: 0 }}>
-          <div
-            style={{
-              width: responsive.iconSize + 4,
-              height: responsive.iconSize + 4,
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #1e40af 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: responsive.textSize,
-              color: 'white',
-              fontWeight: 'bold',
-              flexShrink: 0,
-              boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
-              border: '2px solid white',
-              position: 'relative'
-            }}
-          >
-            {delivery.driver?.avatar || delivery.driver.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
-            <div
-              style={{
-                position: 'absolute',
-                bottom: -1,
-                right: -1,
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: '#10b981',
-                border: '2px solid white',
-                animation: 'pulse 2s infinite'
-              }}
-            />
-          </div>
-          <div style={{ minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: responsive.textSize,
-                fontWeight: '500',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {delivery.driver.name}
-            </div>
-            <div
-              style={{
-                fontSize: responsive.textSize,
-                color: '#6b7280',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}
-            >
-              {delivery.driver.contact}
-            </div>
-          </div>
-        </div>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px',
-            fontSize: responsive.textSize,
-            backgroundColor: statusInfo.bg,
-            color: statusInfo.color,
-            padding: '4px 8px',
-            borderRadius: '8px',
-            fontWeight: '600',
-            whiteSpace: 'nowrap',
-            border: `1px solid ${statusInfo.color}20`,
-            boxShadow: `0 2px 4px ${statusInfo.color}15`
-          }}
-        >
-          <span>{statusInfo.text}</span>
-        </div>
+       <div style={{ display: 'flex', alignItems: 'center', gap: responsive.gap, minWidth: 0 }}>
+  <div
+    style={{
+      width: responsive.iconSize + 4,
+      height: responsive.iconSize + 4,
+      borderRadius: '50%',
+      background: 'linear-gradient(135deg, #f6a23bff 0%, #3a61deff 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: responsive.textSize,
+      color: 'white',
+      fontWeight: 'bold',
+      flexShrink: 0,
+      boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
+      border: '2px solid white',
+      position: 'relative'
+    }}
+  >
+    {delivery.driver?.avatar || delivery.driver.name.split(' ').map(n => n[0]).join('').substring(0, 2)}
+    <div
+      style={{
+        position: 'absolute',
+        bottom: -1,
+        right: -1,
+        width: '8px',
+        height: '8px',
+        borderRadius: '50%',
+        backgroundColor: '#10b981',
+        border: '2px solid white',
+        animation: 'pulse 2s infinite'
+      }}
+    />
+  </div>
+  
+  {/* Conteneur texte modifié */}
+  <div style={{ 
+    minWidth: 0,
+    marginTop: '-6px',  // Décalage vers le haut
+    paddingTop: '1px',  // Compensation
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center'
+  }}>
+    <div
+      style={{
+        fontSize: responsive.textSize,
+        fontWeight: '400',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        lineHeight: '1.2'  // Ajustement de l'interligne
+      }}
+    >
+      {delivery.driver.name}
+    </div>
+    <div
+      style={{
+        fontSize: responsive.textSize,
+        color: '#423939ff',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        marginTop: '1px',  // Espacement réduit
+        lineHeight: '1.2'  // Ajustement de l'interligne
+      }}
+    >
+      {delivery.driver.contact}
+    </div>
+  </div>
+<div
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '3px',
+    fontSize: responsive.textSize,
+    backgroundColor: statusInfo.bg,
+    color: statusInfo.color,
+    padding: '3px 7px',
+    borderRadius: '8px',
+    fontWeight: '600',
+    whiteSpace: 'nowrap',
+    border: `1px solid ${statusInfo.color}20`,
+    boxShadow: `0 2px 4px ${statusInfo.color}15`,
+    marginLeft: '29px', // Augmente la marge gauche pour déplacer le badge à droite
+    marginRight: '8px', // Conserve la marge droite
+    marginTop: '-3px' // Déplace le badge légèrement en haut
+  }}
+>
+  <span>{statusInfo.text}</span>
+</div>
+</div>
       </div>
     </div>
     </>

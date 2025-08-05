@@ -13,7 +13,37 @@ class AlertsService {
     this.cities = [
       { name: 'Tunis', lat: 36.8065, lon: 10.1815 },
       { name: 'Sfax', lat: 34.7406, lon: 10.7603 },
-      { name: 'Sousse', lat: 35.8256, lon: 10.6369 }
+      { name: 'Sousse', lat: 35.8256, lon: 10.6369 },
+      // Ajouter d'autres villes si nécessaire
+      // { name: 'Ariana', lat: 36.8663, lon: 10.1797 },
+      // { name: 'Gabès', lat: 33.8869, lon: 10.0982 },
+      // { name: 'Kairouan', lat: 35.6786, lon: 10.0963 },
+      // { name: 'Bizerte', lat: 37.2707, lon: 9.8739 },
+      // { name: 'Nabeul', lat: 36.4561, lon: 10.7380 },
+      // { name: 'Kasserine', lat: 35.2167, lon: 8.8333 },
+      // { name: 'Tozeur', lat: 33.9019, lon: 8.1333 },
+      // { name: 'Djerba', lat: 33.8792, lon: 10.8470 },
+      // { name: 'Monastir', lat: 35.7667, lon: 10.8167 },
+      // { name: 'Gafsa', lat: 34.4200, lon: 8.7800 },
+      // { name: 'Kebili', lat: 33.7167, lon: 8.9667 },
+      // { name: 'Zaghouan', lat: 36.4000, lon: 10.1000 },
+      // { name: 'Mahdia', lat: 35.5000, lon: 11.0667 },
+      // { name: 'Siliana', lat: 36.0833, lon: 9.4000 },
+      // { name: 'Béja', lat: 36.7333, lon: 9.2000 },
+      // { name: 'Jendouba', lat: 36.5000, lon: 8.7500 },
+      // { name: 'Kef', lat: 36.1667, lon: 8.7000 },
+      // { name: 'Sidi Bouzid', lat: 35.0000, lon: 9.5000 },
+      // { name: 'Tataouine', lat: 32.9300, lon: 10.4500 },
+      // { name: 'Bizerte Nord', lat: 37.2700, lon: 9.8700 },
+      // { name: 'Bizerte Sud', lat: 37.2500, lon: 9.8500 },,
+      // { name: 'Kairouan Nord', lat: 35.7000, lon: 10.1000 },
+      // { name: 'Kairouan Sud', lat: 35.6500, lon: 10.0500 },
+      // { name: 'Gabès Nord', lat: 33.9000, lon: 10.1000 },
+      // { name: 'Gabès Sud', lat: 33.8700, lon: 10.0800 },
+      // { name: 'Sfax Nord', lat: 34.7500, lon: 10.8000 },
+      // { name: 'Sfax Sud', lat: 34.7200, lon: 10.7800 },
+      // { name: 'Sousse Nord', lat: 35.8500, lon: 10.6500 },
+      // { name: 'Sousse Sud', lat: 35.8000, lon: 10.6000 }
     ];
     
     // Types d'alertes exhaustifs avec icônes selon description utilisateur

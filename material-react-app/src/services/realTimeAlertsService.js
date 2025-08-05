@@ -417,6 +417,15 @@ class RealTimeAlertsService {
       }
     };
     
+    if (city === 'Tunisie') {
+      impactData.accident.delay += 5;
+      impactData.construction.delay += 5;
+      impactData.traffic.delay += 5;
+      impactData.police.delay += 5;
+      impactData.maintenance.delay += 5;
+      impactData.weather.delay += 5;
+    };
+    
     return impactData[alertType] || impactData.traffic;
   }
 

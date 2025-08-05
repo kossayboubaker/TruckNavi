@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const AdvancedMapControls = ({ 
   onZoomIn, 
@@ -17,6 +17,25 @@ const AdvancedMapControls = ({
   onToggleFollowTruck
 }) => {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = windowSize.width < 768;
+  const isSmallScreen = windowSize.width < 480;
 
   const mapStyles = [
     { value: 'standard', label: 'Standard', icon: '🗺️' },
@@ -24,28 +43,32 @@ const AdvancedMapControls = ({
     { value: 'terrain', label: 'Terrain', icon: '🏔️' }
   ];
 
-
+  const getSize = (mobileSize, tabletSize, desktopSize) => {
+    if (isSmallScreen) return mobileSize;
+    if (isMobile) return tabletSize;
+    return desktopSize;
+  };
 
   return (
     <div style={{
       position: 'fixed',
-      top: window.innerWidth < 90 && window.innerHeight < 90 ? '5px' : '15px',
-      right: window.innerWidth < 90 && window.innerHeight < 90 ? '5px' : '15px',
+      top: getSize('30px', '30px', '30px'),
+      right: getSize('10px', '15px', '20px'),
       zIndex: 1500,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'flex-end',
-      gap: window.innerWidth < 90 && window.innerHeight < 90 ? '4px' : '8px'
+      gap: getSize('6px', '8px', '10px')
     }}>
-      {/* Bouton principal pour ouvrir/fermer le panneau */}
+      {/* Bouton principal */}
       <button
         onClick={() => setIsPanelOpen(!isPanelOpen)}
         style={{
-          width: window.innerWidth < 90 && window.innerHeight < 90 ? '30px' :
-                 window.innerWidth < 768 ? '40px' : '50px',
-          height: window.innerWidth < 90 && window.innerHeight < 90 ? '30px' :
-                  window.innerWidth < 768 ? '40px' : '50px',
-          background: isPanelOpen ? 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)' : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+          width: getSize('40px', '45px', '50px'),
+          height: getSize('40px', '45px', '50px'),
+          background: isPanelOpen ? 
+            'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)' : 
+            'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
           border: '2px solid rgba(255, 255, 255, 0.3)',
           borderRadius: '50%',
           color: 'white',
@@ -55,19 +78,20 @@ const AdvancedMapControls = ({
           justifyContent: 'center',
           boxShadow: '0 8px 32px rgba(59, 130, 246, 0.4)',
           transition: 'all 0.3s ease',
-          position: 'relative'
+          position: 'relative',
+          zIndex: 1500,
+          
         }}
-        onMouseEnter={(e) => {
-          e.target.style.transform = 'scale(1.05)';
-          e.target.style.boxShadow = '0 12px 40px rgba(59, 130, 246, 0.6)';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.transform = 'scale(1)';
-          e.target.style.boxShadow = '0 8px 32px rgba(59, 130, 246, 0.4)';
-        }}
-        title="Contrôles Carte"
+        aria-label="Contrôles Carte"
       >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg 
+          width={getSize('20px', '22px', '24px')} 
+          height={getSize('20px', '22px', '24px')} 
+          viewBox="0 0 24 24" 
+          fill="none" 
+          stroke="currentColor" 
+          strokeWidth="2"
+        >
           <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
           <circle cx="12" cy="12" r="3"/>
         </svg>
@@ -75,16 +99,16 @@ const AdvancedMapControls = ({
         {alertsCount > 0 && (
           <div style={{
             position: 'absolute',
-            top: '-6px',
-            right: '-6px',
-            width: '24px',
-            height: '24px',
+            top: '-5px',
+            right: '-5px',
+            width: getSize('20px', '22px', '24px'),
+            height: getSize('20px', '22px', '24px'),
             background: '#ef4444',
             borderRadius: '50%',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: '11px',
+            fontSize: getSize('10px', '11px', '12px'),
             fontWeight: 'bold',
             border: '2px solid white',
             color: 'white'
@@ -94,40 +118,48 @@ const AdvancedMapControls = ({
         )}
       </button>
 
-      {/* Panneau de contrôles selon votre image */}
+      {/* Panneau de contrôles */}
       {isPanelOpen && (
         <div style={{
-          width: window.innerWidth < 90 && window.innerHeight < 90 ? '200px' :
-                 window.innerWidth < 768 ? '280px' : '320px',
-          maxHeight: window.innerWidth < 90 && window.innerHeight < 90 ? '70vh' : '80vh',
+          width: getSize('260px', '280px', '300px'),
+          maxWidth: `calc(100vw - ${getSize('30px', '40px', '50px')})`,
           background: 'rgba(255, 255, 255, 0.98)',
           backdropFilter: 'blur(20px)',
-          borderRadius: window.innerWidth < 90 && window.innerHeight < 90 ? '8px' : '16px',
+          borderRadius: getSize('12px', '14px', '16px'),
           boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
           border: '2px solid rgba(255,255,255,0.3)',
           overflow: 'hidden',
-          animation: 'slideInRight 0.3s ease-out',
-          position: 'relative',
-          top: window.innerWidth < 90 && window.innerHeight < 90 ? '0px' : '-30px'
+          animation: 'slideInRight 0.3s ease-out'
         }}>
-          {/* Header du panneau */}
+          {/* Header */}
           <div style={{
             background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
             color: 'white',
-            padding: '16px 20px',
+            padding: getSize('10px 14px', '12px 16px', '14px 18px'),
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <svg 
+                width={getSize('16px', '18px', '20px')} 
+                height={getSize('16px', '18px', '20px')} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2"
+              >
                 <path d="M5 18H3c-.6 0-1-.4-1-1V7c0-.6.4-1 1-1h10c.6 0 1 .4 1 1v11"/>
                 <path d="M14 9h4l4 4v4c0 .6-.4 1-1 1h-2c-.6 0-1-.4-1-1v-3c0-.6-.4-1-1-1h-5z"/>
                 <circle cx="7" cy="18" r="2"/>
                 <path d="M15 18H9"/>
                 <circle cx="17" cy="18" r="2"/>
               </svg>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700' }}>
+              <h3 style={{ 
+                margin: 0, 
+                fontSize: getSize('14px', '15px', '16px'), 
+                fontWeight: '700' 
+              }}>
                 Contrôles Carte
               </h3>
             </div>
@@ -137,43 +169,44 @@ const AdvancedMapControls = ({
                 background: 'rgba(255, 255, 255, 0.2)',
                 border: 'none',
                 borderRadius: '6px',
-                width: '28px',
-                height: '28px',
+                width: getSize('24px', '26px', '28px'),
+                height: getSize('24px', '26px', '28px'),
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
                 color: 'white'
               }}
+              aria-label="Fermer"
             >
               ✕
             </button>
           </div>
 
+          {/* Contenu */}
           <div style={{
-            padding: window.innerWidth < 90 && window.innerHeight < 90 ? '8px' : '15px',
-            maxHeight: 'none',
-            overflow: 'hidden'
+            padding: getSize('10px', '12px', '14px'),
+            maxHeight: `calc(${windowSize.height}px - ${getSize('160px', '180px', '200px')})`,
+            overflowY: 'auto'
           }}>
-            {/* Contrôles de zoom */}
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ display: 'flex', gap: '8px' }}>
+            {/* Zoom Controls */}
+            <div style={{ marginBottom: getSize('12px', '14px', '16px') }}>
+              <div style={{ display: 'flex', gap: '6px' }}>
                 <button
                   onClick={onZoomIn}
                   style={{
                     flex: 1,
-                    padding: '10px',
+                    padding: getSize('6px', '8px', '10px'),
                     background: '#3b82f6',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
-                    fontSize: '16px',
+                    fontSize: getSize('14px', '15px', '16px'),
                     fontWeight: 'bold',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease'
                   }}
-                  onMouseEnter={(e) => e.target.style.background = '#1d4ed8'}
-                  onMouseLeave={(e) => e.target.style.background = '#3b82f6'}
+                  aria-label="Zoom avant"
                 >
                   +
                 </button>
@@ -181,30 +214,29 @@ const AdvancedMapControls = ({
                   onClick={onZoomOut}
                   style={{
                     flex: 1,
-                    padding: '10px',
+                    padding: getSize('6px', '8px', '10px'),
                     background: '#3b82f6',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',
-                    fontSize: '16px',
+                    fontSize: getSize('14px', '15px', '16px'),
                     fontWeight: 'bold',
                     cursor: 'pointer',
                     transition: 'all 0.2s ease'
                   }}
-                  onMouseEnter={(e) => e.target.style.background = '#1d4ed8'}
-                  onMouseLeave={(e) => e.target.style.background = '#3b82f6'}
+                  aria-label="Zoom arrière"
                 >
                   −
                 </button>
               </div>
             </div>
 
-            {/* Style de carte */}
-            <div style={{ marginBottom: '20px' }}>
+            {/* Map Style */}
+            <div style={{ marginBottom: getSize('12px', '14px', '16px') }}>
               <label style={{ 
                 display: 'block', 
-                marginBottom: '8px', 
-                fontSize: '13px', 
+                marginBottom: getSize('4px', '6px', '8px'), 
+                fontSize: getSize('12px', '13px', '14px'), 
                 fontWeight: '600', 
                 color: '#374151' 
               }}>
@@ -215,10 +247,10 @@ const AdvancedMapControls = ({
                 onChange={(e) => onMapStyleChange(e.target.value)}
                 style={{
                   width: '100%',
-                  padding: '10px 12px',
+                  padding: getSize('6px 8px', '8px 10px', '10px 12px'),
                   borderRadius: '8px',
                   border: '2px solid #e2e8f0',
-                  fontSize: '13px',
+                  fontSize: getSize('12px', '13px', '14px'),
                   cursor: 'pointer',
                   background: 'white',
                   outline: 'none',
@@ -233,24 +265,28 @@ const AdvancedMapControls = ({
               </select>
             </div>
 
-            {/* Couches de carte */}
-            <div style={{ marginBottom: '20px' }}>
+            {/* Map Layers */}
+            <div style={{ marginBottom: getSize('12px', '14px', '16px') }}>
               <h4 style={{ 
-                margin: '0 0 12px 0', 
-                fontSize: '13px', 
+                margin: `0 0 ${getSize('8px', '10px', '12px')} 0`, 
+                fontSize: getSize('12px', '13px', '14px'), 
                 fontWeight: '600', 
                 color: '#374151' 
               }}>
                 Couches de carte
               </h4>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ 
+                display: 'flex', 
+                flexDirection: 'column', 
+                gap: getSize('6px', '8px', '10px') 
+              }}>
                 <label style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: '10px',
+                  gap: '8px',
                   cursor: 'pointer',
-                  fontSize: '13px',
+                  fontSize: getSize('12px', '13px', '14px'),
                   color: '#374151'
                 }}>
                   <input
@@ -258,8 +294,8 @@ const AdvancedMapControls = ({
                     checked={showRoutes}
                     onChange={(e) => onToggleRoutes(e.target.checked)}
                     style={{ 
-                      width: '16px', 
-                      height: '16px', 
+                      width: getSize('14px', '15px', '16px'), 
+                      height: getSize('14px', '15px', '16px'), 
                       cursor: 'pointer',
                       accentColor: '#3b82f6'
                     }}
@@ -270,9 +306,9 @@ const AdvancedMapControls = ({
                 <label style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: '10px',
+                  gap: '8px',
                   cursor: 'pointer',
-                  fontSize: '13px',
+                  fontSize: getSize('12px', '13px', '14px'),
                   color: '#374151'
                 }}>
                   <input
@@ -280,8 +316,8 @@ const AdvancedMapControls = ({
                     checked={showWeather}
                     onChange={(e) => onToggleWeather(e.target.checked)}
                     style={{ 
-                      width: '16px', 
-                      height: '16px', 
+                      width: getSize('14px', '15px', '16px'), 
+                      height: getSize('14px', '15px', '16px'), 
                       cursor: 'pointer',
                       accentColor: '#3b82f6'
                     }}
@@ -292,9 +328,9 @@ const AdvancedMapControls = ({
                 <label style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: '10px',
+                  gap: '8px',
                   cursor: 'pointer',
-                  fontSize: '13px',
+                  fontSize: getSize('12px', '13px', '14px'),
                   color: '#374151'
                 }}>
                   <input
@@ -302,35 +338,36 @@ const AdvancedMapControls = ({
                     checked={followTruck}
                     onChange={(e) => onToggleFollowTruck(e.target.checked)}
                     style={{ 
-                      width: '16px', 
-                      height: '16px', 
+                      width: getSize('14px', '15px', '16px'), 
+                      height: getSize('14px', '15px', '16px'), 
                       cursor: 'pointer',
                       accentColor: '#3b82f6'
                     }}
                   />
-                  📱 Suivre le camion sélectionné
+                  📱 Suivre le camion
                 </label>
               </div>
             </div>
 
-            {/* Camion sélectionné selon votre image */}
+            {/* Selected Truck Card */}
             {selectedTruck && (
               <div style={{
-                background: 'linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%)',
-                borderRadius: '12px',
-                padding: '16px',
-                border: '2px solid #4fc3f7'
+                background: 'linear-gradient(135deg, #e0f2fe 0%, #77d3feff 100%)',
+                borderRadius: '10px',
+                padding: getSize('8px', '10px', '12px'),
+                border: '2px solid #4fc3f7',
+                marginBottom: getSize('12px', '14px', '16px')
               }}>
                 <div style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'space-between', 
-                  marginBottom: '12px' 
+                  marginBottom: getSize('8px', '10px', '12px') 
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ fontSize: '16px' }}>��</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: getSize('14px', '15px', '16px') }}>🚚</span>
                     <span style={{ 
-                      fontSize: '14px', 
+                      fontSize: getSize('12px', '13px', '14px'), 
                       fontWeight: '700', 
                       color: '#0d47a1' 
                     }}>
@@ -340,58 +377,88 @@ const AdvancedMapControls = ({
                   <span style={{
                     background: '#4caf50',
                     color: 'white',
-                    padding: '4px 8px',
-                    borderRadius: '6px',
-                    fontSize: '11px',
+                    padding: getSize('2px 4px', '3px 6px', '4px 8px'),
+                    borderRadius: '4px',
+                    fontSize: getSize('10px', '11px', '12px'),
                     fontWeight: '600'
                   }}>
                     En Route
                   </span>
                 </div>
                 
-                <div style={{ marginBottom: '12px' }}>
-                  <div style={{ fontSize: '11px', color: '#5f6368', marginBottom: '2px' }}>Conducteur</div>
-                  <div style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937' }}>
-                    👤 {selectedTruck.driver?.name || 'N/A'}
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: '12px' }}>
-                  <div style={{ fontSize: '11px', color: '#5f6368', marginBottom: '2px' }}>Destination</div>
-                  <div style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937' }}>
-                    📍 {selectedTruck.destination || 'N/A'}
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                <div style={{ 
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: getSize('8px', '10px', '12px'),
+                  marginBottom: getSize('8px', '10px', '12px')
+                }}>
                   <div>
-                    <div style={{ fontSize: '11px', color: '#5f6368', marginBottom: '2px' }}>Vitesse</div>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937' }}>
+                    <div style={{ 
+                      fontSize: getSize('10px', '11px', '12px'), 
+                      color: '#5f6368', 
+                      marginBottom: '2px' 
+                    }}>
+                      Conducteur
+                    </div>
+                    <div style={{ 
+                      fontSize: getSize('12px', '13px', '14px'), 
+                      fontWeight: '600', 
+                      color: '#1f2937' 
+                    }}>
+                      👤 {selectedTruck.driver?.name || 'N/A'}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ 
+                      fontSize: getSize('10px', '11px', '12px'), 
+                      color: '#5f6368', 
+                      marginBottom: '2px' 
+                    }}>
+                      Destination
+                    </div>
+                    <div style={{ 
+                      fontSize: getSize('12px', '13px', '14px'), 
+                      fontWeight: '600', 
+                      color: '#1f2937' 
+                    }}>
+                      📍 {selectedTruck.destination || 'N/A'}
+                    </div>
+                  </div>
+
+                  <div>
+                    <div style={{ 
+                      fontSize: getSize('10px', '11px', '12px'), 
+                      color: '#5f6368', 
+                      marginBottom: '2px' 
+                    }}>
+                      Vitesse
+                    </div>
+                    <div style={{ 
+                      fontSize: getSize('12px', '13px', '14px'), 
+                      fontWeight: '600', 
+                      color: '#1f2937' 
+                    }}>
                       ⚡ {Math.round(selectedTruck.speed || 0)} km/h
                     </div>
                   </div>
+
                   <div>
-                    <div style={{ fontSize: '11px', color: '#5f6368', marginBottom: '2px' }}>Progression</div>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#1f2937' }}>
+                    <div style={{ 
+                      fontSize: getSize('10px', '11px', '12px'), 
+                      color: '#5f6368', 
+                      marginBottom: '2px' 
+                    }}>
+                      Progression
+                    </div>
+                    <div style={{ 
+                      fontSize: getSize('12px', '13px', '14px'), 
+                      fontWeight: '600', 
+                      color: '#1f2937' 
+                    }}>
                       📊 {selectedTruck.route_progress || 0}%
                     </div>
                   </div>
-                </div>
-
-                {/* Barre de progression */}
-                <div style={{
-                  background: 'rgba(59, 130, 246, 0.2)',
-                  borderRadius: '6px',
-                  height: '6px',
-                  overflow: 'hidden'
-                }}>
-                  <div style={{
-                    width: `${selectedTruck.route_progress || 0}%`,
-                    height: '100%',
-                    background: 'linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%)',
-                    borderRadius: '6px',
-                    transition: 'width 0.5s ease'
-                  }} />
                 </div>
               </div>
             )}
@@ -403,7 +470,7 @@ const AdvancedMapControls = ({
         {`
           @keyframes slideInRight {
             from {
-              transform: translateX(100%);
+              transform: translateX(20px);
               opacity: 0;
             }
             to {

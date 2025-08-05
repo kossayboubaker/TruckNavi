@@ -48,7 +48,7 @@
 }
 
 .delivery-card {
-  width: 92%;
+  width: 100%;
   background: hsl(var(--background));
   border: 1px solid hsl(var(--border));
   border-radius: var(--border-radius);
@@ -56,6 +56,7 @@
   margin-bottom: 0.4rem;
   transition: all 0.2s ease;
   flex-shrink: 0;
+  overflow-y:auto
 }
 
 .delivery-card:hover {
@@ -88,7 +89,7 @@
 }
 
 /* Scrollbar personnalisée (très discrète) */
-.deliveries-list-container::-webkit-scrollbar {
+/* .deliveries-list-container::-webkit-scrollbar {
   width: 2px;
 }
 
@@ -103,7 +104,7 @@
 
 .deliveries-list-container::-webkit-scrollbar-thumb:hover {
   background: rgba(0,0,0,0.2);
-}
+} */
 
 /* Support pour Firefox */
 .deliveries-list-container {

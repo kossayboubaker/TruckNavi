@@ -220,6 +220,8 @@ const DeliveryList = ({ deliveries, searchTerm, onSearchChange, selectedDelivery
         )}
       </div>
 
+      
+
       {/* Contrôles de pagination compacts SANS espace - Format exact screenshot */}
       {totalPages > 1 && (
         <div
