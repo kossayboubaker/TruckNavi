@@ -121,8 +121,10 @@ const runConsumer = async (io) => {
               { new: true }
             );
 
+            // Diffuser les mises à jour de routes
             io.emit('truckRouteUpdate', data);
-            console.log(`Forwarded route update for truck ${data.truck_id}`);
+            io.to('truck_updates').emit('route_update', data);
+            console.log(`🛣️ Mise à jour route diffusée pour ${data.truck_id}`);
           }
         } catch (error) {
           console.error(`Error parsing Kafka message from topic ${topic}:`, error.message);
