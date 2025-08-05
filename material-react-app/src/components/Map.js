@@ -71,45 +71,67 @@ const Map = () => {
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
 
-  // Initialisation Socket.IO
-  useEffect(() => {
-    console.log('🔌 Initialisation Socket.IO...');
-    
-    const socketConnection = io(SOCKET_URL, {
-      withCredentials: true,
-      query: { userId: currentUser.id },
-      transports: ['websocket', 'polling']
-    });
+  // Fonction pour récupérer les camions depuis l'API
+  const fetchTrucksFromAPI = async () => {
+    setLoading(true);
+    setError(null);
 
-    socketConnection.on('connect', () => {
-      console.log('✅ Socket connecté:', socketConnection.id);
-      setConnectionStatus('connected');
-      setSocket(socketConnection);
-    });
+    try {
+      console.log('📡 Récupération camions depuis l\'API...');
 
-    socketConnection.on('disconnect', () => {
-      console.log('❌ Socket déconnecté');
-      setConnectionStatus('disconnected');
-    });
+      const response = await axios.get(`${API_BASE_URL}/api/trucks/active-trucks`, {
+        withCredentials: true,
+        timeout: 10000
+      });
 
-    socketConnection.on('connect_error', (error) => {
-      console.error('❌ Erreur Socket:', error);
-      setConnectionStatus('error');
-    });
+      if (response.data.success && response.data.trucks) {
+        const trucks = response.data.trucks;
+        console.log(`✅ ${trucks.length} camions récupérés`);
 
-    // Écouter les mises à jour en temps réel
-    socketConnection.on('truck_update', handleTruckUpdate);
-    socketConnection.on('route_update', handleRouteUpdate);
-    socketConnection.on('trucks_list_update', handleTrucksListUpdate);
-    socketConnection.on('truck_alert', handleTruckAlert);
-    socketConnection.on('truckUpdate', handleLegacyTruckUpdate);
-    socketConnection.on('truckRouteUpdate', handleLegacyRouteUpdate);
+        // Valider et nettoyer les données
+        const validTrucks = trucks.map(truck => ({
+          ...truck,
+          position: Array.isArray(truck.position) ? truck.position : [36.8, 10.18],
+          speed: truck.speed || 0,
+          bearing: truck.bearing || 0,
+          route_progress: truck.route_progress || 0,
+          state: truck.state || 'Arrêté',
+          route: Array.isArray(truck.route) ? truck.route : [],
+          last_update: truck.last_update || new Date().toISOString()
+        }));
 
-    return () => {
-      console.log('🔌 Déconnexion Socket.IO');
-      socketConnection.disconnect();
-    };
-  }, [currentUser.id]);
+        // Mettre à jour le générateur de routes avec les nouvelles données
+        validTrucks.forEach(truck => {
+          routeGenerator.updateTruckData(truck);
+        });
+
+        setVisibleTrucks(validTrucks);
+
+        if (validTrucks.length > 0 && !selectedDelivery) {
+          setSelectedDelivery(validTrucks[0]);
+        }
+
+        setLastUpdate(new Date());
+      } else {
+        throw new Error('Format de réponse invalide');
+      }
+
+    } catch (err) {
+      console.error('❌ Erreur récupération:', err);
+      setError(`Erreur: ${err.message}`);
+
+      // Retry automatique en cas d'erreur réseau
+      if (err.code === 'NETWORK_ERROR' || err.code === 'ECONNABORTED') {
+        setTimeout(() => {
+          if (visibleTrucks.length === 0) {
+            fetchTrucksFromAPI();
+          }
+        }, 5000);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Gestionnaires des mises à jour Socket
   const handleTruckUpdate = (truckData) => {
