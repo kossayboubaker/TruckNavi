@@ -205,11 +205,20 @@ class RouteGenerator {
 
   // Mettre à jour les données d'un camion
   updateTruckData(truckData) {
-    this.activeTrucks.set(truckData.truck_id, {
-      ...truckData,
-      position: this.validateAndFormatCoordinates(truckData.position),
-      lastUpdate: Date.now()
-    });
+    if (!truckData || !truckData.truck_id) {
+      console.warn('⚠️ Données camion invalides pour updateTruckData');
+      return;
+    }
+
+    try {
+      this.activeTrucks.set(truckData.truck_id, {
+        ...truckData,
+        position: this.validateAndFormatCoordinates(truckData.position),
+        lastUpdate: Date.now()
+      });
+    } catch (error) {
+      console.error(`❌ Erreur mise à jour camion ${truckData.truck_id}:`, error);
+    }
   }
 
   // Générer toutes les routes pour une liste de camions
@@ -416,7 +425,7 @@ class RouteGenerator {
     return null;
   }
 
-  // Vérifier si un camion est en pause
+  // V��rifier si un camion est en pause
   isTruckPaused(truckId) {
     return this.pausedTrucks.has(truckId);
   }
