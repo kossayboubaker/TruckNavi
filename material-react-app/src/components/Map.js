@@ -200,13 +200,16 @@ const Map = () => {
   useEffect(() => {
     fetchTrucksFromAPI();
 
-    // Rafraîchissement automatique toutes les 10 secondes
+    // Rafraîchissement automatique toutes les 30 secondes (réduit pour éviter spam si erreur)
     const interval = setInterval(() => {
-      fetchTrucksFromAPI();
-    }, 10000);
+      // Ne rafraîchir que si pas d'erreur critique
+      if (!error || error.includes('demo')) {
+        fetchTrucksFromAPI();
+      }
+    }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [error]);
 
 
 
