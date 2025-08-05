@@ -431,13 +431,14 @@ const Map = () => {
 
   return (
     <div className={`min-h-screen ${isAsideOpen ? 'bg-background' : 'bg-white'} overflow-hidden`}>
-      {/* Indicateur de statut API */}
+      {/* Indicateur de statut connexion */}
       <div style={{
         position: 'fixed',
         top: '10px',
         right: '10px',
         zIndex: 3000,
-        background: !error ? '#10b981' : '#ef4444',
+        background: connectionStatus === 'connected' ? '#10b981' :
+                   connectionStatus === 'error' ? '#ef4444' : '#f59e0b',
         color: 'white',
         padding: '4px 8px',
         borderRadius: '12px',
@@ -445,7 +446,8 @@ const Map = () => {
         fontWeight: '700',
         boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
       }}>
-        {!error ? '🟢 API ACTIVE' : '🔴 API ERREUR'}
+        {connectionStatus === 'connected' ? '🟢 TEMPS RÉEL' :
+         connectionStatus === 'error' ? '🔴 SOCKET ERREUR' : '🟡 CONNEXION...'}
       </div>
 
       {/* Indicateur de rôle */}
