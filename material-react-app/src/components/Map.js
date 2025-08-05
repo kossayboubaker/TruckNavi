@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import io from 'socket.io-client';
 import DeliveryList from '../components/DeliveryList/DeliveryList.js';
 import MapCanvas from '../components/MapCanvas/MapCanvas.js';
 import AdvancedMapControls from '../components/AdvancedMapControls/AdvancedMapControls.js';
@@ -10,6 +9,7 @@ import BreakNotification from '../components/BreakNotification/BreakNotification
 import PreventiveAlert from '../components/PreventiveAlert/PreventiveAlert.js';
 import roleManager from '../services/roleManager';
 import extendedAlertsService from '../services/extendedAlertsService';
+import routeGenerator from '../services/routeGenerator';
 
 // Configuration API et Socket
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
