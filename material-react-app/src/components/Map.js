@@ -199,20 +199,143 @@ const Map = () => {
     console.log('📋 Données de démonstration chargées');
   };
 
-  // Chargement initial et rafraîchissement périodique
+  // Configuration Socket.IO pour temps réel
   useEffect(() => {
+    console.log('🔌 Initialisation Socket.IO...');
+
+    const newSocket = io(API_BASE_URL, {
+      withCredentials: true,
+      transports: ['websocket', 'polling'],
+      autoConnect: true
+    });
+
+    newSocket.on('connect', () => {
+      console.log('✅ Socket.IO connecté:', newSocket.id);
+      setConnectionStatus('connected');
+      setSocket(newSocket);
+
+      // S'abonner aux mises à jour des camions
+      newSocket.join('truck_updates');
+      console.log('🚛 Abonné aux mises à jour des camions');
+    });
+
+    newSocket.on('disconnect', () => {
+      console.log('❌ Socket.IO déconnecté');
+      setConnectionStatus('disconnected');
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('❌ Erreur connexion Socket.IO:', error);
+      setConnectionStatus('error');
+    });
+
+    // Écouter les mises à jour de camions en temps réel
+    newSocket.on('truckUpdate', (truckData) => {
+      console.log('🚛 Mise à jour camion reçue:', truckData.id);
+
+      setVisibleTrucks(prevTrucks => {
+        const updatedTrucks = prevTrucks.map(truck => {
+          if (truck.id === truckData.id || truck.truck_id === truckData.id) {
+            return {
+              ...truck,
+              position: truckData.position,
+              speed: truckData.speed || truck.speed,
+              bearing: truckData.bearing || truck.bearing,
+              route_progress: truckData.route_progress || truck.route_progress,
+              state: truckData.state || truck.state,
+              route: truckData.route || truck.route,
+              last_update: new Date().toISOString()
+            };
+          }
+          return truck;
+        });
+
+        setLastUpdate(new Date());
+        return updatedTrucks;
+      });
+    });
+
+    // Écouter les mises à jour de routes
+    newSocket.on('truckRouteUpdate', (routeData) => {
+      console.log('🛣️ Mise à jour route reçue:', routeData.truck_id);
+
+      setVisibleTrucks(prevTrucks => {
+        const updatedTrucks = prevTrucks.map(truck => {
+          if (truck.id === routeData.truck_id || truck.truck_id === routeData.truck_id) {
+            return {
+              ...truck,
+              route: routeData.route,
+              distance: routeData.distance,
+              duration: routeData.duration,
+              last_update: new Date().toISOString()
+            };
+          }
+          return truck;
+        });
+
+        setLastUpdate(new Date());
+        return updatedTrucks;
+      });
+    });
+
+    // Écouter les listes complètes de camions
+    newSocket.on('trucks_list_update', (data) => {
+      console.log(`📋 Liste complète reçue: ${data.count} camions`);
+
+      if (data.trucks && Array.isArray(data.trucks)) {
+        const formattedTrucks = data.trucks.map(truck => ({
+          ...truck,
+          position: Array.isArray(truck.position) ? truck.position : [36.8, 10.18],
+          speed: truck.speed || 0,
+          bearing: truck.bearing || 0,
+          route_progress: truck.route_progress || 0,
+          state: truck.state || 'Arrêté',
+          route: Array.isArray(truck.route) ? truck.route : [],
+          last_update: truck.last_update || new Date().toISOString()
+        }));
+
+        setVisibleTrucks(formattedTrucks);
+        setLastUpdate(new Date());
+
+        if (formattedTrucks.length > 0 && !selectedDelivery) {
+          setSelectedDelivery(formattedTrucks[0]);
+        }
+      }
+    });
+
+    // Écouter les alertes de camions
+    newSocket.on('truck_alert', (alert) => {
+      console.log('🚨 Alerte reçue:', alert.title);
+      setAlerts(prev => [...prev, {
+        ...alert,
+        id: Date.now() + Math.random(),
+        timestamp: new Date().toISOString()
+      }]);
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      console.log('🔌 Fermeture Socket.IO');
+      newSocket.disconnect();
+    };
+  }, [API_BASE_URL]);
+
+  // Chargement initial et rafraîchissement de secours
+  useEffect(() => {
+    // Chargement initial
     fetchTrucksFromAPI();
 
-    // Rafraîchissement automatique toutes les 30 secondes (réduit pour éviter spam si erreur)
+    // Rafraîchissement de secours si Socket.IO ne fonctionne pas
     const interval = setInterval(() => {
-      // Ne rafraîchir que si pas d'erreur critique
-      if (!error || error.includes('demo')) {
+      if (connectionStatus !== 'connected') {
+        console.log('🔄 Rafraîchissement de secours (Socket.IO déconnecté)');
         fetchTrucksFromAPI();
       }
-    }, 30000);
+    }, 45000); // Plus long car Socket.IO gère le temps réel
 
     return () => clearInterval(interval);
-  }, [error]);
+  }, [connectionStatus]);
 
 
 
