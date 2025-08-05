@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import io from 'socket.io-client';
 import DeliveryList from '../components/DeliveryList/DeliveryList.js';
 import MapCanvas from '../components/MapCanvas/MapCanvas.js';
 import AdvancedMapControls from '../components/AdvancedMapControls/AdvancedMapControls.js';
@@ -9,8 +10,12 @@ import BreakNotification from '../components/BreakNotification/BreakNotification
 import PreventiveAlert from '../components/PreventiveAlert/PreventiveAlert.js';
 import roleManager from '../services/roleManager';
 import extendedAlertsService from '../services/extendedAlertsService';
-import routeGenerator from '../services/routeGenerator';
 
+// Configuration API et Socket
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
+const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:8080';
+
+// Hook responsive
 const useResponsive = () => {
   const [dimensions, setDimensions] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1024,
@@ -36,36 +41,10 @@ const useResponsive = () => {
   return { dimensions, isUltraCompact, isMobile, isSmallMobile };
 };
 
-// Liste des localisations avec leurs coordonnées
-const LOCATIONS = {
-  "Tunis": [10.18, 36.8],
-  "Ariana": [10.11, 36.86],
-  "Ben Arous": [10.23, 36.77],
-  "Manouba": [10.09, 36.8],
-  "Nabeul": [11.02, 36.45],
-  "Zaghouan": [10.14, 36.4],
-  "Bizerte": [9.87, 37.27],
-  "Beja": [9.19, 36.73],
-  "Jendouba": [8.79, 36.5],
-  "Kef": [8.71, 36.18],
-  "Siliana": [9.37, 36.08],
-  "Sousse": [10.62, 35.83],
-  "Monastir": [10.8, 35.77],
-  "Mahdia": [11.06, 35.5],
-  "Kairouan": [10.1, 35.67],
-  "Kasserine": [8.75, 35.17],
-  "Sidi Bouzid": [9.5, 35.03],
-  "Sfax": [10.76, 34.74],
-  "Gafsa": [8.78, 34.42],
-  "Tozeur": [8.13, 33.92],
-  "Kebili": [8.97, 33.7],
-  "Gabes": [10.1, 33.88],
-  "Medenine": [10.5, 33.35],
-  "Tataouine": [10.45, 32.93]
-};
-
-const Map = ({ socket }) => {
+const Map = () => {
   const { dimensions, isUltraCompact, isMobile, isSmallMobile } = useResponsive();
+  
+  // États principaux
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDelivery, setSelectedDelivery] = useState(null);
   const [isAsideOpen, setIsAsideOpen] = useState(!isUltraCompact);
@@ -91,63 +70,226 @@ const Map = ({ socket }) => {
   const [preventiveAlerts, setPreventiveAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState('connecting');
+  const [lastUpdate, setLastUpdate] = useState(null);
 
-  // Fonction pour valider et formater les coordonnées
-  const validateAndFormatCoordinates = (coords) => {
-    if (!coords) return [10.18, 36.8]; // Default to Tunis
+  // Initialisation Socket.IO
+  useEffect(() => {
+    console.log('🔌 Initialisation Socket.IO...');
+    
+    const socketConnection = io(SOCKET_URL, {
+      withCredentials: true,
+      query: { userId: currentUser.id },
+      transports: ['websocket', 'polling']
+    });
 
-    // Si c'est un objet {lat, lng} ou {lat, lon}
-    if (typeof coords === 'object' && !Array.isArray(coords)) {
-      if ('lat' in coords && 'lng' in coords) {
-        return [coords.lng, coords.lat];
+    socketConnection.on('connect', () => {
+      console.log('✅ Socket connecté:', socketConnection.id);
+      setConnectionStatus('connected');
+      setSocket(socketConnection);
+    });
+
+    socketConnection.on('disconnect', () => {
+      console.log('❌ Socket déconnecté');
+      setConnectionStatus('disconnected');
+    });
+
+    socketConnection.on('connect_error', (error) => {
+      console.error('❌ Erreur Socket:', error);
+      setConnectionStatus('error');
+    });
+
+    // Écouter les mises à jour en temps réel
+    socketConnection.on('truck_update', handleTruckUpdate);
+    socketConnection.on('route_update', handleRouteUpdate);
+    socketConnection.on('trucks_list_update', handleTrucksListUpdate);
+    socketConnection.on('truck_alert', handleTruckAlert);
+    socketConnection.on('truckUpdate', handleLegacyTruckUpdate);
+    socketConnection.on('truckRouteUpdate', handleLegacyRouteUpdate);
+
+    return () => {
+      console.log('🔌 Déconnexion Socket.IO');
+      socketConnection.disconnect();
+    };
+  }, [currentUser.id]);
+
+  // Gestionnaires des mises à jour Socket
+  const handleTruckUpdate = (truckData) => {
+    console.log('🚛 Mise à jour camion:', truckData.truck_id || truckData.id);
+    
+    setVisibleTrucks(prevTrucks => {
+      return prevTrucks.map(truck => {
+        const targetId = truckData.truck_id || truckData.id;
+        if (truck.truck_id === targetId || truck.id === targetId) {
+          return {
+            ...truck,
+            position: truckData.position || truckData.location ? [truckData.location.lat, truckData.location.lng] : truck.position,
+            speed: truckData.speed ?? truck.speed,
+            bearing: truckData.bearing ?? truck.bearing,
+            route_progress: truckData.route_progress ?? truckData.routeProgress ?? truck.route_progress,
+            state: truckData.state || truck.state,
+            route: truckData.route || truck.route,
+            last_update: new Date().toISOString()
+          };
+        }
+        return truck;
+      });
+    });
+    setLastUpdate(new Date());
+  };
+
+  const handleRouteUpdate = (routeData) => {
+    console.log('🛣️ Mise à jour route:', routeData.truck_id);
+    
+    setVisibleTrucks(prevTrucks => {
+      return prevTrucks.map(truck => {
+        if (truck.truck_id === routeData.truck_id) {
+          return {
+            ...truck,
+            route: routeData.route || truck.route,
+            destinationCoords: routeData.destination_coords || truck.destinationCoords
+          };
+        }
+        return truck;
+      });
+    });
+  };
+
+  const handleTrucksListUpdate = (data) => {
+    console.log('📋 Liste camions mise à jour:', data.count);
+    if (data.trucks && Array.isArray(data.trucks)) {
+      setVisibleTrucks(data.trucks);
+      if (data.trucks.length > 0 && !selectedDelivery) {
+        setSelectedDelivery(data.trucks[0]);
       }
-      if ('lat' in coords && 'lon' in coords) {
-        return [coords.lon, coords.lat];
+    }
+    setLastUpdate(new Date());
+  };
+
+  const handleTruckAlert = (alert) => {
+    console.log('🚨 Alerte reçue:', alert.title);
+    setAlerts(prev => [...prev, alert]);
+  };
+
+  // Gestionnaires legacy pour compatibilité
+  const handleLegacyTruckUpdate = (data) => {
+    console.log('🚛 Mise à jour legacy:', data.id);
+    handleTruckUpdate({
+      truck_id: data.id,
+      position: data.position,
+      speed: data.speed,
+      bearing: data.bearing,
+      route_progress: data.route_progress,
+      state: data.state,
+      route: data.route
+    });
+  };
+
+  const handleLegacyRouteUpdate = (data) => {
+    console.log('🛣️ Route legacy mise à jour:', data.truck_id);
+    handleRouteUpdate(data);
+  };
+
+  // Récupération des camions depuis l'API
+  const fetchTrucksFromAPI = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      console.log('📡 Récupération camions API...');
+      
+      const response = await axios.get(`${API_BASE_URL}/api/trucks/active-trucks`, {
+        withCredentials: true,
+        timeout: 10000
+      });
+
+      if (response.data.success && response.data.trucks) {
+        const trucks = response.data.trucks;
+        console.log(`✅ ${trucks.length} camions récupérés`);
+        
+        // Valider et nettoyer les données
+        const validTrucks = trucks.map(truck => ({
+          ...truck,
+          position: Array.isArray(truck.position) ? truck.position : [36.8, 10.18],
+          speed: truck.speed || 0,
+          bearing: truck.bearing || 0,
+          route_progress: truck.route_progress || 0,
+          state: truck.state || 'Arrêté',
+          route: Array.isArray(truck.route) ? truck.route : [],
+          last_update: truck.last_update || new Date().toISOString()
+        }));
+        
+        setVisibleTrucks(validTrucks);
+        
+        if (validTrucks.length > 0 && !selectedDelivery) {
+          setSelectedDelivery(validTrucks[0]);
+        }
+        
+        setLastUpdate(new Date());
+      } else {
+        throw new Error('Format de réponse invalide');
       }
-    }
-
-    // Si c'est un tableau [lat, lng] ou [lng, lat]
-    if (Array.isArray(coords)) {
-      // Vérifier si c'est [lat, lng] ou [lng, lat]
-      if (Math.abs(coords[0]) <= 90 && Math.abs(coords[1]) <= 180) {
-        return [coords[1], coords[0]]; // Convertir [lat, lng] en [lng, lat]
+      
+    } catch (err) {
+      console.error('❌ Erreur récupération:', err);
+      setError(`Erreur: ${err.message}`);
+      
+      // Retry automatique en cas d'erreur réseau
+      if (err.code === 'NETWORK_ERROR' || err.code === 'ECONNABORTED') {
+        setTimeout(() => {
+          if (visibleTrucks.length === 0) {
+            fetchTrucksFromAPI();
+          }
+        }, 5000);
       }
-      return coords; // Déjà au format [lng, lat]
-    }
-
-    return [10.18, 36.8]; // Fallback
-  };
-  const handleZoomIn = () => {
-    if (mapInstance) {
-      mapInstance.zoomIn();
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleZoomOut = () => {
-    if (mapInstance) {
-      mapInstance.zoomOut();
-    }
-  };
+  // Chargement initial et rafraîchissement
+  useEffect(() => {
+    fetchTrucksFromAPI();
 
-  const handleMapStyleChange = (style) => {
-    setMapStyle(style);
-  };
+    // Rafraîchissement périodique
+    const interval = setInterval(() => {
+      if (connectionStatus !== 'connected') {
+        fetchTrucksFromAPI();
+      }
+    }, 30000);
 
-  const handleToggleAlerts = () => {
-    setShowAlerts(!showAlerts);
-  };
+    return () => clearInterval(interval);
+  }, [connectionStatus]);
 
-  const handleToggleRoutes = (show) => {
-    setShowRoutes(show);
-  };
+  // Gestion des changements de rôle
+  useEffect(() => {
+    const handleRoleChange = (event) => {
+      setCurrentRole(event.detail.role);
+      const filteredTrucks = roleManager.filterTrucks(visibleTrucks);
+      setVisibleTrucks(filteredTrucks);
 
-  const handleToggleWeather = (show) => {
-    setShowWeather(show);
-  };
+      if (event.detail.role === 'conducteur') {
+        setCurrentUser({ id: 'driver_current', name: 'Conducteur Actuel' });
+      } else {
+        setCurrentUser({ id: 'current_user', name: 'Gestionnaire' });
+      }
 
-  const handleToggleFollowTruck = (follow) => {
-    setFollowTruck(follow);
-  };
+      console.log(`🎭 Rôle changé: ${event.detail.role}`);
+    };
+
+    window.addEventListener('roleChanged', handleRoleChange);
+    return () => window.removeEventListener('roleChanged', handleRoleChange);
+  }, [visibleTrucks]);
+
+  // Gestionnaires d'événements
+  const handleZoomIn = () => mapInstance?.zoomIn();
+  const handleZoomOut = () => mapInstance?.zoomOut();
+  const handleMapStyleChange = (style) => setMapStyle(style);
+  const handleToggleAlerts = () => setShowAlerts(!showAlerts);
+  const handleToggleRoutes = (show) => setShowRoutes(show);
+  const handleToggleWeather = (show) => setShowWeather(show);
+  const handleToggleFollowTruck = (follow) => setFollowTruck(follow);
 
   const handleAlertClick = (alert) => {
     if (mapInstance && alert.position) {
@@ -156,13 +298,6 @@ const Map = ({ socket }) => {
         duration: 1.5
       });
       setIsAlertsOpen(false);
-      setTimeout(() => {
-        mapInstance.eachLayer(layer => {
-          if (layer.options && layer.options.alertId === alert.id) {
-            layer.openPopup();
-          }
-        });
-      }, 1600);
     }
   };
 
@@ -171,13 +306,8 @@ const Map = ({ socket }) => {
     setDeletedAlerts(prev => [...prev, alertId]);
   };
 
-  const handleToggleAlertPanel = () => {
-    setIsAlertsOpen(!isAlertsOpen);
-  };
-
-  const handleSearchChange = (term) => {
-    setSearchTerm(term);
-  };
+  const handleToggleAlertPanel = () => setIsAlertsOpen(!isAlertsOpen);
+  const handleSearchChange = (term) => setSearchTerm(term);
 
   const handleDeliverySelect = (delivery) => {
     setSelectedDelivery(delivery);
@@ -192,164 +322,68 @@ const Map = ({ socket }) => {
         setIsAsideOpen(false);
       }
     }
-  };
-  // Récupérer les données des camions depuis l'API backend
-  const fetchTrucks = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get("http://localhost:8080/trip/details", {
-        withCredentials: true,
-      });
 
-      const trucksData = await Promise.all(response.data.map(async (trip) => {
-        const position = validateAndFormatCoordinates(trip.position);
-        const destinationCoords = trip.destination
-          ? LOCATIONS[trip.destination] || [10.18, 36.8]
-          : [10.18, 36.8];
-
-        const pickupCoords = trip.startPoint
-          ? LOCATIONS[trip.startPoint] || [10.18, 36.8]
-          : [10.18, 36.8];
-
-        // Récupérer l'itinéraire complet depuis l'API backend
-        let route = [];
-        if (trip.startPoint && trip.destination) {
-          const start = LOCATIONS[trip.startPoint];
-          const end = LOCATIONS[trip.destination];
-          if (start && end) {
-            try {
-              const routeResponse = await axios.get(
-                `http://localhost:8080/trip/route?start=${start[1]},${start[0]}&end=${end[1]},${end[0]}`
-              );
-              route = routeResponse.data.route || [];
-            } catch (error) {
-              console.error("Erreur lors de la récupération de l'itinéraire:", error);
-            }
-          }
-        }
-
-        return {
-          id: trip.id,
-          truck_id: trip.truck_id,
-          position: position,
-          speed: trip.speed || 50,
-          fuelConsumption: trip.fuelConsumption || 0,
-          state: trip.status || 'En Route',
-          ecoMode: trip.ecoMode || false,
-          vehicle: trip.vehicle || 'Camion',
-          cargo: trip.cargo || 'Marchandises',
-          status: trip.status || 'in_progress',
-          weight: trip.weight || 0,
-          route_progress: trip.routeProgress || 0,
-          bearing: trip.bearing || 0,
-          route: route.length > 0 ? route : [], // Utiliser l'itinéraire récupéré
-          pickup: {
-            address: trip.startPoint || 'Départ',
-            city: trip.startPoint || 'Ville de départ',
-            coordinates: pickupCoords,
-          },
-          destination: trip.destination || 'Destination',
-          destinationCoords: destinationCoords,
-          driver: {
-            id: trip.driver?.id || 'driver_default',
-            name: trip.driver?.name || 'Chauffeur',
-            company: trip.driver?.company || 'Transport',
-            contact: trip.driver?.contact || '+216 00 000 000',
-            avatar: trip.driver?.avatar || '👨‍💼',
-          },
-          last_update: trip.last_update || new Date().toISOString(),
-          estimatedArrival: trip.estimatedArrival || new Date(Date.now() + 2 * 3600000).toISOString(),
-          fuel_level: trip.fuel_level || 100,
-          temperature: trip.temperature || 20,
-          alerts: trip.alerts || [],
-        };
-      }));
-
-      setVisibleTrucks(trucksData);
-      if (trucksData.length > 0 && !selectedDelivery) {
-        setSelectedDelivery(trucksData[0]);
-      }
-      setLoading(false);
-      setError(null);
-    } catch (err) {
-      console.error('Erreur de chargement des camions:', err);
-      setError(err.message);
-      setLoading(false);
+    // S'abonner aux mises à jour spécifiques
+    if (socket && delivery.truck_id) {
+      socket.emit('subscribe_truck', delivery.truck_id);
     }
   };
 
-  // Écouter les mises à jour en temps réel via Socket.io
-  useEffect(() => {
-    if (!socket) return;
-
-    const handleTruckUpdate = (data) => {
-      setVisibleTrucks(prevTrucks => {
-        return prevTrucks.map(truck => {
-          if (truck.truck_id === data.id) {
-            const position = validateAndFormatCoordinates(data.position);
-
-            return {
-              ...truck,
-              position: position,
-              speed: data.speed || truck.speed,
-              state: data.state || truck.state,
-              route_progress: data.route_progress || truck.route_progress,
-              bearing: data.bearing || truck.bearing,
-              route: data.route ? data.route.map(validateAndFormatCoordinates) : truck.route,
-              last_update: new Date().toISOString()
-            };
-          }
-          return truck;
-        });
-      });
-    };
-
-    const handleRouteUpdate = (data) => {
-      setVisibleTrucks(prevTrucks => {
-        return prevTrucks.map(truck => {
-          if (truck.truck_id === data.truck_id) {
-            const route = data.route.map(validateAndFormatCoordinates);
-            return {
-              ...truck,
-              route: route,
-              destinationCoords: route.length > 0 ? route[route.length - 1] : truck.destinationCoords
-            };
-          }
-          return truck;
-        });
-      });
-    };
-
-    socket.on('truckUpdate', handleTruckUpdate);
-    socket.on('truckRouteUpdate', handleRouteUpdate);
-
-    return () => {
-      socket.off('truckUpdate', handleTruckUpdate);
-      socket.off('truckRouteUpdate', handleRouteUpdate);
-    };
-  }, [socket]);
-
-  // Charger les camions à l'initialisation
-  useEffect(() => {
-    fetchTrucks();
-
-    const interval = setInterval(() => {
-      fetchTrucks();
-    }, 30000); // Rafraîchir toutes les 30 secondes
-
-    return () => clearInterval(interval);
-  }, []);
+  // Interface de chargement
+  if (loading && visibleTrucks.length === 0) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-foreground">Chargement des camions...</h2>
+          <p className="text-muted-foreground mt-2">
+            Connexion: {connectionStatus}
+          </p>
+          {error && (
+            <div className="mt-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+              <p className="text-destructive text-sm">{error}</p>
+              <button 
+                onClick={fetchTrucksFromAPI}
+                className="mt-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90"
+              >
+                Réessayer
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen ${isAsideOpen ? 'bg-background' : 'bg-white'} overflow-hidden`}>
+      {/* Indicateurs de statut */}
+      <div style={{
+        position: 'fixed',
+        top: '10px',
+        right: '10px',
+        zIndex: 3000,
+        background: connectionStatus === 'connected' ? '#10b981' : 
+                   connectionStatus === 'error' ? '#ef4444' : '#f59e0b',
+        color: 'white',
+        padding: '4px 8px',
+        borderRadius: '12px',
+        fontSize: '10px',
+        fontWeight: '700',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+      }}>
+        {connectionStatus === 'connected' ? '🟢 TEMPS RÉEL' : 
+         connectionStatus === 'error' ? '🔴 ERREUR' : '🟡 CONNEXION...'}
+      </div>
+
       {/* Indicateur de rôle */}
       <div style={{
         position: 'fixed',
         top: '10px',
-        right: '120px',
+        right: '150px',
         zIndex: 3000,
         background: currentRole === 'conducteur' ? '#10b981' :
-          currentRole === 'admin' ? '#3b82f6' : '#8b5cf6',
+                   currentRole === 'admin' ? '#3b82f6' : '#8b5cf6',
         color: 'white',
         padding: '4px 8px',
         borderRadius: '12px',
@@ -359,6 +393,34 @@ const Map = ({ socket }) => {
         boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
       }}>
         🎭 {currentRole}
+      </div>
+
+      {/* Compteur de camions */}
+      <div style={{
+        position: 'fixed',
+        top: '50px',
+        right: '10px',
+        zIndex: 3000,
+        background: 'rgba(255,255,255,0.95)',
+        color: '#1f2937',
+        padding: '8px 12px',
+        borderRadius: '8px',
+        fontSize: '12px',
+        fontWeight: '600',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255,255,255,0.2)'
+      }}>
+        🚛 {visibleTrucks.length} camion{visibleTrucks.length > 1 ? 's' : ''}
+        {lastUpdate && (
+          <div style={{ fontSize: '8px', color: '#6b7280', marginTop: '2px' }}>
+            MAJ: {lastUpdate.toLocaleTimeString('fr-FR', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              second: '2-digit'
+            })}
+          </div>
+        )}
       </div>
 
       <AdvancedMapControls
@@ -397,12 +459,12 @@ const Map = ({ socket }) => {
           style={{
             width: isAsideOpen ? (
               isUltraCompact ? '200px' :
-                isSmallMobile ? '240px' :
-                  isMobile ? '280px' :
-                    '320px'
+              isSmallMobile ? '240px' :
+              isMobile ? '280px' :
+              '320px'
             ) : '0px',
             display: 'block',
-            borderWidth: isUltraCompact ? '2px' : '2px'
+            borderWidth: '1px'
           }}
         >
           <DeliveryList
@@ -412,6 +474,10 @@ const Map = ({ socket }) => {
             onSelectDelivery={handleDeliverySelect}
             selectedDelivery={selectedDelivery}
             alerts={roleManager.filterAlerts(allAlerts, visibleTrucks)}
+            loading={loading}
+            error={error}
+            onRefresh={fetchTrucksFromAPI}
+            connectionStatus={connectionStatus}
           />
         </aside>
 
@@ -430,10 +496,12 @@ const Map = ({ socket }) => {
             showWeather={showWeather}
             followTruck={followTruck}
             onAlertClick={handleAlertClick}
-            useDynamicRoutes={true} // Nouvelle prop pour utiliser les routes dynamiques
+            useDynamicRoutes={true}
+            isRealTime={connectionStatus === 'connected'}
           />
         </main>
 
+        {/* Chat pour conducteurs */}
         {currentRole === 'conducteur' && (
           <button
             className="chat-toggle-btn"
@@ -457,15 +525,7 @@ const Map = ({ socket }) => {
               alignItems: 'center',
               justifyContent: 'center'
             }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'scale(1.1)';
-              e.currentTarget.style.boxShadow = '0 12px 35px rgba(16, 185, 129, 0.6)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = '0 8px 25px rgba(16, 185, 129, 0.4)';
-            }}
-            title="Ouvrir le chat"
+            title="Chat conducteurs"
           >
             💬
           </button>
@@ -478,24 +538,13 @@ const Map = ({ socket }) => {
           trucks={visibleTrucks}
         />
 
+        {/* Notifications */}
         {breakNotifications.map((notification) => (
           <BreakNotification
             key={notification.id}
             notification={notification}
             onClose={() => {
-              routeGenerator.resumeTruck(notification.truckId);
               setBreakNotifications(prev => prev.filter(n => n.id !== notification.id));
-            }}
-            onStartBreak={(breakInfo) => {
-              console.log(`🚦 Pause commencée pour ${breakInfo.truckId}`);
-              const truck = visibleTrucks.find(t => t.truck_id === breakInfo.truckId);
-              if (truck) {
-                routeGenerator.pauseTruck(breakInfo.truckId, truck.route_progress, truck.position);
-              }
-            }}
-            onBreakEnd={(truckId) => {
-              console.log(`▶️ Pause terminée pour ${truckId} - reprise automatique`);
-              routeGenerator.resumeTruck(truckId);
             }}
           />
         ))}
@@ -509,7 +558,66 @@ const Map = ({ socket }) => {
             }}
           />
         ))}
+
+        {/* Bouton panneau */}
+        <div style={{
+          position: 'fixed',
+          top: isUltraCompact ? '2px' : '8px',
+          left: isUltraCompact ? '2px' : '8px',
+          zIndex: 3000
+        }}>
+          <button
+            onClick={() => setIsAsideOpen(!isAsideOpen)}
+            style={{
+              background: isAsideOpen ?
+                'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)' :
+                'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+              border: '2px solid rgba(255,255,255,0.3)',
+              borderRadius: '50%',
+              width: isUltraCompact ? '20px' : isMobile ? '32px' : '38px',
+              height: isUltraCompact ? '20px' : isMobile ? '32px' : '38px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              color: 'white'
+            }}
+            title={`${isAsideOpen ? 'Masquer' : 'Afficher'} le panneau`}
+          >
+            <svg
+              width={isUltraCompact ? '10' : '14'}
+              height={isUltraCompact ? '10' : '14'}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d={isAsideOpen ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'} />
+            </svg>
+          </button>
+        </div>
       </div>
+
+      <style>
+        {`
+          .chat-toggle-btn:hover {
+            transform: scale(1.1) !important;
+            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.6) !important;
+          }
+
+          @media (max-width: 768px) {
+            .chat-toggle-btn {
+              bottom: 15px !important;
+              right: 15px !important;
+              width: 56px !important;
+              height: 56px !important;
+              font-size: 20px !important;
+            }
+          }
+        `}
+      </style>
     </div>
   );
 };
