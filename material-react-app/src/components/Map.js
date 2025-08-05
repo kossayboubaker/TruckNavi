@@ -100,7 +100,7 @@ const Map = () => {
           last_update: truck.last_update || new Date().toISOString()
         }));
 
-        // Mettre à jour le générateur de routes avec les nouvelles données
+        // Mettre à jour le générateur de routes avec les nouvelles donn��es
         validTrucks.forEach(truck => {
           routeGenerator.updateTruckData(truck);
         });
@@ -376,7 +376,7 @@ const Map = () => {
             followTruck={followTruck}
             onAlertClick={handleAlertClick}
             useDynamicRoutes={true}
-            isRealTime={connectionStatus === 'connected'}
+            isRealTime={!error}
           />
         </main>
 
