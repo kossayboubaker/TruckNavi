@@ -262,7 +262,6 @@ const MapCanvas = ({
     console.log(`📍 ${Object.keys(routesMap).length} routes générées avec système de cache`);
 
     return routesMap;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trucksData]);
 
   const createTruckIcon = useCallback((truck) => {
@@ -363,7 +362,7 @@ const MapCanvas = ({
       police: { color: '#8B5CF6', icon: '👮', bgColor: '#EDE9FE', borderColor: '#8B5CF6' },
       maintenance: { color: '#10B981', icon: '🔧', bgColor: '#D1FAE5', borderColor: '#10B981' },
       info: { color: '#6B7280', icon: 'ℹ️', bgColor: '#F3F4F6', borderColor: '#6B7280' },
-      danger: { color: '#DC2626', icon: '🚨', bgColor: '#FEE2E2', borderColor: '#DC2626' },
+      danger: { color: '#DC2626', icon: '����', bgColor: '#FEE2E2', borderColor: '#DC2626' },
       warning: { color: '#F59E0B', icon: '⚠️', bgColor: '#FEF3C7', borderColor: '#F59E0B' },
 
       // Météo complète
