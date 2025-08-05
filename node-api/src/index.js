@@ -27,6 +27,7 @@ import tripRoutes from "./routes/trip.js";
 import congeRoutes from "./routes/conge.js";
 import messengerRoutes from"./routes/messenger.js";
 import statisticRoutes from "./routes/statistique.js";
+import dynamicTrucksRoutes from "./routes/dynamic-trucks.js";
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import socketServer from "./socket.js"; // ton fichier serveur socket
