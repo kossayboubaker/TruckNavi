@@ -118,19 +118,72 @@ const Map = () => {
 
     } catch (err) {
       console.error('❌ Erreur récupération:', err);
-      setError(`Erreur: ${err.message}`);
 
-      // Retry automatique en cas d'erreur réseau
-      if (err.code === 'NETWORK_ERROR' || err.code === 'ECONNABORTED') {
-        setTimeout(() => {
-          if (visibleTrucks.length === 0) {
-            fetchTrucksFromAPI();
-          }
-        }, 5000);
+      let errorMessage = 'Erreur de connexion à l\'API';
+
+      if (err.code === 'ECONNABORTED') {
+        errorMessage = 'Timeout - API non accessible';
+      } else if (err.code === 'ERR_NETWORK') {
+        errorMessage = 'Erreur réseau - Vérifiez que le backend est démarré';
+      } else if (err.response) {
+        errorMessage = `Erreur API ${err.response.status}: ${err.response.statusText}`;
+      } else if (err.message) {
+        errorMessage = err.message;
       }
+
+      setError(errorMessage);
+
+      // Si pas de camions chargés, utiliser des données de demo pour éviter crash
+      if (visibleTrucks.length === 0) {
+        console.log('🔄 Chargement de données de démonstration...');
+        loadDemoData();
+      }
+
     } finally {
       setLoading(false);
     }
+  };
+
+  // Fonction pour charger des données de démonstration en cas d'erreur API
+  const loadDemoData = () => {
+    const demoTrucks = [
+      {
+        id: 'demo-1',
+        truck_id: 'TN-DEMO-001',
+        position: [36.8, 10.18],
+        speed: 45,
+        bearing: 90,
+        route_progress: 25,
+        state: 'En Route',
+        route: [[36.8, 10.18], [36.85, 10.25], [36.9, 10.3]],
+        pickup: {
+          address: 'Tunis Centre',
+          city: 'Tunis',
+          coordinates: [36.8, 10.18]
+        },
+        destination: 'Sfax',
+        destinationCoords: [34.74, 10.76],
+        driver: {
+          id: 'demo-driver-1',
+          name: 'Chauffeur Demo',
+          company: 'Transport Demo',
+          contact: '+216 XX XXX XXX',
+          avatar: '👨‍💼'
+        },
+        vehicle: 'Camion Demo',
+        cargo: 'Marchandises',
+        last_update: new Date().toISOString(),
+        estimatedArrival: new Date(Date.now() + 2 * 3600000).toISOString(),
+        fuel_level: 75,
+        temperature: 22
+      }
+    ];
+
+    setVisibleTrucks(demoTrucks);
+    setSelectedDelivery(demoTrucks[0]);
+    setLastUpdate(new Date());
+
+    console.log('📋 Données de démonstration chargées');
   };
 
   // Chargement initial et rafraîchissement périodique
