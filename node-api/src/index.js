@@ -81,6 +81,48 @@ export { io };
 const socketControl = socketServer(io);
 app.set("getOnlineUsers", socketControl.getOnlineUsers);
 
+// 🔄 Diffusion périodique des camions actifs via Socket.IO
+setInterval(async () => {
+  try {
+    const { Camion } = await import('./model/camion.js');
+
+    // Récupérer tous les camions en service
+    const trucks = await Camion.find({
+      status: "in_service"
+    }).lean();
+
+    // Formater les données pour Socket.IO
+    const formattedTrucks = trucks.map(truck => {
+      let position = [36.8, 10.18]; // Tunis par défaut
+      if (truck.location && truck.location.lat && truck.location.lon) {
+        position = [truck.location.lat, truck.location.lon];
+      }
+
+      return {
+        id: truck._id.toString(),
+        truck_id: truck.truckId,
+        position: position,
+        speed: truck.speed || 0,
+        bearing: truck.bearing || 0,
+        state: truck.status === "in_service" ? "En Route" : "Arrêté",
+        route_progress: truck.routeProgress || 0,
+        route: truck.route || [],
+        last_update: truck.lastUpdate || new Date().toISOString()
+      };
+    });
+
+    // Diffuser via Socket.IO
+    if (socketControl && socketControl.broadcastTrucksList) {
+      socketControl.broadcastTrucksList(formattedTrucks);
+    }
+
+    console.log(`�� Diffusion automatique: ${formattedTrucks.length} camions`);
+
+  } catch (error) {
+    console.error("Erreur diffusion périodique:", error);
+  }
+}, 10000); // Toutes les 10 secondes
+
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
