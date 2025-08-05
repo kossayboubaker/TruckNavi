@@ -15,7 +15,7 @@ import routeGenerator from '../services/routeGenerator';
 // Configuration API
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
-// Hook responsive
+// Hook ultra-responsive optimisé pour toutes résolutions (4K à <100px)
 const useResponsive = () => {
   const [dimensions, setDimensions] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1024,
@@ -30,15 +30,76 @@ const useResponsive = () => {
       });
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    // Débouncé pour les performances sur redimensionnement
+    let resizeTimeout;
+    const debouncedResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(handleResize, 16); // 60fps
+    };
+
+    window.addEventListener('resize', debouncedResize);
+    return () => {
+      window.removeEventListener('resize', debouncedResize);
+      clearTimeout(resizeTimeout);
+    };
   }, []);
 
-  const isUltraCompact = dimensions.width < 90 && dimensions.height < 90;
-  const isMobile = dimensions.width < 768;
-  const isSmallMobile = dimensions.width < 480;
+  // Classification détaillée des résolutions
+  const width = dimensions.width;
+  const height = dimensions.height;
+  const minDimension = Math.min(width, height);
 
-  return { dimensions, isUltraCompact, isMobile, isSmallMobile };
+  const breakpoints = {
+    // Résolutions extrêmes
+    isMicro: minDimension < 100,           // <100px (micro devices)
+    isTiny: minDimension < 150 && minDimension >= 100,    // 100-150px
+    isCompact: minDimension < 250 && minDimension >= 150, // 150-250px
+
+    // Résolutions mobiles
+    isSmallMobile: width < 380,            // Petits mobiles
+    isMobile: width >= 380 && width < 768, // Mobiles standards
+    isTabletPortrait: width >= 768 && width < 1024 && height > width,
+
+    // Résolutions desktop
+    isTabletLandscape: width >= 1024 && width < 1366,
+    isDesktop: width >= 1366 && width < 1920,
+    isLargeDesktop: width >= 1920 && width < 2560,
+    is4K: width >= 2560,                   // 4K et plus
+
+    // Ratios d'aspect
+    isUltraWide: width / height > 2.1,     // Écrans ultra-larges
+    isSquare: Math.abs(width - height) < 100, // Écrans carrés
+
+    // Combinaisons critiques
+    isUltraCompact: minDimension < 120,    // Mode ultra-compact
+    isPortrait: height > width,
+    isLandscape: width > height
+  };
+
+  // Calcul de la taille des éléments UI selon la résolution
+  const uiScale = {
+    fontSizeBase: Math.max(8, Math.min(16, minDimension / 25)),
+    iconSize: Math.max(12, Math.min(32, minDimension / 20)),
+    buttonSize: Math.max(20, Math.min(48, minDimension / 15)),
+    panelWidth: breakpoints.isMicro ? '100%' :
+                breakpoints.isTiny ? '90%' :
+                breakpoints.isCompact ? '80%' :
+                breakpoints.isSmallMobile ? '320px' :
+                breakpoints.isMobile ? '380px' : '420px',
+    mapControlsSize: breakpoints.isMicro ? 16 :
+                     breakpoints.isTiny ? 20 :
+                     breakpoints.isCompact ? 24 : 32
+  };
+
+  return {
+    dimensions,
+    ...breakpoints,
+    uiScale,
+    // Helpers pour conditions complexes
+    needsMinimalUI: breakpoints.isMicro || breakpoints.isTiny,
+    needsCompactLayout: breakpoints.isCompact || breakpoints.isSmallMobile,
+    supportsFullFeatures: !breakpoints.isMicro && !breakpoints.isTiny
+  };
 };
 
 const Map = () => {
@@ -359,7 +420,7 @@ const Map = () => {
     return () => window.removeEventListener('roleChanged', handleRoleChange);
   }, [visibleTrucks]);
 
-  // Gestionnaires d'événements
+  // Gestionnaires d'év��nements
   const handleZoomIn = () => mapInstance?.zoomIn();
   const handleZoomOut = () => mapInstance?.zoomOut();
   const handleMapStyleChange = (style) => setMapStyle(style);
