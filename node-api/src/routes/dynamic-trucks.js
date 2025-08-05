@@ -33,6 +33,61 @@ const LOCATIONS = {
   "Tataouine": [32.93, 10.45]
 };
 
+// 📡 Diffuser liste des camions via Socket.IO
+router.post("/broadcast-trucks", authenticate, async (req, res) => {
+  try {
+    // Récupérer tous les camions en service
+    const trucks = await Camion.find({
+      status: "in_service"
+    }).lean();
+
+    // Formater les données pour Socket.IO
+    const formattedTrucks = trucks.map(truck => {
+      let position = [36.8, 10.18]; // Tunis par défaut
+      if (truck.location && truck.location.lat && truck.location.lon) {
+        position = [truck.location.lat, truck.location.lon];
+      }
+
+      return {
+        id: truck._id.toString(),
+        truck_id: truck.truckId,
+        position: position,
+        speed: truck.speed || 0,
+        bearing: truck.bearing || 0,
+        state: truck.status === "in_service" ? "En Route" : "Arrêté",
+        route_progress: truck.routeProgress || 0,
+        route: truck.route || [],
+        last_update: truck.lastUpdate || new Date().toISOString()
+      };
+    });
+
+    // Diffuser via Socket.IO si disponible
+    if (req.io) {
+      req.io.to('truck_updates').emit('trucks_list_update', {
+        trucks: formattedTrucks,
+        timestamp: new Date().toISOString(),
+        count: formattedTrucks.length
+      });
+
+      console.log(`📡 Liste de ${formattedTrucks.length} camions diffusée via Socket.IO`);
+    }
+
+    res.json({
+      success: true,
+      message: `Liste de ${formattedTrucks.length} camions diffusée`,
+      count: formattedTrucks.length
+    });
+
+  } catch (error) {
+    console.error("Erreur diffusion camions:", error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur lors de la diffusion",
+      error: error.message
+    });
+  }
+});
+
 // 📍 Récupérer tous les camions actifs avec leurs trajets
 router.get("/active-trucks", authenticate, async (req, res) => {
   try {
