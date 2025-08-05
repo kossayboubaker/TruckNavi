@@ -14,8 +14,11 @@ let socketInstance = null;
 
 const runConsumer = async (io) => {
   try {
+    // Stocker la référence Socket.IO
+    socketInstance = io;
+
     await consumer.connect();
-    console.log('Kafka consumer connected');
+    console.log('🔌 Kafka consumer connecté et Socket.IO configuré');
 
     await consumer.subscribe({ topic: 'truck-data', fromBeginning: true });
     await consumer.subscribe({ topic: 'truck-route-updates', fromBeginning: true });
