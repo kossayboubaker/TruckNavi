@@ -145,76 +145,7 @@ const Map = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Récupération des camions depuis l'API
-  const fetchTrucksFromAPI = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      console.log('📡 Récupération camions API...');
-      
-      const response = await axios.get(`${API_BASE_URL}/api/trucks/active-trucks`, {
-        withCredentials: true,
-        timeout: 10000
-      });
 
-      if (response.data.success && response.data.trucks) {
-        const trucks = response.data.trucks;
-        console.log(`✅ ${trucks.length} camions récupérés`);
-        
-        // Valider et nettoyer les données
-        const validTrucks = trucks.map(truck => ({
-          ...truck,
-          position: Array.isArray(truck.position) ? truck.position : [36.8, 10.18],
-          speed: truck.speed || 0,
-          bearing: truck.bearing || 0,
-          route_progress: truck.route_progress || 0,
-          state: truck.state || 'Arrêté',
-          route: Array.isArray(truck.route) ? truck.route : [],
-          last_update: truck.last_update || new Date().toISOString()
-        }));
-        
-        setVisibleTrucks(validTrucks);
-        
-        if (validTrucks.length > 0 && !selectedDelivery) {
-          setSelectedDelivery(validTrucks[0]);
-        }
-        
-        setLastUpdate(new Date());
-      } else {
-        throw new Error('Format de réponse invalide');
-      }
-      
-    } catch (err) {
-      console.error('❌ Erreur récupération:', err);
-      setError(`Erreur: ${err.message}`);
-      
-      // Retry automatique en cas d'erreur réseau
-      if (err.code === 'NETWORK_ERROR' || err.code === 'ECONNABORTED') {
-        setTimeout(() => {
-          if (visibleTrucks.length === 0) {
-            fetchTrucksFromAPI();
-          }
-        }, 5000);
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Chargement initial et rafraîchissement
-  useEffect(() => {
-    fetchTrucksFromAPI();
-
-    // Rafraîchissement périodique
-    const interval = setInterval(() => {
-      if (connectionStatus !== 'connected') {
-        fetchTrucksFromAPI();
-      }
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [connectionStatus]);
 
   // Gestion des changements de rôle
   useEffect(() => {
