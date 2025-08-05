@@ -69,8 +69,6 @@ const Map = () => {
   const [preventiveAlerts, setPreventiveAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [socket, setSocket] = useState(null);
-  const [connectionStatus, setConnectionStatus] = useState('connecting');
   const [lastUpdate, setLastUpdate] = useState(null);
 
   // Initialisation Socket.IO
