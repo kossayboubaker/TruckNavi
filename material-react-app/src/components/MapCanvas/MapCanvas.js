@@ -740,7 +740,6 @@ const MapCanvas = ({
         }
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, trucksData, selectedDelivery, showRoutes, alerts, showAlerts, createTruckIcon, onSelectDelivery]);
 
   // Couche météo
