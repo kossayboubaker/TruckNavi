@@ -71,6 +71,8 @@ const Map = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [socket, setSocket] = useState(null);
+  const [connectionStatus, setConnectionStatus] = useState('disconnected');
 
   // Fonction pour récupérer les camions depuis l'API
   const fetchTrucksFromAPI = async () => {
