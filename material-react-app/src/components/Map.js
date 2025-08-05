@@ -11,9 +11,8 @@ import roleManager from '../services/roleManager';
 import extendedAlertsService from '../services/extendedAlertsService';
 import routeGenerator from '../services/routeGenerator';
 
-// Configuration API et Socket
+// Configuration API
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
-const SOCKET_URL = process.env.REACT_APP_SOCKET_URL || 'http://localhost:8080';
 
 // Hook responsive
 const useResponsive = () => {
