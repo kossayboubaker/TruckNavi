@@ -136,6 +136,7 @@ app.use('/trip',tripRoutes);
 app.use('/conge',congeRoutes);
 app.use('/messenger', messengerRoutes);
 app.use('/statistic',statisticRoutes);
+app.use('/api/trucks', dynamicTrucksRoutes);
 
 //app.use('/admin', adminRoutes);
 
