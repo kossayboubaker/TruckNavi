@@ -74,9 +74,51 @@ console.log("📤 Envoi à", receiverSocket.socketId, "pour receiverId =", recei
 
   return {
     getOnlineUsers: () => {
-      console.log("📡 Récupération des onlineUsers :", onlineUsers);
+      console.log("📡 Récupération des onlineUsers :", onlineUsers.length);
       return onlineUsers;
     },
+
+    // Diffuser mise à jour de position d'un camion
+    broadcastTruckUpdate: (truckData) => {
+      io.to('truck_updates').emit('truck_update', truckData);
+      io.to(`truck_${truckData.truck_id}`).emit('truck_specific_update', truckData);
+      console.log(`🚛 Mise à jour diffusée pour ${truckData.truck_id}`);
+    },
+
+    // Diffuser mise à jour de route
+    broadcastRouteUpdate: (routeData) => {
+      io.to('truck_updates').emit('route_update', routeData);
+      io.to(`truck_${routeData.truck_id}`).emit('route_specific_update', routeData);
+      console.log(`🛣️ Route mise à jour pour ${routeData.truck_id}`);
+    },
+
+    // Diffuser liste complète des camions
+    broadcastTrucksList: (trucks) => {
+      io.to('truck_updates').emit('trucks_list_update', {
+        trucks: trucks,
+        timestamp: new Date().toISOString(),
+        count: trucks.length
+      });
+      console.log(`📋 Liste de ${trucks.length} camions diffusée`);
+    },
+
+    // Diffuser alerte pour un camion
+    broadcastTruckAlert: (alert) => {
+      io.to('truck_updates').emit('truck_alert', alert);
+      if (alert.truckId) {
+        io.to(`truck_${alert.truckId}`).emit('truck_specific_alert', alert);
+      }
+      console.log(`🚨 Alerte diffusée: ${alert.title}`);
+    },
+
+    // Obtenir statistiques des connexions
+    getConnectionStats: () => {
+      return {
+        totalConnections: connectedClients.size,
+        onlineUsers: onlineUsers.length,
+        connectedClients: Array.from(connectedClients.values())
+      };
+    }
   };
 }
 
