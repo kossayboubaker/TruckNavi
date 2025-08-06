@@ -55,6 +55,17 @@ class EnvironmentService {
 
   // Vérifier si le backend est accessible
   async checkBackendAvailability() {
+    // En mode sécurisé, ne JAMAIS faire d'appel réseau
+    if (this.safeMode) {
+      console.log('🛡️ checkBackendAvailability: Mode sécurisé - Aucun appel réseau');
+      this.backendStatus = {
+        isAvailable: false,
+        lastCheck: new Date().toISOString(),
+        error: 'SAFE_MODE_NO_NETWORK_CALLS'
+      };
+      return false;
+    }
+
     // Si pas d'URL API configurée, considérer comme non disponible sans erreur
     if (!this.config.apiUrl) {
       this.backendStatus = {
@@ -305,7 +316,7 @@ class EnvironmentService {
         
         console.log(`${endpoint}: ${response.ok ? '✅' : '❌'} (${response.status})`);
       } catch (error) {
-        console.log(`${endpoint}: ❌ (${error.message})`);
+        console.log(`${endpoint}: ��� (${error.message})`);
       }
     }
   }
