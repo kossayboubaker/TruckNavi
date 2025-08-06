@@ -13,69 +13,7 @@ import dynamicRoutesService from '../services/dynamicRoutesService';
 import realtimeService from '../services/realtimeService';
 import roleManager from '../services/roleManager';
 
-
-// PLUS AUCUNE DONNÉE STATIQUE - Toutes les données viennent du backend et simulateur Python
-
-// Système d'alertes intelligent
-const mockAlerts = extendedAlertsService.generateAlertBatch(10); // Plus d'alertes pour tous les camions
-
-// Anciennes alertes commentées
-const oldMockAlerts = [
-  // {
-  //   id: 'alert-001',
-  //   type: 'weather',
-  //   title: 'Pluie forte sur A1',
-  //   description: 'Conditions météo dangereuses détectées',
-  //   severity: 'warning',
-  //   position: [36.6, 10.2],
-  //   affectedRoutes: ['TN-001', 'TN-003'],
-  //   timestamp: new Date().toISOString(),
-  //   delay: 15,
-  //   icon: '🌧️',
-  //   location: 'Autoroute A1 - Tunis'
-  // },
-  // {
-  //   id: 'alert-002',
-  //   type: 'traffic',
-  //   title: 'Embouteillage Sousse',
-  //   description: 'Trafic dense, ralentissements importants',
-  //   severity: 'warning',
-  //   position: [35.8256, 10.6369],
-  //   affectedRoutes: ['TN-002'],
-  //   timestamp: new Date().toISOString(),
-  //   delay: 25,
-  //   icon: '🚦',
-  //   location: 'Centre-ville Sousse'
-  // },
-  // {
-  //   id: 'alert-003',
-  //   type: 'maintenance',
-  //   title: 'Maintenance requise TN-005',
-  //   description: 'Niveau de carburant critique',
-  //   severity: 'danger',
-  //   position: [33.8869, 10.0982],
-  //   affectedRoutes: ['TN-005'],
-  //   timestamp: new Date().toISOString(),
-  //   delay: 45,
-  //   icon: '⛽',
-  //   location: 'Gabes - Station service'
-  // },
-  // {
-  //   id: 'alert-004',
-  //   type: 'construction',
-  //   title: 'Travaux Route GP1',
-  //   description: 'Circulation alternée, ralentissements',
-  //   severity: 'info',
-  //   position: [36.4, 10.6],
-  //   affectedRoutes: ['TN-004'],
-  //   timestamp: new Date().toISOString(),
-  //   delay: 12,
-  //   icon: '��',
-  //   location: 'Route GP1 vers Nabeul'
-  // }
-];
-
-// Hook pour gestion responsive
+// Hook pour gestion responsive ultra-optimisée
 const useResponsive = () => {
   const [dimensions, setDimensions] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1024,
@@ -94,46 +32,93 @@ const useResponsive = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const isUltraCompact = dimensions.width < 90 && dimensions.height < 90;
+  // Support des très petits écrans jusqu'à 4K
+  const isUltraCompact = dimensions.width < 100 && dimensions.height < 100;
   const isMobile = dimensions.width < 768;
   const isSmallMobile = dimensions.width < 480;
+  const is4K = dimensions.width >= 3840;
+  const isTablet = dimensions.width >= 768 && dimensions.width < 1024;
 
-  return { dimensions, isUltraCompact, isMobile, isSmallMobile };
+  return { 
+    dimensions, 
+    isUltraCompact, 
+    isMobile, 
+    isSmallMobile, 
+    is4K, 
+    isTablet 
+  };
 };
 
 const Map = () => {
-  const { dimensions, isUltraCompact, isMobile, isSmallMobile } = useResponsive();
+  const { dimensions, isUltraCompact, isMobile, isSmallMobile, is4K } = useResponsive();
+  
+  // États locaux de l'interface
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDelivery, setSelectedDelivery] = useState(mockTrucks[0]);
-  const [isAsideOpen, setIsAsideOpen] = useState(!isUltraCompact); // Fermé par défaut en ultra-compact
+  const [selectedDelivery, setSelectedDelivery] = useState(null);
+  const [isAsideOpen, setIsAsideOpen] = useState(!isUltraCompact);
   const [mapStyle, setMapStyle] = useState('standard');
   const [showAlerts, setShowAlerts] = useState(false);
-  const [alerts, setAlerts] = useState(mockAlerts);
-  const [allAlerts, setAllAlerts] = useState([]); // Toutes les alertes (statiques + générées)
-  const [deletedAlerts, setDeletedAlerts] = useState([]);
   const [mapInstance, setMapInstance] = useState(null);
   const [showRoutes, setShowRoutes] = useState(true);
   const [showWeather, setShowWeather] = useState(false);
   const [followTruck, setFollowTruck] = useState(false);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
   const [currentRole, setCurrentRole] = useState(roleManager.getCurrentRole());
-  const [visibleTrucks, setVisibleTrucks] = useState(mockTrucks);
   const [chatOpen, setChatOpen] = useState(false);
+  const [breakNotifications, setBreakNotifications] = useState([]);
+  const [preventiveAlerts, setPreventiveAlerts] = useState([]);
+
+  // Utilisateur actuel basé sur le rôle
   const [currentUser, setCurrentUser] = useState(
     currentRole === 'conducteur'
       ? { id: 'driver_current', name: 'Conducteur Actuel' }
       : { id: 'current_user', name: 'Gestionnaire' }
   );
-  const [breakNotifications, setBreakNotifications] = useState([]);
-  const [preventiveAlerts, setPreventiveAlerts] = useState([]);
+
+  // Hook de données temps réel - TOUTES LES DONNÉES DEPUIS LE BACKEND
+  const {
+    trucks,
+    routes,
+    alerts,
+    weather,
+    traffic,
+    connectionStatus,
+    lastUpdate,
+    isLoading,
+    error,
+    activeTrucks,
+    pausedTrucks,
+    activeAlerts,
+    isConnected,
+    refresh,
+    sendTruckCommand,
+    startSimulator,
+    stopSimulator
+  } = useRealTimeData({
+    autoConnect: true,
+    enableTrucks: true,
+    enableRoutes: true,
+    enableAlerts: true,
+    enableWeather: showWeather,
+    enableTraffic: true,
+    updateInterval: 5000
+  });
+
+  // Camions visibles selon le rôle (filtrage dynamique)
+  const visibleTrucks = roleManager.filterTrucks(trucks);
+
+  // Sélection automatique du premier camion disponible
+  useEffect(() => {
+    if (!selectedDelivery && visibleTrucks.length > 0) {
+      setSelectedDelivery(visibleTrucks[0]);
+    }
+  }, [visibleTrucks, selectedDelivery]);
 
   // Gestion des changements de rôle
   useEffect(() => {
     const handleRoleChange = (event) => {
       setCurrentRole(event.detail.role);
-      const filteredTrucks = roleManager.filterTrucks(mockTrucks);
-      setVisibleTrucks(filteredTrucks);
-
+      
       // Mettre à jour currentUser selon le rôle
       if (event.detail.role === 'conducteur') {
         setCurrentUser({ id: 'driver_current', name: 'Conducteur Actuel' });
@@ -141,25 +126,23 @@ const Map = () => {
         setCurrentUser({ id: 'current_user', name: 'Gestionnaire' });
       }
 
-      console.log(`🎭 Rôle changé: ${event.detail.role} - ${filteredTrucks.length} camions visibles`);
+      console.log(`🎭 Rôle changé: ${event.detail.role} - ${visibleTrucks.length} camions visibles`);
     };
 
-    // Gestion des notifications de pause
+    // Gestion des notifications de pause (100% dynamiques)
     const handleBreakRequired = (event) => {
       const notification = event.detail;
       setBreakNotifications(prev => {
-        // Éviter les doublons
         const exists = prev.find(n => n.truckId === notification.truckId);
         if (exists) return prev;
         return [...prev, notification];
       });
     };
 
-    // Gestion des alertes préventives
+    // Gestion des alertes préventives (100% dynamiques)
     const handlePreventiveAlert = (event) => {
       const alert = event.detail;
       setPreventiveAlerts(prev => {
-        // Éviter les doublons
         const exists = prev.find(a => a.id === alert.id && a.truckId === alert.truckId);
         if (exists) return prev;
         return [...prev, alert];
@@ -170,28 +153,21 @@ const Map = () => {
     window.addEventListener('breakRequired', handleBreakRequired);
     window.addEventListener('preventiveAlert', handlePreventiveAlert);
 
-    // Initialiser avec le rôle par défaut
-    setVisibleTrucks(roleManager.filterTrucks(mockTrucks));
-
     return () => {
       window.removeEventListener('roleChanged', handleRoleChange);
       window.removeEventListener('breakRequired', handleBreakRequired);
       window.removeEventListener('preventiveAlert', handlePreventiveAlert);
     };
-  }, []);
+  }, [visibleTrucks.length]);
 
+  // Responsive: fermer panneau automatiquement en ultra-compact
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 100 && isAsideOpen) {
-        setIsAsideOpen(false);
-      }
-    };
+    if (isUltraCompact && isAsideOpen) {
+      setIsAsideOpen(false);
+    }
+  }, [isUltraCompact, isAsideOpen]);
 
-    window.addEventListener('resize', handleResize);
-    handleResize(); // Appliquer au chargement initial
-    return () => window.removeEventListener('resize', handleResize);
-  }, [isAsideOpen]);
-
+  // Gestionnaires d'événements
   const handleSearchChange = (term) => {
     setSearchTerm(term);
   };
@@ -199,15 +175,16 @@ const Map = () => {
   const handleDeliverySelect = (delivery) => {
     setSelectedDelivery(delivery);
 
-    // Focus sur le camion sélectionné dans la carte avec zoom approprié
+    // Focus sur le camion avec zoom intelligent
     if (mapInstance && delivery && delivery.position) {
-      mapInstance.flyTo(delivery.position, Math.max(mapInstance.getZoom(), 14), {
+      const zoomLevel = isUltraCompact ? 12 : isMobile ? 13 : 14;
+      mapInstance.flyTo(delivery.position, Math.max(mapInstance.getZoom(), zoomLevel), {
         animate: true,
         duration: 1.8
       });
 
-      // Fermer le panneau latéral sur mobile pour voir la carte
-      if (window.innerWidth < 768) {
+      // Fermer panneau sur mobile pour voir la carte
+      if (isMobile) {
         setIsAsideOpen(false);
       }
     }
@@ -247,18 +224,16 @@ const Map = () => {
 
   const handleAlertClick = (alert) => {
     if (mapInstance && alert.position) {
-      // Zoomer et centrer sur l'alerte avec animation fluide
-      mapInstance.flyTo(alert.position, 15, {
+      const zoomLevel = isUltraCompact ? 13 : 15;
+      mapInstance.flyTo(alert.position, zoomLevel, {
         animate: true,
         duration: 1.5
       });
 
-      // Fermer le panneau d'alertes pour voir la carte
       setIsAlertsOpen(false);
 
-      // Optionnel: ouvrir la popup de l'alerte après navigation
+      // Ouvrir popup après navigation
       setTimeout(() => {
-        // Trouver le marqueur d'alerte et ouvrir sa popup
         mapInstance.eachLayer(layer => {
           if (layer.options && layer.options.alertId === alert.id) {
             layer.openPopup();
@@ -268,90 +243,156 @@ const Map = () => {
     }
   };
 
-  const handleCloseAlert = (alertId) => {
-    setAlerts(prev => prev.filter(alert => alert.id !== alertId));
-    setDeletedAlerts(prev => [...prev, alertId]);
+  const handleCloseAlert = async (alertId) => {
+    // Supprimer l'alerte via l'API (pas localement)
+    try {
+      const success = await realtimeService.emit('close_alert', { alertId });
+      if (success) {
+        console.log(`✅ Alerte ${alertId} fermée`);
+      }
+    } catch (error) {
+      console.error(`❌ Erreur fermeture alerte ${alertId}:`, error);
+    }
   };
 
   const handleToggleAlertPanel = () => {
     setIsAlertsOpen(!isAlertsOpen);
   };
 
-  // Callback pour recevoir toutes les alertes générées par les APIs améliorées
-  const handleAlertsUpdate = (generatedAlerts) => {
-    // Filtrer et combiner alertes avec priorité aux temps réel
-    const realTimeAlerts = generatedAlerts.filter(alert => alert.realEvent === true);
-    const standardAlerts = generatedAlerts.filter(alert => alert.realEvent !== true);
-
-    // Combiner avec priorité: temps réel > API standard > statiques
-    const combinedAlerts = [...realTimeAlerts, ...standardAlerts, ...alerts];
-
-    // Supprimer doublons par localisation et type
-    const uniqueAlerts = combinedAlerts.filter((alert, index, self) =>
-      index === self.findIndex(a =>
-        a.location === alert.location &&
-        a.type === alert.type
-      )
-    );
-
-    setAllAlerts(uniqueAlerts);
-
-    // Log détaillé pour debug compteur
-    console.log(`🎯 Compteur alertes mis à jour: ${uniqueAlerts.length} total (${realTimeAlerts.length} temps réel + ${standardAlerts.length} standard + ${alerts.length} statiques)`);
+  // Gestion des pauses 100% dynamiques
+  const handleBreakStart = async (truckId, breakInfo) => {
+    try {
+      const success = await sendTruckCommand(truckId, 'start_break', breakInfo);
+      if (success) {
+        console.log(`🚦 Pause commencée pour ${truckId}`);
+      }
+    } catch (error) {
+      console.error(`❌ Erreur pause ${truckId}:`, error);
+    }
   };
 
-  // Simuler des mises à jour d'alertes en temps réel avec service étendu
-  useEffect(() => {
-    const realTimeInterval = extendedAlertsService.startRealTimeAlertSimulation(
-      (newAlert) => {
-        console.log(`🚨 Nouvelle alerte temps réel: ${newAlert.title} - ${newAlert.location}`);
-        setAlerts(prev => {
-          // Éviter les doublons
-          const exists = prev.find(a => a.id === newAlert.id);
-          if (exists) return prev;
-          return [...prev, newAlert];
-        });
-      },
-      30000 // Nouvelle alerte toutes les 30 secondes
-    );
-
-    return () => {
-      if (realTimeInterval) {
-        clearInterval(realTimeInterval);
+  const handleBreakEnd = async (truckId) => {
+    try {
+      const success = await sendTruckCommand(truckId, 'end_break');
+      if (success) {
+        console.log(`▶️ Pause terminée pour ${truckId} - reprise automatique`);
       }
-    };
-  }, []);
+    } catch (error) {
+      console.error(`❌ Erreur fin pause ${truckId}:`, error);
+    }
+  };
+
+  const handleBreakClose = (notificationId) => {
+    setBreakNotifications(prev =>
+      prev.filter(n => n.id !== notificationId)
+    );
+  };
+
+  // Styles responsives dynamiques
+  const getAsideWidth = () => {
+    if (!isAsideOpen) return '0px';
+    if (isUltraCompact) return '180px';
+    if (isSmallMobile) return '240px';
+    if (isMobile) return '280px';
+    if (isTablet) return '300px';
+    if (is4K) return '400px';
+    return '320px';
+  };
+
+  const getButtonSize = () => {
+    if (isUltraCompact) return { width: '18px', height: '18px', fontSize: '8px' };
+    if (isSmallMobile) return { width: '28px', height: '28px', fontSize: '12px' };
+    if (isMobile) return { width: '32px', height: '32px', fontSize: '14px' };
+    if (is4K) return { width: '48px', height: '48px', fontSize: '18px' };
+    return { width: '38px', height: '38px', fontSize: '14px' };
+  };
+
+  const buttonSize = getButtonSize();
+
+  // Affichage conditionnel en cas d'erreur
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-red-50">
+        <div className="text-center p-6">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">❌ Erreur de Connexion</h2>
+          <p className="text-red-500 mb-4">{error}</p>
+          <button 
+            onClick={refresh}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            🔄 Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen ${isAsideOpen ? 'bg-background' : 'bg-white'} overflow-hidden`}>
-      {/* <Header /> */}
-
-      {/* Indicateur de rôle (coin supérieur droit) */}
+      {/* Indicateur de rôle et connexion */}
       <div style={{
         position: 'fixed',
         top: '10px',
         right: '120px',
         zIndex: 3000,
-        background: currentRole === 'conducteur' ? '#10b981' :
-                   currentRole === 'admin' ? '#3b82f6' : '#8b5cf6',
-        color: 'white',
-        padding: '4px 8px',
-        borderRadius: '12px',
-        fontSize: '10px',
-        fontWeight: '700',
-        textTransform: 'uppercase',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '4px'
       }}>
-        🎭 {currentRole}
+        {/* Indicateur de rôle */}
+        <div style={{
+          background: currentRole === 'conducteur' ? '#10b981' :
+                     currentRole === 'admin' ? '#3b82f6' : '#8b5cf6',
+          color: 'white',
+          padding: isUltraCompact ? '2px 4px' : '4px 8px',
+          borderRadius: '12px',
+          fontSize: isUltraCompact ? '8px' : '10px',
+          fontWeight: '700',
+          textTransform: 'uppercase',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+        }}>
+          🎭 {currentRole}
+        </div>
+
+        {/* Indicateur de connexion */}
+        <div style={{
+          background: isConnected ? '#10b981' : '#ef4444',
+          color: 'white',
+          padding: isUltraCompact ? '2px 4px' : '3px 6px',
+          borderRadius: '8px',
+          fontSize: isUltraCompact ? '6px' : '8px',
+          fontWeight: '600',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+        }}>
+          {isConnected ? '🟢 LIVE' : '🔴 OFFLINE'}
+        </div>
+
+        {/* Indicateur de dernière mise à jour */}
+        {lastUpdate && (
+          <div style={{
+            background: 'rgba(0,0,0,0.7)',
+            color: 'white',
+            padding: isUltraCompact ? '1px 3px' : '2px 4px',
+            borderRadius: '6px',
+            fontSize: isUltraCompact ? '5px' : '7px',
+            fontWeight: '500'
+          }}>
+            ⏱️ {new Date(lastUpdate).toLocaleTimeString('fr-FR', {
+              hour: '2-digit', 
+              minute: '2-digit',
+              second: '2-digit'
+            })}
+          </div>
+        )}
       </div>
 
-      {/* AdvancedMapControls selon votre image */}
+      {/* Contrôles avancés de carte */}
       <AdvancedMapControls
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onMapStyleChange={handleMapStyleChange}
         mapStyle={mapStyle}
-        alertsCount={allAlerts.length} // Compteur basé sur toutes les alertes réelles
+        alertsCount={activeAlerts.length}
         onToggleAlerts={handleToggleAlerts}
         showAlerts={showAlerts}
         selectedTruck={selectedDelivery}
@@ -363,13 +404,12 @@ const Map = () => {
         onToggleFollowTruck={handleToggleFollowTruck}
       />
 
-      {/* Nouveau système AlertNotifications intelligent */}
+      {/* Système AlertNotifications 100% dynamique */}
       <AlertNotifications
         alerts={alerts}
         trucks={visibleTrucks}
         onAlertClick={handleAlertClick}
         onCloseAlert={handleCloseAlert}
-        onAlertsUpdate={handleAlertsUpdate}
         isOpen={isAlertsOpen}
         onToggle={handleToggleAlertPanel}
       />
@@ -379,18 +419,14 @@ const Map = () => {
         maxHeight: isUltraCompact ? '100vh' : 'calc(100vh - 1px)',
         overflow: 'hidden'
       }}>
+        {/* Panneau latéral responsive */}
         <aside
-         className={`transition-all duration-300 bg-background border-r border-border flex-shrink-0 overflow-hidden`}
-  style={{
-    width: isAsideOpen ? (
-      isUltraCompact ? '200px' :    // Mode ultra-compact
-      isSmallMobile ? '240px' :     // Petit mobile
-      isMobile ? '280px' :          // Mobile standard
-      '320px'                       // Desktop
-    ) : '0px',                     // Fermé
-    display: 'block',
-    borderWidth: isUltraCompact ? '2px' : '2px'
-  }}
+          className="transition-all duration-300 bg-background border-r border-border flex-shrink-0 overflow-hidden"
+          style={{
+            width: getAsideWidth(),
+            display: 'block',
+            borderWidth: isUltraCompact ? '1px' : '2px'
+          }}
         >
           <DeliveryList
             deliveries={visibleTrucks}
@@ -398,19 +434,21 @@ const Map = () => {
             onSearchChange={handleSearchChange}
             onSelectDelivery={handleDeliverySelect}
             selectedDelivery={selectedDelivery}
-            alerts={roleManager.filterAlerts(allAlerts, visibleTrucks)}
+            alerts={roleManager.filterAlerts(alerts, visibleTrucks)}
+            isLoading={isLoading}
           />
         </aside>
-        <main
-          className={`flex-1 min-w-0 overflow-hidden ${isAsideOpen ? '' : 'w-full'}`}
-        >
+
+        {/* Carte principale */}
+        <main className={`flex-1 min-w-0 overflow-hidden ${isAsideOpen ? '' : 'w-full'}`}>
           <MapCanvas
             deliveries={visibleTrucks}
             selectedDelivery={selectedDelivery}
             onSelectDelivery={handleDeliverySelect}
             alerts={alerts}
-            allAlerts={allAlerts}
-            deletedAlerts={deletedAlerts}
+            routes={routes}
+            weather={weather}
+            traffic={traffic}
             mapStyle={mapStyle}
             onMapReady={setMapInstance}
             showAlerts={showAlerts}
@@ -418,25 +456,26 @@ const Map = () => {
             showWeather={showWeather}
             followTruck={followTruck}
             onAlertClick={handleAlertClick}
+            isLoading={isLoading}
           />
         </main>
 
-        {/* Bouton Chat Conducteurs - Seulement pour les conducteurs */}
+        {/* Chat Conducteurs - Rôle conditionnel */}
         {currentRole === 'conducteur' && (
           <button
             className="chat-toggle-btn"
             onClick={() => setChatOpen(true)}
             style={{
               position: 'fixed',
-              bottom: '20px',
-              right: '20px',
-              width: '60px',
-              height: '60px',
+              bottom: isUltraCompact ? '5px' : '20px',
+              right: isUltraCompact ? '5px' : '20px',
+              width: isUltraCompact ? '35px' : '60px',
+              height: isUltraCompact ? '35px' : '60px',
               borderRadius: '50%',
               border: 'none',
               background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
               color: 'white',
-              fontSize: '24px',
+              fontSize: isUltraCompact ? '12px' : '24px',
               cursor: 'pointer',
               boxShadow: '0 8px 25px rgba(16, 185, 129, 0.4)',
               zIndex: 1500,
@@ -444,14 +483,6 @@ const Map = () => {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = 'scale(1.1)';
-              e.target.style.boxShadow = '0 12px 35px rgba(16, 185, 129, 0.6)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = 'scale(1)';
-              e.target.style.boxShadow = '0 8px 25px rgba(16, 185, 129, 0.4)';
             }}
           >
             💬
@@ -466,38 +497,18 @@ const Map = () => {
           trucks={visibleTrucks}
         />
 
-        {/* Notifications de pause */}
+        {/* Notifications de pause 100% dynamiques */}
         {breakNotifications.map((notification, index) => (
           <BreakNotification
             key={notification.id}
             notification={notification}
-            onClose={() => {
-              // Reprendre le camion depuis sa position d'arrêt
-              routeGenerator.resumeTruck(notification.truckId);
-              setBreakNotifications(prev =>
-                prev.filter(n => n.id !== notification.id)
-              );
-            }}
-            onStartBreak={(breakInfo) => {
-              console.log(`🚦 Pause commencée pour ${breakInfo.truckId}`);
-              // Mettre le camion en pause avec sa position actuelle
-              const truck = visibleTrucks.find(t => t.truck_id === breakInfo.truckId);
-              if (truck) {
-                routeGenerator.pauseTruck(
-                  breakInfo.truckId,
-                  truck.route_progress,
-                  truck.position
-                );
-              }
-            }}
-            onBreakEnd={(truckId) => {
-              console.log(`▶️ Pause terminée pour ${truckId} - reprise automatique`);
-              routeGenerator.resumeTruck(truckId);
-            }}
+            onClose={() => handleBreakClose(notification.id)}
+            onStartBreak={(breakInfo) => handleBreakStart(notification.truckId, breakInfo)}
+            onBreakEnd={(truckId) => handleBreakEnd(truckId)}
           />
         ))}
 
-        {/* Alertes préventives */}
+        {/* Alertes préventives 100% dynamiques */}
         {preventiveAlerts.map((alert, index) => (
           <PreventiveAlert
             key={`${alert.id}-${alert.truckId}`}
@@ -509,7 +520,8 @@ const Map = () => {
             }}
           />
         ))}
-        {/* Boutons de contrôle responsive - adaptatifs */}
+
+        {/* Boutons de contrôle responsive ultra-adaptatifs */}
         <div style={{
           position: 'fixed',
           top: isUltraCompact ? '2px' : '8px',
@@ -517,9 +529,9 @@ const Map = () => {
           zIndex: 3000,
           display: 'flex',
           flexDirection: 'column',
-          gap: isUltraCompact ? '2px' : '4px'
+          gap: isUltraCompact ? '1px' : '4px'
         }}>
-          {/* Bouton Panneau (bleu) */}
+          {/* Bouton Panneau */}
           <button
             onClick={() => setIsAsideOpen(!isAsideOpen)}
             style={{
@@ -528,8 +540,7 @@ const Map = () => {
                 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
               border: '2px solid rgba(255,255,255,0.3)',
               borderRadius: '50%',
-              width: isUltraCompact ? '20px' : isMobile ? '32px' : '38px',
-              height: isUltraCompact ? '20px' : isMobile ? '32px' : '38px',
+              ...buttonSize,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -543,8 +554,8 @@ const Map = () => {
             title="Panneau de livraisons"
           >
             <svg
-              width={isUltraCompact ? '10' : '14'}
-              height={isUltraCompact ? '10' : '14'}
+              width={isUltraCompact ? '8' : '14'}
+              height={isUltraCompact ? '8' : '14'}
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -554,12 +565,95 @@ const Map = () => {
             </svg>
           </button>
 
-         
+          {/* Bouton Actualiser */}
+          <button
+            onClick={refresh}
+            style={{
+              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+              border: '2px solid rgba(255,255,255,0.3)',
+              borderRadius: '50%',
+              ...buttonSize,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 15px rgba(5, 150, 105, 0.3)',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              color: 'white'
+            }}
+            title="Actualiser les données"
+          >
+            <svg
+              width={isUltraCompact ? '8' : '14'}
+              height={isUltraCompact ? '8' : '14'}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M3 3v5h5M3 8a9 9 0 1 0 2.12-5.84" />
+            </svg>
+          </button>
         </div>
       </div>
 
+      {/* Styles responsives ultra-adaptatifs */}
       <style>
         {`
+          /* Mode ultra-compact pour très petits écrans */
+          @media (max-width: 100px) and (max-height: 100px) {
+            .ultra-compact {
+              font-size: 6px !important;
+              padding: 0px !important;
+              margin: 0px !important;
+            }
+            
+            .hide-on-mini {
+              display: none !important;
+            }
+          }
+
+          /* Modes mobiles */
+          @media (max-width: 480px) {
+            .mobile-compact {
+              font-size: 10px !important;
+              padding: 2px !important;
+            }
+          }
+
+          @media (max-width: 320px) {
+            .mobile-mini {
+              font-size: 8px !important;
+              padding: 1px !important;
+            }
+          }
+
+          /* Mode tablette */
+          @media (min-width: 768px) and (max-width: 1024px) {
+            .tablet-optimized {
+              font-size: 14px !important;
+              padding: 8px !important;
+            }
+          }
+
+          /* Mode 4K */
+          @media (min-width: 3840px) {
+            .ultra-hd {
+              font-size: 18px !important;
+              padding: 12px !important;
+            }
+            
+            .delivery-card {
+              max-width: 400px;
+            }
+            
+            .statistics-grid {
+              grid-template-columns: repeat(8, 1fr);
+              gap: 12px;
+            }
+          }
+
+          /* Animations optimisées */
           @keyframes slideInRight {
             from {
               transform: translateX(100%);
@@ -571,89 +665,15 @@ const Map = () => {
             }
           }
 
-          /* Responsive styles for chat button */
-          @media (max-width: 768px) {
-            .chat-toggle-btn {
-              bottom: 15px !important;
-              right: 15px !important;
-              width: 56px !important;
-              height: 56px !important;
-              font-size: 20px !important;
-            }
-          }
-
-          @media (max-width: 480px) {
-            .chat-toggle-btn {
-              bottom: 12px !important;
-              right: 12px !important;
-              width: 52px !important;
-              height: 52px !important;
-              font-size: 18px !important;
-            }
-          }
-
-          @media (max-width: 320px) {
-            .chat-toggle-btn {
-              bottom: 10px !important;
-              right: 10px !important;
-              width: 48px !important;
-              height: 48px !important;
-              font-size: 16px !important;
-            }
-          }
-
-          /* Mode ultra-compact pour très petits écrans */
-          @media (max-width: 90px) and (max-height: 90px) {
-            .chat-toggle-btn {
-              bottom: 3px !important;
-              right: 3px !important;
-              width: 20px !important;
-              height: 20px !important;
-              font-size: 8px !important;
-            }
-
-            /* Interface ultra-compacte */
-            .ultra-compact {
-              font-size: 6px !important;
-              padding: 1px !important;
-              margin: 1px !important;
-            }
-
-            /* Masquer éléments non essentiels en mode mini */
-            .hide-on-mini {
-              display: none !important;
-            }
-
-            /* Boutons ultra-compacts */
-            .compact-button {
-              width: 20px !important;
-              height: 20px !important;
-              font-size: 8px !important;
-            }
-          }
-
-          /* Mode très petit mobile */
-          @media (max-width: 320px) {
-            .mobile-compact {
-              font-size: 10px !important;
-              padding: 2px !important;
-            }
-          }
-
-          /* Adaptations pour résolution 4K */
-          @media (min-width: 3840px) {
-            .delivery-card {
-              max-width: 300px;
-            }
-
-            .statistics-grid {
-              grid-template-columns: repeat(6, 1fr);
-              gap: 8px;
-            }
+          /* Chat button responsive */
+          .chat-toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(16, 185, 129, 0.6);
           }
         `}
       </style>
     </div>
   );
 };
+
 export default Map;
