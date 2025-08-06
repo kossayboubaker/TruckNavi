@@ -541,7 +541,6 @@ const MapCanvas = ({
     return () => {
       leafletMap.remove();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Mise à jour du style de carte
