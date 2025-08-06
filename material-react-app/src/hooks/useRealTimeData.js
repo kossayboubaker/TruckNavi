@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import realtimeService from '../services/realtimeService';
 import trucksService from '../services/trucksService';
 import dynamicRoutesService from '../services/dynamicRoutesService';
+import mandatoryBreaksService from '../services/mandatoryBreaksService';
 
 export const useRealTimeData = (options = {}) => {
   const {
