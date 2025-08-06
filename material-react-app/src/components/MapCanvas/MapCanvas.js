@@ -191,30 +191,45 @@ const MapCanvas = ({
       const batchPromises = batch.map(async (truck) => {
       let startCoord, endCoord, waypoints = [];
 
-      switch (truck.truck_id) {
-        case 'TN-001': // Tunis vers Sfax
-          startCoord = [36.770032, 10.23034];
-          endCoord = [36.785403, 10.190556];
-          break;
-        case 'TN-002': // Tunis vers Sousse
-          startCoord = [36.8065, 10.1815];
-          endCoord = [35.8256, 10.6369];
-          break;
-        case 'TN-003': // Ariana vers Kairouan
-          startCoord = [36.4098, 10.1398];
-          endCoord = [35.6786, 10.0963];
-          break;
-        case 'TN-004': // La Goulette vers Nabeul
-          startCoord = [36.7538, 10.2286];
-          endCoord = [36.4561, 10.7376];
-          break;
-        case 'TN-005': // Sfax vers Gabes
-          startCoord = [34.7406, 10.7603];
-          endCoord = [33.8869, 10.0982];
-          break;
-        default:
-          startCoord = truck.pickup?.coordinates || truck.position;
-          endCoord = truck.destinationCoords || truck.destination?.coordinates || truck.position;
+      // 🔥 Récupération dynamique des coordonnées depuis l'API au lieu de données statiques
+      try {
+        // Utiliser les données du camion directement depuis la base de données
+        startCoord = truck.pickup?.coordinates || truck.position;
+        endCoord = truck.destinationCoords || truck.destination?.coordinates;
+
+        // Si pas de coordonnées, récupérer depuis l'API
+        if (!startCoord || !endCoord) {
+          console.log(`📡 Récupération coordonnées dynamiques pour ${truck.truck_id}`);
+
+          const response = await fetch(`http://localhost:8080/api/trucks/coordinates/${truck.truck_id}`, {
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+
+          if (response.ok) {
+            const coordData = await response.json();
+            startCoord = coordData.startCoord || truck.position;
+            endCoord = coordData.endCoord || truck.position;
+            console.log(`✅ Coordonnées dynamiques récupérées pour ${truck.truck_id}`);
+          } else {
+            throw new Error('Coordonnées non disponibles');
+          }
+        }
+
+        // Validation des coordonnées
+        if (!startCoord || !endCoord) {
+          console.warn(`⚠️ Coordonnées manquantes pour ${truck.truck_id}, utilisation position actuelle`);
+          startCoord = truck.position || [36.8, 10.18]; // Fallback Tunis
+          endCoord = truck.position || [36.8, 10.18];
+        }
+
+      } catch (error) {
+        console.error(`❌ Erreur récupération coordonnées pour ${truck.truck_id}:`, error);
+        // Fallback sur les données du camion
+        startCoord = truck.pickup?.coordinates || truck.position || [36.8, 10.18];
+        endCoord = truck.destinationCoords || truck.destination?.coordinates || truck.position || [36.8, 10.18];
       }
 
         // Priorité au générateur de routes intégré pour éviter les appels API excessifs
