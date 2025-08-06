@@ -119,12 +119,7 @@ export const useRealTimeData = (options = {}) => {
       const hasSuccessfulCall = results.some(result => result.status === 'fulfilled');
 
       if (!hasSuccessfulCall) {
-        console.warn('⚠️ Aucune API accessible - utilisation des données de fallback');
-        const fallbackData = getFallbackData();
-        setTrucks(fallbackData.trucks);
-        setAlerts(fallbackData.alerts);
-        setError('Backend non accessible - mode démo activé');
-        setLastUpdate(new Date().toISOString());
+        handleAPIFailure('Toutes les APIs backend sont inaccessibles');
         return;
       }
 
