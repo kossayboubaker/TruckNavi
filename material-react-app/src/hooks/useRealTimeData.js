@@ -410,6 +410,27 @@ export const useRealTimeData = (options = {}) => {
     // Quitter une room
     leaveRoom: useCallback((roomName) => {
       return realtimeService.leaveRoom(roomName);
+    }, []),
+
+    // ** NOUVEAU : Actions pour les pauses obligatoires **
+    startMandatoryBreak: useCallback(async (truckId, breakId) => {
+      return dynamicRoutesService.startMandatoryBreak(truckId, breakId);
+    }, []),
+
+    endMandatoryBreak: useCallback(async (truckId, breakId) => {
+      return dynamicRoutesService.endMandatoryBreak(truckId, breakId);
+    }, []),
+
+    checkBreakRequirement: useCallback((truckId) => {
+      return dynamicRoutesService.checkBreakRequirement(truckId);
+    }, []),
+
+    getBreakStatistics: useCallback((driverId = null) => {
+      return mandatoryBreaksService.getBreakStatistics(driverId);
+    }, []),
+
+    getScheduledBreaks: useCallback((truckId) => {
+      return mandatoryBreaksService.getScheduledBreaks(truckId);
     }, [])
   };
 
