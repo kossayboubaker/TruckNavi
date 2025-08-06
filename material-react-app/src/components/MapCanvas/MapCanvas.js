@@ -246,16 +246,27 @@ const MapCanvas = ({
         } catch (error) {
           console.warn(`🔄 Fallback route pour ${truck.truck_id}:`, error.message);
 
-          // Fallback avec waypoints prédéfinis
-          const fallbackWaypoints = {
-            'TN-001': [[36.7500, 10.1200], [36.3000, 10.0000], [35.9000, 9.9500], [35.5000, 10.2000]],
-            'TN-002': [[36.7000, 10.0800], [36.5000, 10.0000], [36.2000, 10.1000]],
-            'TN-003': [[36.3500, 10.0800], [36.2000, 10.0500], [36.0000, 10.0000]],
-            'TN-004': [[36.7000, 10.1500], [36.6000, 10.2000], [36.5500, 10.4000]],
-            'TN-005': [[34.6500, 10.5000], [34.4000, 10.3000], [34.2000, 10.2000]]
-          };
+          // 🔥 Récupération dynamique des waypoints depuis l'API au lieu de données statiques
+          try {
+            const waypointsResponse = await fetch(`http://localhost:8080/api/trucks/waypoints/${truck.truck_id}`, {
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              }
+            });
 
-          waypoints = fallbackWaypoints[truck.truck_id] || [];
+            if (waypointsResponse.ok) {
+              const waypointsData = await waypointsResponse.json();
+              waypoints = waypointsData.waypoints || [];
+              console.log(`✅ Waypoints dynamiques récupérés pour ${truck.truck_id}`);
+            } else {
+              throw new Error('Waypoints non disponibles');
+            }
+          } catch (waypointError) {
+            console.warn(`⚠️ Waypoints dynamiques non disponibles pour ${truck.truck_id}, route directe utilisée`);
+            waypoints = [];
+          }
+
           const fallbackRoute = getRealRoute(startCoord, endCoord, waypoints);
           return { truckId: truck.truck_id, route: fallbackRoute };
         }
@@ -578,7 +589,7 @@ const MapCanvas = ({
 
     // Filtrer les camions selon le rôle utilisateur
     const visibleTrucks = roleManager.filterTrucks(trucksData);
-    console.log(`🚛 Affichage ${visibleTrucks.length} camions (rôle: ${roleManager.getCurrentRole()})`);
+    console.log(`�� Affichage ${visibleTrucks.length} camions (rôle: ${roleManager.getCurrentRole()})`);
 
     // Ajouter les camions avec positions mises à jour
     visibleTrucks.forEach((truck) => {
