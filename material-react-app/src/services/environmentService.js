@@ -231,6 +231,12 @@ class EnvironmentService {
 
   // Vérification périodique du backend
   startPeriodicCheck(interval = 30000) {
+    // En mode sécurisé, ne jamais démarrer les vérifications
+    if (this.safeMode) {
+      console.log('🛡️ Vérification périodique désactivée - Mode sécuris��');
+      return null;
+    }
+
     // Ne pas démarrer la vérification si pas de backend configuré
     if (!this.config.apiUrl) {
       console.log('ℹ️ Vérification périodique désactivée - Pas de backend configuré');
@@ -273,7 +279,7 @@ class EnvironmentService {
     // En mode sécurisé, pas de diagnostic réseau
     if (this.safeMode) {
       console.log('🛡️ Mode sécurisé: Diagnostic réseau désactivé');
-      console.log('🔧 === FIN DIAGNOSTIC ===');
+      console.log('�� === FIN DIAGNOSTIC ===');
       return status;
     }
 
