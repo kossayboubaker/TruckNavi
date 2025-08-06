@@ -64,7 +64,7 @@ function BasicLayout({ image, children }) {
   };
 
   return (
-    <PageLayout>
+    <PageLayout className="auth-page">
       <DefaultNavbar
         // action={{
         //   type: "external",
@@ -73,7 +73,7 @@ function BasicLayout({ image, children }) {
         //   color: "dark",
         // }}
       />
-      <MDBox sx={responsiveStyles} display="flex" flexDirection="column">
+      <MDBox sx={responsiveStyles} display="flex" flexDirection="column" className="auth-page">
         <MDBox
           position="absolute"
           width="100%"
