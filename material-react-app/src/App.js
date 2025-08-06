@@ -93,6 +93,40 @@ export default function App() {
 
   const alertsShownRef = useRef({ profile: false, company: false, password: false });
 
+  // Gestion d'erreur globale pour les fetch
+  useEffect(() => {
+    const originalFetch = window.fetch;
+    window.fetch = async (...args) => {
+      try {
+        const response = await originalFetch(...args);
+        // Réinitialiser l'erreur backend si une requête réussit
+        if (response.ok && backendError) {
+          setBackendError(null);
+        }
+        return response;
+      } catch (error) {
+        // Capturer les erreurs de réseau pour diagnostic
+        if (!backendError) {
+          setBackendError(error.message);
+          console.warn('🌐 Erreur réseau détectée:', error.message);
+        }
+        throw error;
+      }
+    };
+
+    // Test initial du backend pour les routes logistics
+    environmentService.checkBackendAvailability().then(isAvailable => {
+      if (!isAvailable) {
+        const errorInfo = environmentService.generateUserErrorMessage();
+        console.warn('⚠️ Backend logistics non accessible:', errorInfo.technical);
+      }
+    });
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, [backendError]);
+
   useEffect(() => {
       console.log("Début vérification de l'utilisateur");
 
