@@ -94,7 +94,12 @@ export default function App() {
   useEffect(() => {
       console.log("Début vérification de l'utilisateur");
 
-    fetch("http://localhost:8080/user/auto-login", { credentials: "include" })
+    fetch("http://localhost:8080/user/auto-login", {
+      credentials: "include",
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
       .then((res) => {
         if (res.ok) return res.json();
         throw new Error("Not authenticated");
