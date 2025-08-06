@@ -23,6 +23,7 @@ export const useRealTimeData = (options = {}) => {
   const [weather, setWeather] = useState([]);
   const [traffic, setTraffic] = useState([]);
   const [statistics, setStatistics] = useState({});
+  const [mandatoryBreaks, setMandatoryBreaks] = useState({});
   
   // États de connexion
   const [connectionStatus, setConnectionStatus] = useState('disconnected');
