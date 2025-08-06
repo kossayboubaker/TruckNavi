@@ -161,8 +161,7 @@ const Map = () => {
     setError(null);
 
     try {
-      console.log('📡 Récupération camions depuis l\'API...');
-      console.log('🔗 URL API:', `${API_BASE_URL}/api/trucks/active-trucks`);
+      console.log('📡 Récupération 100% dynamique des camions...');
 
       // Vérifier si l'API_BASE_URL est définie
       if (!API_BASE_URL || API_BASE_URL === 'undefined') {
