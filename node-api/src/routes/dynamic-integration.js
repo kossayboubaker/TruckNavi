@@ -5,89 +5,53 @@ import kafkaService from '../services/kafkaService.js';
 
 const router = express.Router();
 
-// État global des camions (en attendant la vraie base de données)
-let trucksData = [];
-let alertsData = [];
-let routesData = {};
+// AUCUNE donnée statique - Tout provient de MongoDB
+// Import des modèles MongoDB (à adapter selon votre structure)
+// import Truck from '../model/truck.js';
+// import Alert from '../model/alert.js';
+// import Route from '../model/route.js';
 
-// Simuler des données initiales si aucune donnée n'est disponible
-const generateMockTruckData = () => {
-  return [
-    {
-      id: 'EV-201700346',
-      truck_id: 'TN-001',
-      position: [36.770032, 10.23034],
-      speed: 65,
-      state: 'En Route',
-      ecoMode: true,
-      vehicle: 'Ford F-150',
-      cargo: 'Food Materials',
-      cargo_type: 'Perishable Goods',
-      status: 'in-progress',
-      weight: 15000,
-      route_progress: 25,
-      bearing: 45,
-      pickup: {
-        address: 'Ben Arous Centre',
-        city: 'Ben Arous, Tunisia',
-        coordinates: [36.770032, 10.23034]
-      },
-      destination: 'Manouba Centre',
-      destinationCoords: [36.8098, 10.1085],
-      driver: {
-        id: 'driver_001',
-        name: 'Ahmed Ben Ali',
-        company: 'TransTunisia, LTD',
-        contact: '+216 12 345 678',
-        avatar: '👨‍💼'
-      },
-      last_update: new Date().toISOString(),
-      estimatedArrival: new Date(Date.now() + 3600000 * 2).toISOString(),
-      fuel_level: 78,
-      temperature: 4,
-      alerts: []
-    },
-    {
-      id: 'EV-201700323',
-      truck_id: 'TN-002',
-      position: [36.8065, 10.1815],
-      speed: 52,
-      state: 'En Route',
-      ecoMode: false,
-      vehicle: 'MAN TGX 440',
-      cargo: 'Electronics',
-      cargo_type: 'Fragile',
-      status: 'in-progress',
-      weight: 12000,
-      route_progress: 60,
-      bearing: 95,
-      pickup: {
-        address: 'Tunis Centre',
-        city: 'Tunis, Tunisia',
-        coordinates: [36.8065, 10.1815]
-      },
-      destination: 'Sousse Port',
-      destinationCoords: [35.8256, 10.6369],
-      driver: {
-        id: 'driver_002',
-        name: 'Mohamed Trabelsi',
-        company: 'Coastal Logistics',
-        contact: '+216 98 765 432',
-        avatar: '👨‍🔧'
-      },
-      last_update: new Date().toISOString(),
-      estimatedArrival: new Date(Date.now() + 3600000 * 1.5).toISOString(),
-      fuel_level: 45,
-      temperature: 18,
-      alerts: []
-    }
-  ];
+// Collections MongoDB (simulées - remplacez par vos vrais modèles)
+let trucksData = []; // Sera récupéré depuis MongoDB
+let alertsData = []; // Sera récupéré depuis MongoDB
+let routesData = {}; // Sera récupéré depuis MongoDB
+
+// Fonction pour récupérer les données depuis MongoDB
+const fetchFromMongoDB = async () => {
+  try {
+    // TODO: Remplacez par vos vraies requêtes MongoDB
+    // const trucks = await Truck.find({});
+    // const alerts = await Alert.find({});
+    // const routes = await Route.find({});
+
+    console.log('🔄 Récupération données depuis MongoDB...');
+
+    // Pour l'instant, on simule que MongoDB est vide
+    // Vous devez implémenter vos vraies requêtes ici
+
+    return {
+      trucks: [],
+      alerts: [],
+      routes: {}
+    };
+  } catch (error) {
+    console.error('❌ Erreur récupération MongoDB:', error);
+    throw new Error('Échec connexion MongoDB');
+  }
 };
 
-// Initialiser avec des données mock si nécessaire
-if (trucksData.length === 0) {
-  trucksData = generateMockTruckData();
-}
+// Initialiser avec MongoDB au démarrage
+(async () => {
+  try {
+    const data = await fetchFromMongoDB();
+    trucksData = data.trucks;
+    alertsData = data.alerts;
+    routesData = data.routes;
+    console.log('✅ Données MongoDB chargées');
+  } catch (error) {
+    console.error('❌ Impossible de charger MongoDB:', error);
+  }
+})();
 
 // GET /api/trucks - Récupérer tous les camions
 router.get('/trucks', (req, res) => {
