@@ -68,6 +68,8 @@ const Map = () => {
   const [chatOpen, setChatOpen] = useState(false);
   const [breakNotifications, setBreakNotifications] = useState([]);
   const [preventiveAlerts, setPreventiveAlerts] = useState([]);
+  const [showMandatoryBreaks, setShowMandatoryBreaks] = useState(false);
+  const [selectedTruck, setSelectedTruck] = useState(null);
 
   // Utilisateur actuel basé sur le rôle
   const [currentUser, setCurrentUser] = useState(
