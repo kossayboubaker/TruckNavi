@@ -96,7 +96,13 @@ const Map = () => {
     refresh,
     sendTruckCommand,
     startSimulator,
-    stopSimulator
+    stopSimulator,
+    mandatoryBreaks,
+    startMandatoryBreak,
+    endMandatoryBreak,
+    checkBreakRequirement,
+    getBreakStatistics,
+    getScheduledBreaks
   } = useRealTimeData({
     autoConnect: true,
     enableTrucks: true,
