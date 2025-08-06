@@ -417,6 +417,9 @@ const Map = () => {
 
   return (
     <div className={`min-h-screen ${isAsideOpen ? 'bg-background' : 'bg-white'} overflow-hidden`}>
+      {/* Notice de mode démo si applicable */}
+      <DemoModeNotice />
+
       {/* Indicateur de rôle et connexion */}
       <div style={{
         position: 'fixed',
