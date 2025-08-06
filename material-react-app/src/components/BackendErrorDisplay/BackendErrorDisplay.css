@@ -1,0 +1,311 @@
+/* Styles pour l'affichage d'erreur backend */
+
+.backend-error-display {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.error-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  width: 100%;
+  padding: 40px;
+  border: 1px solid #fecaca;
+}
+
+.error-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.error-icon {
+  margin-bottom: 20px;
+  display: block;
+}
+
+.error-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #dc2626;
+  margin-bottom: 15px;
+  line-height: 1.2;
+}
+
+.error-message {
+  font-size: 1.2rem;
+  color: #6b7280;
+  margin-bottom: 0;
+  line-height: 1.5;
+}
+
+.severity-indicator {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 30px;
+}
+
+.actions-section {
+  background: #fef9c3;
+  border: 1px solid #fde047;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+}
+
+.actions-section h3 {
+  margin: 0 0 15px 0;
+  color: #a16207;
+  font-size: 1.1rem;
+}
+
+.actions-list {
+  margin: 0;
+  padding-left: 20px;
+  color: #a16207;
+}
+
+.actions-list li {
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.buttons-section {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.retry-button,
+.diagnostic-button,
+.test-button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+  justify-content: center;
+}
+
+.retry-button {
+  background: #3b82f6;
+  color: white;
+}
+
+.retry-button:hover:not(:disabled) {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.retry-button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.diagnostic-button {
+  background: #8b5cf6;
+  color: white;
+}
+
+.diagnostic-button:hover:not(:disabled) {
+  background: #7c3aed;
+  transform: translateY(-1px);
+}
+
+.test-button {
+  background: #10b981;
+  color: white;
+}
+
+.test-button:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.technical-section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+  margin-bottom: 20px;
+}
+
+.toggle-technical {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #6b7280;
+  transition: all 0.2s ease;
+}
+
+.toggle-technical:hover {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.technical-details {
+  margin-top: 15px;
+  padding: 20px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.config-info,
+.error-details,
+.diagnostic-details {
+  margin-bottom: 20px;
+}
+
+.config-info h4,
+.error-details h4,
+.diagnostic-details h4 {
+  margin: 0 0 10px 0;
+  color: #374151;
+  font-size: 1rem;
+}
+
+.config-info ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #6b7280;
+}
+
+.config-info li {
+  margin-bottom: 5px;
+}
+
+.error-details code {
+  display: block;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 4px;
+  padding: 10px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 0.875rem;
+  color: #dc2626;
+  overflow-x: auto;
+}
+
+.diagnostic-details pre {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 15px;
+  font-size: 0.75rem;
+  overflow-x: auto;
+  max-height: 300px;
+  color: #374151;
+}
+
+.documentation-section {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.documentation-section h3 {
+  margin: 0 0 15px 0;
+  color: #1d4ed8;
+  font-size: 1.1rem;
+}
+
+.doc-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.doc-links span {
+  color: #1e40af;
+  font-size: 0.875rem;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .backend-error-display {
+    padding: 10px;
+  }
+  
+  .error-container {
+    padding: 20px;
+  }
+  
+  .error-title {
+    font-size: 1.8rem;
+  }
+  
+  .error-message {
+    font-size: 1rem;
+  }
+  
+  .buttons-section {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .retry-button,
+  .diagnostic-button,
+  .test-button {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-title {
+    font-size: 1.5rem;
+  }
+  
+  .error-message {
+    font-size: 0.9rem;
+  }
+  
+  .actions-section,
+  .technical-details,
+  .documentation-section {
+    padding: 15px;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-container {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.technical-details {
+  animation: fadeInUp 0.3s ease-out;
+}
