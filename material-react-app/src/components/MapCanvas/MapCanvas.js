@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import routeGenerator from '../../services/routeGenerator';
 import roleManager from '../../services/roleManager';
+import apiService from '../../services/apiService';
 
 const WEATHER_API_KEY = '4437791bbdc183036e4e04dc15c92cb8';
 
@@ -938,7 +939,7 @@ const MapCanvas = ({
                     <strong style={{ color: '#1f2937' }}>{hoveredItem.data.destination}</strong>
                   </div>
                   <div>
-                    <span style={{ color: '#6b7280' }}>��� Vitesse:</span><br/>
+                    <span style={{ color: '#6b7280' }}>⚡ Vitesse:</span><br/>
                     <strong style={{ color: '#1f2937' }}>{Math.round(hoveredItem.data.speed)} km/h</strong>
                   </div>
                   <div>
