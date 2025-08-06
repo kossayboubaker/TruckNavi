@@ -1,5 +1,6 @@
 // Routes pour l'intégration dynamique avec le simulateur Python
 import express from 'express';
+import osrmService from '../services/osrmService.js';
 
 const router = express.Router();
 
