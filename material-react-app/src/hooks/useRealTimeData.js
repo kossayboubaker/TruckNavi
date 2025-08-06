@@ -113,26 +113,50 @@ export const useRealTimeData = (options = {}) => {
     setIsLoading(false);
   };
 
-  // Charger les données initiales depuis l'API avec fallback
+  // Charger les données initiales depuis l'API avec gestion d'erreur robuste
   const loadInitialData = useCallback(async () => {
     try {
+      setIsLoading(true);
       const promises = [];
 
       if (enableTrucks) {
-        promises.push(trucksService.getAllTrucks());
+        promises.push(
+          trucksService.getAllTrucks().catch(error => ({
+            error: true,
+            message: error.message,
+            type: 'trucks'
+          }))
+        );
       }
 
       if (enableAlerts) {
-        promises.push(trucksService.getDynamicAlerts());
+        promises.push(
+          trucksService.getDynamicAlerts().catch(error => ({
+            error: true,
+            message: error.message,
+            type: 'alerts'
+          }))
+        );
       }
 
       const results = await Promise.allSettled(promises);
 
-      // Vérifier si au moins une API fonctionne
-      const hasSuccessfulCall = results.some(result => result.status === 'fulfilled');
+      // Analyser les résultats sans bloquer l'interface
+      let hasAnyData = false;
+      let errorMessages = [];
 
-      if (!hasSuccessfulCall) {
-        handleAPIFailure('Toutes les APIs backend sont inaccessibles');
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled' && !result.value?.error) {
+          hasAnyData = true;
+        } else {
+          const errorInfo = result.value?.error ? result.value : { message: result.reason?.message || 'Erreur inconnue' };
+          errorMessages.push(errorInfo.message);
+        }
+      });
+
+      if (!hasAnyData && errorMessages.length > 0) {
+        // Toutes les APIs ont échoué - afficher l'erreur mais garder l'interface
+        handleAPIFailure(errorMessages[0]); // Première erreur rencontrée
         return;
       }
 
