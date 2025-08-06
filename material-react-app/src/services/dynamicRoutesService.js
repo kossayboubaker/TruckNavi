@@ -296,7 +296,7 @@ class DynamicRoutesService {
     const markers = [];
     const waypoints = routeInfo.fullRoute;
     const truck = routeInfo.truck;
-    
+
     // Marqueur de départ dynamique
     markers.push({
       position: waypoints[0],
@@ -308,12 +308,12 @@ class DynamicRoutesService {
         <span style="font-size: 10px; color: #666;">Camion: ${truck?.truck_id || 'N/A'}</span>
       </div>`
     });
-    
+
     // Marqueur d'arrivée dynamique
-    const arrivalTime = truck?.estimatedArrival ? 
-      new Date(truck.estimatedArrival).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}) : 
+    const arrivalTime = truck?.estimatedArrival ?
+      new Date(truck.estimatedArrival).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}) :
       'Calcul en cours...';
-      
+
     markers.push({
       position: waypoints[waypoints.length - 1],
       type: 'end',
@@ -325,7 +325,37 @@ class DynamicRoutesService {
         <span style="font-size: 10px; color: #666;">Distance: ${routeInfo.distance || 0}km</span>
       </div>`
     });
-    
+
+    // ** NOUVEAU : Marqueurs de pauses obligatoires **
+    if (routeInfo.mandatoryBreaks && routeInfo.mandatoryBreaks.length > 0) {
+      routeInfo.mandatoryBreaks.forEach((breakInfo, index) => {
+        if (breakInfo.coordinates) {
+          const breakTime = new Date(breakInfo.scheduledTime).toLocaleTimeString('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          const priorityColor = breakInfo.priority === 'critical' ? '#ff0000' :
+                               breakInfo.priority === 'high' ? '#ff6600' : '#ff9900';
+
+          markers.push({
+            position: breakInfo.coordinates,
+            type: 'mandatory_break',
+            icon: breakInfo.priority === 'critical' ? '🛑' : '⏸️',
+            className: 'mandatory-break-marker',
+            popup: `<div style="text-align: center; font-family: sans-serif; border-left: 3px solid ${priorityColor}; padding-left: 8px;">
+              <strong style="color: ${priorityColor};">${breakInfo.icon || '⏸️'} Pause Obligatoire</strong><br>
+              <span style="font-size: 12px; font-weight: bold;">Durée: ${breakInfo.duration} minutes</span><br>
+              <span style="font-size: 11px;">Programmée: ${breakTime}</span><br>
+              <span style="font-size: 10px; color: #666;">${breakInfo.reason}</span><br>
+              <span style="font-size: 9px; color: #999;">${breakInfo.regulation}</span><br>
+              ${breakInfo.priority === 'critical' ? '<span style="font-size: 10px; color: #ff0000; font-weight: bold;">🚨 PAUSE IMMÉDIATE REQUISE</span>' : ''}
+            </div>`
+          });
+        }
+      });
+    }
+
     // Points d'étapes seulement si fournis par le backend
     if (routeInfo.waypoints && routeInfo.waypoints.length > 2) {
       routeInfo.waypoints.forEach((waypoint, index) => {
@@ -343,7 +373,7 @@ class DynamicRoutesService {
         }
       });
     }
-    
+
     return markers;
   }
 
