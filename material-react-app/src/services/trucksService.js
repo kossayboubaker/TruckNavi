@@ -25,26 +25,72 @@ class TrucksService {
   async getAllTrucks() {
     try {
       console.log('🔄 Récupération camions depuis MongoDB...');
-      
+
+      // Test de connectivité d'abord
+      await this.testConnection();
+
       // Utilise votre endpoint existant
       const response = await axios.get(`${this.baseURL}/trip/details`, this.axiosConfig);
-      
+
       if (!response.data.success) {
         throw new Error(response.data.message || 'Erreur API backend');
       }
 
       const trucks = response.data.trucks || [];
       console.log(`✅ ${trucks.length} camions récupérés depuis MongoDB`);
-      
+
       return trucks;
     } catch (error) {
       console.error('❌ Erreur récupération camions:', error.message);
-      
-      if (error.response?.status === 404) {
-        throw new Error('Aucun camion trouvé en base MongoDB - Ajoutez des données');
+
+      // Gestion spécifique des erreurs réseau
+      if (error.code === 'NETWORK_ERROR' || error.message.includes('fetch')) {
+        throw new Error('Backend non accessible - Vérifiez que le serveur est démarré sur ' + this.baseURL);
       }
-      
+
+      if (error.response?.status === 404) {
+        throw new Error('Endpoint /trip/details non trouvé - Vérifiez la configuration de votre API');
+      }
+
+      if (error.response?.status === 500) {
+        throw new Error('Erreur serveur backend - Vérifiez les logs du serveur MongoDB');
+      }
+
       throw new Error(`Backend MongoDB inaccessible: ${error.message}`);
+    }
+  }
+
+  // Test de connectivité backend
+  async testConnection() {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      const response = await fetch(`${this.baseURL}/api/health`, {
+        method: 'GET',
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      return true;
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new Error('TIMEOUT: Backend ne répond pas dans les 5 secondes');
+      }
+
+      if (error.message.includes('fetch')) {
+        throw new Error('NETWORK_ERROR: Impossible de joindre le backend');
+      }
+
+      throw error;
     }
   }
 
@@ -185,7 +231,7 @@ class TrucksService {
         simulatorStatus: response.data.simulatorStatus
       };
     } catch (error) {
-      console.error('❌ Erreur données temps réel:', error.message);
+      console.error('❌ Erreur donn��es temps réel:', error.message);
       throw error;
     }
   }
