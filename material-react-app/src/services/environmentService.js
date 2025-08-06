@@ -148,8 +148,19 @@ class EnvironmentService {
     if (!this.backendStatus.error) {
       return 'Backend accessible';
     }
-    
+
     const { error } = this.backendStatus;
+
+    // Cas spécial : pas de backend configuré en production
+    if (error === 'NO_BACKEND_CONFIGURED') {
+      return {
+        title: 'Mode Frontend Seul',
+        message: 'Application en mode démonstration sans backend',
+        action: 'Configurez REACT_APP_API_URL pour connecter un backend',
+        technical: 'Backend URL non configurée - utilisation en mode démo',
+        severity: 'info'
+      };
+    }
     
     if (error.includes('TIMEOUT')) {
       return {
