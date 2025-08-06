@@ -27,8 +27,14 @@ class TrucksService {
       return response.data.trucks || [];
     } catch (error) {
       console.error('❌ Erreur récupération camions:', error);
-      // Fallback en cas d'erreur - pas de données statiques
-      return [];
+
+      // Vérifier si c'est une erreur de réseau
+      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
+        console.warn('⚠️ Backend non accessible - mode hors ligne');
+      }
+
+      // Rejeter l'erreur pour permettre la gestion par le hook
+      throw new Error('Backend non accessible');
     }
   }
 
