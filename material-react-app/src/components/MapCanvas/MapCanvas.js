@@ -200,34 +200,17 @@ const MapCanvas = ({
 
         // Si pas de coordonnées, essayer de récupérer depuis l'API avec fallback robuste
         if (!startCoord || !endCoord) {
-          try {
-            console.log(`📡 Tentative récupération coordonnées dynamiques pour ${truck.truck_id}`);
+          const coordResult = await apiService.getTruckCoordinates(truck.truck_id);
 
-            const response = await fetch(`http://localhost:8080/api/trucks/coordinates/${truck.truck_id}`, {
-              credentials: 'include',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              timeout: 5000 // Timeout de 5 secondes
-            });
-
-            if (response.ok) {
-              const coordData = await response.json();
-              if (coordData.success) {
-                startCoord = coordData.startCoord || truck.position;
-                endCoord = coordData.endCoord || truck.position;
-                console.log(`✅ Coordonnées dynamiques récupérées pour ${truck.truck_id}`);
-              } else {
-                throw new Error('API response not successful');
-              }
-            } else {
-              throw new Error(`API responded with status ${response.status}`);
-            }
-          } catch (apiError) {
-            console.warn(`⚠️ API coordonnées non disponible pour ${truck.truck_id}, utilisation fallback:`, apiError.message);
-            // Fallback immédiat sans bloquer l'application
-            startCoord = truck.pickup?.coordinates || truck.position || [36.8, 10.18];
-            endCoord = truck.destinationCoords || truck.destination?.coordinates || truck.position || [36.8, 10.18];
+          if (coordResult.success && coordResult.data) {
+            startCoord = coordResult.data.startCoord || truck.position;
+            endCoord = coordResult.data.endCoord || truck.position;
+            console.log(`✅ Coordonnées dynamiques récupérées pour ${truck.truck_id}`);
+          } else {
+            // Fallback automatique géré par le service API
+            console.warn(`⚠️ Utilisation coordonnées fallback pour ${truck.truck_id}`);
+            startCoord = truck.pickup?.coordinates || truck.position || coordResult.data?.startCoord || [36.8, 10.18];
+            endCoord = truck.destinationCoords || truck.destination?.coordinates || truck.position || coordResult.data?.endCoord || [36.8, 10.18];
           }
         }
 
