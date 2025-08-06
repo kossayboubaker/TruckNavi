@@ -208,11 +208,17 @@ class EnvironmentService {
 
   // Vérification périodique du backend
   startPeriodicCheck(interval = 30000) {
+    // Ne pas démarrer la vérification si pas de backend configuré
+    if (!this.config.apiUrl) {
+      console.log('ℹ️ Vérification périodique désactivée - Pas de backend configuré');
+      return null;
+    }
+
     console.log('🔄 Démarrage vérification périodique backend...');
-    
+
     // Vérification immédiate
     this.checkBackendAvailability();
-    
+
     // Puis vérification périodique
     return setInterval(() => {
       this.checkBackendAvailability();
