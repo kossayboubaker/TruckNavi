@@ -1,0 +1,87 @@
+/* Notice de mode démonstration */
+
+.demo-mode-notice {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 9999;
+  max-width: 300px;
+}
+
+.notice-content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.notice-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.notice-text {
+  flex: 1;
+}
+
+.notice-text h3 {
+  margin: 0 0 4px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.notice-text p {
+  margin: 0;
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+.demo-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* Animation d'apparition */
+.demo-mode-notice {
+  animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .demo-mode-notice {
+    right: 5px;
+    max-width: 250px;
+  }
+  
+  .notice-content {
+    padding: 10px 12px;
+  }
+  
+  .notice-text h3 {
+    font-size: 0.8rem;
+  }
+  
+  .notice-text p {
+    font-size: 0.7rem;
+  }
+}
