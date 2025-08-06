@@ -270,6 +270,13 @@ class EnvironmentService {
     console.log('Configuration:', status.config);
     console.log('Environnement:', status.environment);
 
+    // En mode sécurisé, pas de diagnostic réseau
+    if (this.safeMode) {
+      console.log('🛡️ Mode sécurisé: Diagnostic réseau désactivé');
+      console.log('🔧 === FIN DIAGNOSTIC ===');
+      return status;
+    }
+
     // Éviter le test de connectivité si pas de backend configuré
     if (!this.config.apiUrl) {
       console.log('Backend: Non configuré (mode frontend seul)');
@@ -316,7 +323,7 @@ class EnvironmentService {
         
         console.log(`${endpoint}: ${response.ok ? '✅' : '❌'} (${response.status})`);
       } catch (error) {
-        console.log(`${endpoint}: ��� (${error.message})`);
+        console.log(`${endpoint}: ❌ (${error.message})`);
       }
     }
   }
