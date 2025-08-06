@@ -437,7 +437,7 @@ const Map = () => {
     return () => window.removeEventListener('roleChanged', handleRoleChange);
   }, [visibleTrucks]);
 
-  // Gestionnaires d'événements
+  // Gestionnaires d'év��nements
   const handleZoomIn = () => mapInstance?.zoomIn();
   const handleZoomOut = () => mapInstance?.zoomOut();
   const handleMapStyleChange = (style) => setMapStyle(style);
@@ -827,18 +827,148 @@ const Map = () => {
 
       <style>
         {`
+          /* Styles ultra-responsifs pour toutes résolutions */
+
+          /* Chat button responsive */
           .chat-toggle-btn:hover {
             transform: scale(1.1) !important;
             box-shadow: 0 12px 35px rgba(16, 185, 129, 0.6) !important;
           }
 
-          @media (max-width: 768px) {
+          /* Micro écrans (<100px) */
+          @media (max-width: 100px), (max-height: 100px) {
+            .chat-toggle-btn {
+              bottom: 2px !important;
+              right: 2px !important;
+              width: 20px !important;
+              height: 20px !important;
+              font-size: 10px !important;
+            }
+          }
+
+          /* Tiny écrans (100-150px) */
+          @media (min-width: 100px) and (max-width: 150px) {
+            .chat-toggle-btn {
+              bottom: 4px !important;
+              right: 4px !important;
+              width: 24px !important;
+              height: 24px !important;
+              font-size: 12px !important;
+            }
+          }
+
+          /* Compact écrans (150-250px) */
+          @media (min-width: 150px) and (max-width: 250px) {
+            .chat-toggle-btn {
+              bottom: 6px !important;
+              right: 6px !important;
+              width: 28px !important;
+              height: 28px !important;
+              font-size: 14px !important;
+            }
+          }
+
+          /* Mobiles standards */
+          @media (min-width: 380px) and (max-width: 768px) {
             .chat-toggle-btn {
               bottom: 15px !important;
               right: 15px !important;
-              width: 56px !important;
-              height: 56px !important;
-              font-size: 20px !important;
+              width: 48px !important;
+              height: 48px !important;
+              font-size: 18px !important;
+            }
+          }
+
+          /* Desktop standards */
+          @media (min-width: 1366px) and (max-width: 1920px) {
+            .chat-toggle-btn {
+              bottom: 20px !important;
+              right: 20px !important;
+              width: 60px !important;
+              height: 60px !important;
+              font-size: 24px !important;
+            }
+          }
+
+          /* Large Desktop */
+          @media (min-width: 1920px) and (max-width: 2560px) {
+            .chat-toggle-btn {
+              bottom: 24px !important;
+              right: 24px !important;
+              width: 72px !important;
+              height: 72px !important;
+              font-size: 28px !important;
+            }
+          }
+
+          /* 4K et ultra-haute résolution */
+          @media (min-width: 2560px) {
+            .chat-toggle-btn {
+              bottom: 32px !important;
+              right: 32px !important;
+              width: 96px !important;
+              height: 96px !important;
+              font-size: 36px !important;
+            }
+          }
+
+          /* Optimisations performance pour micro-écrans */
+          @media (max-width: 150px) {
+            * {
+              transform: none !important;
+              transition: none !important;
+              animation: none !important;
+            }
+
+            .transition-all {
+              transition: none !important;
+            }
+          }
+
+          /* Scrollbars ultra-fines pour petits écrans */
+          @media (max-width: 250px) {
+            ::-webkit-scrollbar {
+              width: 2px;
+            }
+
+            ::-webkit-scrollbar-track {
+              background: rgba(0,0,0,0.1);
+            }
+
+            ::-webkit-scrollbar-thumb {
+              background: rgba(0,0,0,0.3);
+              border-radius: 2px;
+            }
+          }
+
+          /* Optimisations pour écrans ultra-larges */
+          @media (min-aspect-ratio: 21/10) {
+            .aside-panel {
+              max-width: 25vw !important;
+            }
+          }
+
+          /* Mode portrait étroit */
+          @media (orientation: portrait) and (max-width: 480px) {
+            .panel-overlay {
+              backdrop-filter: blur(8px);
+              background: rgba(0,0,0,0.3);
+            }
+          }
+
+          /* Optimisations tactiles pour petits écrans */
+          @media (max-width: 380px) {
+            button, .clickable {
+              min-height: 32px !important;
+              min-width: 32px !important;
+            }
+          }
+
+          /* Haute densité pixel (Retina, etc.) */
+          @media (-webkit-min-device-pixel-ratio: 2) {
+            .high-dpi-icons {
+              image-rendering: -webkit-optimize-contrast;
+              image-rendering: crisp-edges;
             }
           }
         `}
