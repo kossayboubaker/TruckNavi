@@ -481,7 +481,7 @@ const Map = () => {
             fontSize: isUltraCompact ? '5px' : '7px',
             fontWeight: '500'
           }}>
-            ⏱️ {new Date(lastUpdate).toLocaleTimeString('fr-FR', {
+            ⏱�� {new Date(lastUpdate).toLocaleTimeString('fr-FR', {
               hour: '2-digit', 
               minute: '2-digit',
               second: '2-digit'
@@ -579,6 +579,9 @@ const Map = () => {
             selectedDelivery={selectedDelivery}
             alerts={roleManager.filterAlerts(alerts, visibleTrucks)}
             isLoading={isLoading}
+            onTruckSelect={handleTruckSelect}
+            mandatoryBreaks={mandatoryBreaks}
+            showBreaksButton={true}
           />
         </aside>
 
