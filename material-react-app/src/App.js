@@ -114,13 +114,17 @@ export default function App() {
       }
     };
 
-    // Test initial du backend pour les routes logistics
-    environmentService.checkBackendAvailability().then(isAvailable => {
-      if (!isAvailable) {
-        const errorInfo = environmentService.generateUserErrorMessage();
-        console.warn('⚠️ Backend logistics non accessible:', errorInfo.technical);
-      }
-    });
+    // Test initial du backend seulement si configuré
+    if (environmentService.config.apiUrl) {
+      environmentService.checkBackendAvailability().then(isAvailable => {
+        if (!isAvailable) {
+          const errorInfo = environmentService.generateUserErrorMessage();
+          console.warn('⚠️ Backend logistics non accessible:', errorInfo.technical);
+        }
+      });
+    } else {
+      console.log('ℹ️ Backend non configuré - Mode démonstration frontend');
+    }
 
     return () => {
       window.fetch = originalFetch;
