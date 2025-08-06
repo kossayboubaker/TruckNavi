@@ -304,10 +304,13 @@ const environmentService = new EnvironmentService();
 
 // Démarrage automatique de la vérification
 if (typeof window !== 'undefined') {
-  environmentService.startPeriodicCheck();
-  
-  // Diagnostic initial en mode développement
-  if (environmentService.config.isDevelopment) {
+  // Démarrer seulement si on est en développement ou si backend configuré
+  if (environmentService.isDevelopmentEnvironment() || environmentService.config.apiUrl) {
+    environmentService.startPeriodicCheck();
+  }
+
+  // Diagnostic initial seulement en mode développement
+  if (environmentService.isDevelopmentEnvironment()) {
     setTimeout(() => {
       environmentService.runDiagnostic();
     }, 1000);
