@@ -139,7 +139,8 @@ export default function App() {
 
         setLoadingRoutes(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log("Erreur auto-login (normal si pas connecté):", error.message);
         const path = window.location.pathname;
         const isPublic = ["/auth/reset-password", "/auth/register", "/auth/forgot-password"].some((p) => path.startsWith(p));
         setUser(null);
