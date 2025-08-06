@@ -1,6 +1,7 @@
 // Service de routes 100% dynamiques - aucune donnée hardcodée
 import trucksService from './trucksService';
 import realtimeService from './realtimeService';
+import mandatoryBreaksService from './mandatoryBreaksService';
 
 class DynamicRoutesService {
   constructor() {
