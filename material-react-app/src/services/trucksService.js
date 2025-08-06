@@ -24,15 +24,24 @@ class TrucksService {
 
   // Initialisation avec vérification
   async initializeConnection() {
+    // Ne pas tenter de connexion si pas de backend configuré
+    if (!this.baseURL) {
+      console.log('ℹ️ TrucksService en mode frontend seul - Pas de backend configuré');
+      return;
+    }
+
     try {
       const isAvailable = await this.environmentService.checkBackendAvailability();
       if (isAvailable) {
         console.log('✅ Backend MongoDB accessible au démarrage');
       } else {
-        console.warn('⚠️ Backend MongoDB non accessible au démarrage');
+        console.log('ℹ️ Backend MongoDB non accessible au démarrage');
       }
     } catch (error) {
-      console.warn('⚠️ Erreur vérification backend:', error.message);
+      // Ne pas logger comme erreur en production
+      if (this.environmentService.isDevelopmentEnvironment()) {
+        console.warn('⚠️ Erreur vérification backend:', error.message);
+      }
     }
   }
 
@@ -185,7 +194,7 @@ class TrucksService {
   // Récupérer itinéraire complet depuis votre backend
   async getTruckRoute(startCoords, endCoords) {
     try {
-      console.log('🗺️ Récup��ration itinéraire depuis backend...');
+      console.log('🗺️ Récupération itinéraire depuis backend...');
       
       // Utilise votre endpoint existant de routes
       const response = await axios.get(
