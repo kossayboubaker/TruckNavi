@@ -174,6 +174,17 @@ class EnvironmentService {
 
     const { error } = this.backendStatus;
 
+    // Cas spécial : mode sécurisé activé
+    if (error === 'SAFE_MODE_NO_NETWORK_CALLS' || error === 'SAFE_MODE_ENABLED') {
+      return {
+        title: 'Mode Production Sécurisé',
+        message: 'Application en mode production sans vérifications réseau',
+        action: 'Normal en production - configurez REACT_APP_API_URL si backend requis',
+        technical: 'Mode sécurisé activé - aucun appel réseau effectué',
+        severity: 'info'
+      };
+    }
+
     // Cas spécial : pas de backend configuré en production
     if (error === 'NO_BACKEND_CONFIGURED') {
       return {
@@ -233,7 +244,7 @@ class EnvironmentService {
   startPeriodicCheck(interval = 30000) {
     // En mode sécurisé, ne jamais démarrer les vérifications
     if (this.safeMode) {
-      console.log('🛡️ Vérification périodique désactivée - Mode sécuris��');
+      console.log('🛡️ Vérification périodique désactivée - Mode sécurisé');
       return null;
     }
 
@@ -279,7 +290,7 @@ class EnvironmentService {
     // En mode sécurisé, pas de diagnostic réseau
     if (this.safeMode) {
       console.log('🛡️ Mode sécurisé: Diagnostic réseau désactivé');
-      console.log('�� === FIN DIAGNOSTIC ===');
+      console.log('🔧 === FIN DIAGNOSTIC ===');
       return status;
     }
 
