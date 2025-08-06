@@ -211,7 +211,7 @@ const Map = () => {
       }
 
     } catch (err) {
-      console.error('��� Erreur récupération:', err);
+      console.error('❌ Erreur récupération:', err);
 
       let errorMessage = 'Erreur de connexion à l\'API';
 
@@ -227,11 +227,9 @@ const Map = () => {
 
       setError(errorMessage);
 
-      // Si pas de camions chargés, utiliser des données de demo pour éviter crash
-      if (visibleTrucks.length === 0) {
-        console.log('🔄 Chargement de données de démonstration...');
-        loadDemoData();
-      }
+      // Pas de données de démonstration - système 100% dynamique
+      console.log('🚫 Aucune donnée statique utilisée - attente de données dynamiques');
+      setVisibleTrucks([]);
 
     } finally {
       setLoading(false);
