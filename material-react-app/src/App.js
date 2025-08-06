@@ -35,6 +35,7 @@ import Footer from "examples/Footer";
 import ChatbotWidget from "layouts/Chatbot/chatbot";
 
 import { AuthContext } from "context";
+import apiService from "./services/apiService";
 
 import theme from "assets/theme";
 import themeRTL from "assets/theme/theme-rtl";
