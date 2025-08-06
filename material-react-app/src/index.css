@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 🎯 Styles Ultra-Responsifs pour toutes les résolutions */
+@import './assets/styles/ultra-responsive.css';
+
 /* Design system for Ongoing Delivery Interface. All colors MUST be HSL. */
 
 @layer base {
