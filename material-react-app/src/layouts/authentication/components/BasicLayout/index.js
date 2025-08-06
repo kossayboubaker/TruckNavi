@@ -77,8 +77,10 @@ function BasicLayout({ image, children }) {
         <MDBox
           position="absolute"
           width="100%"
+          height="100vh"
           minHeight="100vh"
-          paddingTop="3em"
+          maxHeight="100vh"
+          paddingTop={{ xs: "1em", sm: "2em", md: "3em", lg: "3em" }}
           sx={{
             backgroundImage: ({ functions: { linearGradient, rgba }, palette: { gradients } }) =>
               image &&
@@ -92,6 +94,20 @@ function BasicLayout({ image, children }) {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
+            overflow: "hidden",
+            // Ultra-responsivité
+            '@media (max-width: 100px)': {
+              paddingTop: '4px',
+              fontSize: '6px',
+            },
+            '@media (min-width: 100px) and (max-width: 250px)': {
+              paddingTop: '8px',
+              fontSize: '8px',
+            },
+            '@media (min-width: 2560px)': {
+              paddingTop: '4em',
+              fontSize: '20px',
+            },
           }}
         >
           <MDBox
