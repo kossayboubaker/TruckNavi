@@ -43,12 +43,23 @@ class EnvironmentService {
 
   // Vérifier si le backend est accessible
   async checkBackendAvailability() {
+    // Si pas d'URL API configurée, considérer comme non disponible sans erreur
+    if (!this.config.apiUrl) {
+      this.backendStatus = {
+        isAvailable: false,
+        lastCheck: new Date().toISOString(),
+        error: 'NO_BACKEND_CONFIGURED'
+      };
+      console.log('ℹ️ Aucun backend configuré - Mode frontend seul');
+      return false;
+    }
+
     try {
       console.log('🔍 Vérification disponibilité backend...');
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), this.config.timeouts.connection);
-      
+
       // Test simple avec fetch natif
       const response = await fetch(`${this.config.apiUrl}/api/health`, {
         method: 'GET',
@@ -57,22 +68,22 @@ class EnvironmentService {
           'Content-Type': 'application/json'
         }
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       const isAvailable = response.ok;
       this.backendStatus = {
         isAvailable,
         lastCheck: new Date().toISOString(),
         error: isAvailable ? null : `HTTP ${response.status}`
       };
-      
+
       if (isAvailable) {
         console.log('✅ Backend accessible:', this.config.apiUrl);
       } else {
         console.warn('⚠️ Backend répond mais avec erreur:', response.status);
       }
-      
+
       return isAvailable;
     } catch (error) {
       this.backendStatus = {
@@ -80,8 +91,13 @@ class EnvironmentService {
         lastCheck: new Date().toISOString(),
         error: this.categorizeError(error)
       };
-      
-      console.warn('❌ Backend non accessible:', error.message);
+
+      // Ne pas logger comme erreur en production si c'est prévu
+      if (this.config.isDevelopment) {
+        console.warn('❌ Backend non accessible:', error.message);
+      } else {
+        console.log('ℹ️ Backend non configuré en production');
+      }
       return false;
     }
   }
