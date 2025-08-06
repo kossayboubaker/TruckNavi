@@ -89,8 +89,73 @@ router.get('/trucks', async (req, res) => {
   }
 });
 
+// GET /trip/details - Endpoint compatible avec votre API existante
+router.get('/trip/details', async (req, res) => {
+  try {
+    // TODO: Implémentez votre logique de récupération depuis MongoDB
+    // const trucks = await Truck.find({}).populate('driver').populate('route');
+
+    if (trucksData.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Aucune donnée de voyage en base',
+        message: 'Veuillez ajouter des camions dans MongoDB',
+        trucks: []
+      });
+    }
+
+    res.json({
+      success: true,
+      trucks: trucksData,
+      total: trucksData.length,
+      source: 'mongodb'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Erreur récupération détails voyages',
+      message: error.message
+    });
+  }
+});
+
+// GET /trip/route - Endpoint pour itinéraires compatibles
+router.get('/trip/route', async (req, res) => {
+  try {
+    const { start, end } = req.query;
+
+    if (!start || !end) {
+      return res.status(400).json({
+        success: false,
+        error: 'Paramètres start et end requis',
+        example: '/trip/route?start=10.1815,36.8065&end=10.23034,36.770032'
+      });
+    }
+
+    // TODO: Intégrez avec votre service OSRM ou votre API de routes
+    const route = await osrmService.calculateRoute(
+      start.split(',').map(Number).reverse(), // [lat, lng]
+      end.split(',').map(Number).reverse()    // [lat, lng]
+    );
+
+    res.json({
+      success: true,
+      route: route.waypoints || [],
+      distance: route.distance || 0,
+      duration: route.duration || 0,
+      source: 'osrm'
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Erreur calcul itinéraire',
+      message: error.message
+    });
+  }
+});
+
 // GET /api/trucks/:id - Récupérer un camion spécifique
-router.get('/trucks/:id', (req, res) => {
+router.get('/trucks/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const truck = trucksData.find(t => t.truck_id === id || t.id === id);
