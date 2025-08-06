@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// import Header from './components/Header/Header.js';
 import DeliveryList from '../components/DeliveryList/DeliveryList.js';
 import MapCanvas from '../components/MapCanvas/MapCanvas.js';
 import AdvancedMapControls from '../components/AdvancedMapControls/AdvancedMapControls.js';
@@ -7,9 +6,12 @@ import AlertNotifications from '../components/AlertNotifications/AlertNotificati
 import DriverChat from '../components/DriverChat/DriverChat.js';
 import BreakNotification from '../components/BreakNotification/BreakNotification.js';
 import PreventiveAlert from '../components/PreventiveAlert/PreventiveAlert.js';
+
+// Services dynamiques - AUCUNE donnée statique
+import useRealTimeData from '../hooks/useRealTimeData';
+import dynamicRoutesService from '../services/dynamicRoutesService';
+import realtimeService from '../services/realtimeService';
 import roleManager from '../services/roleManager';
-import extendedAlertsService from '../services/extendedAlertsService';
-import routeGenerator from '../services/routeGenerator';
 
 
 const mockTrucks = [
