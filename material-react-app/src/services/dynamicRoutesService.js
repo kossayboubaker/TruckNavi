@@ -66,6 +66,21 @@ class DynamicRoutesService {
         routeData = await this.requestOptimizedRoute(truckData);
       }
 
+      // ** NOUVEAU : Calculer les pauses obligatoires pour ce trajet **
+      const driverId = truckData.driver?.id || truckData.driver?.name || `driver_${truckId}`;
+      const breakData = mandatoryBreaksService.calculateMandatoryBreaks(routeData, driverId, progress);
+
+      // Programmer les pauses pour ce camion
+      if (breakData.breaks.length > 0) {
+        mandatoryBreaksService.scheduleBreaksForRoute(truckId, routeData, driverId);
+        console.log(`🚦 ${breakData.breaks.length} pause(s) obligatoire(s) programmée(s) pour ${truckId}`);
+      }
+
+      // Ajouter les informations de pause à la route
+      routeData.mandatoryBreaks = breakData.breaks;
+      routeData.breakWarnings = breakData.warnings;
+      routeData.driverId = driverId;
+
       // Stocker en cache
       this.cacheRoute(truckId, routeData);
 
