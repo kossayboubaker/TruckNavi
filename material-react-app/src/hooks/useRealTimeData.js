@@ -296,28 +296,44 @@ export const useRealTimeData = (options = {}) => {
   const startPeriodicUpdates = useCallback(() => {
     intervalRef.current = setInterval(async () => {
       try {
-        // Vérifier la connexion
+        // Vérifier la connexion Socket.IO
         const status = realtimeService.getConnectionStatus();
         if (!status.connected) {
-          console.log('🔄 Reconnexion Socket.IO...');
-          realtimeService.reconnect();
-          return;
-        }
-
-        // Mise à jour périodique des données critiques
-        if (enableTrucks) {
-          const realTimeData = await trucksService.getRealTimeData();
-          if (realTimeData.trucks) {
-            setTrucks(realTimeData.trucks);
-            setLastUpdate(realTimeData.lastUpdate);
+          console.log('🔄 Tentative reconnexion Socket.IO...');
+          try {
+            realtimeService.reconnect();
+          } catch (reconnectError) {
+            console.warn('⚠️ Reconnexion Socket.IO échouée');
           }
         }
-        
+
+        // Mise à jour périodique des données critiques (si backend accessible)
+        if (enableTrucks) {
+          try {
+            const realTimeData = await trucksService.getRealTimeData();
+            if (realTimeData.trucks) {
+              setTrucks(realTimeData.trucks);
+              setLastUpdate(realTimeData.lastUpdate);
+
+              // Réinitialiser l'erreur si succès
+              setError(null);
+            }
+          } catch (updateError) {
+            console.warn('⚠️ Mise à jour données échouée:', updateError.message);
+            // Ne pas changer l'état d'erreur si on est déjà en mode dégradé
+          }
+        }
+
         // Nettoyage du cache des routes
-        dynamicRoutesService.clearExpiredCache();
-        
+        try {
+          dynamicRoutesService.clearExpiredCache();
+        } catch (cacheError) {
+          console.warn('⚠️ Nettoyage cache échoué');
+        }
+
       } catch (err) {
         console.error('❌ Erreur mise à jour périodique:', err);
+        // Ne pas bloquer l'application, continuer en mode dégradé
       }
     }, updateInterval);
   }, [updateInterval, enableTrucks]);
