@@ -508,68 +508,95 @@ const Map = () => {
   }
 
   return (
-    <div className={`min-h-screen ${isAsideOpen ? 'bg-background' : 'bg-white'} overflow-hidden`}>
-      {/* Indicateur de statut connexion */}
-      <div style={{
-        position: 'fixed',
-        top: '10px',
-        right: '10px',
-        zIndex: 3000,
-        background: connectionStatus === 'connected' ? '#10b981' :
-                   connectionStatus === 'error' ? '#ef4444' : '#f59e0b',
-        color: 'white',
-        padding: '4px 8px',
-        borderRadius: '12px',
-        fontSize: '10px',
-        fontWeight: '700',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
-      }}>
-        {connectionStatus === 'connected' ? '🟢 TEMPS RÉEL' :
-         connectionStatus === 'error' ? '🔴 SOCKET ERREUR' : '🟡 CONNEXION...'}
-      </div>
+    <div
+      className={`min-h-screen ${isAsideOpen ? 'bg-background' : 'bg-white'} overflow-hidden`}
+      style={{
+        fontSize: `${uiScale.fontSizeBase}px`,
+        // Optimisation pour très hautes résolutions
+        ...(is4K && {
+          '--ui-scale': '1.5',
+          fontSize: `${uiScale.fontSizeBase * 1.2}px`
+        })
+      }}
+    >
+      {/* Indicateurs de statut adaptatifs selon résolution */}
+      {!needsMinimalUI && (
+        <>
+          {/* Indicateur de statut connexion */}
+          <div style={{
+            position: 'fixed',
+            top: isMicro ? '2px' : isTiny ? '4px' : '10px',
+            right: isMicro ? '2px' : isTiny ? '4px' : '10px',
+            zIndex: 3000,
+            background: connectionStatus === 'connected' ? '#10b981' :
+                       connectionStatus === 'error' ? '#ef4444' : '#f59e0b',
+            color: 'white',
+            padding: isMicro ? '1px 3px' : isTiny ? '2px 4px' : '4px 8px',
+            borderRadius: isMicro ? '4px' : isTiny ? '6px' : '12px',
+            fontSize: `${Math.max(6, uiScale.fontSizeBase * 0.8)}px`,
+            fontWeight: '700',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+            display: isMicro ? 'none' : 'block' // Masquer sur micro-écrans
+          }}>
+            {isTiny ? (connectionStatus === 'connected' ? '🟢' : connectionStatus === 'error' ? '🔴' : '🟡') :
+             (connectionStatus === 'connected' ? '🟢 TEMPS RÉEL' :
+              connectionStatus === 'error' ? '🔴 SOCKET ERREUR' : '🟡 CONNEXION...')}
+          </div>
 
-      {/* Indicateur de rôle */}
-      <div style={{
-        position: 'fixed',
-        top: '10px',
-        right: '150px',
-        zIndex: 3000,
-        background: currentRole === 'conducteur' ? '#10b981' :
-                   currentRole === 'admin' ? '#3b82f6' : '#8b5cf6',
-        color: 'white',
-        padding: '4px 8px',
-        borderRadius: '12px',
-        fontSize: '10px',
-        fontWeight: '700',
-        textTransform: 'uppercase',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
-      }}>
-        🎭 {currentRole}
-      </div>
+          {/* Indicateur de rôle - Adaptatif */}
+          {supportsFullFeatures && !isCompact && (
+            <div style={{
+              position: 'fixed',
+              top: '10px',
+              right: isMobile ? '80px' : '150px',
+              zIndex: 3000,
+              background: currentRole === 'conducteur' ? '#10b981' :
+                         currentRole === 'admin' ? '#3b82f6' : '#8b5cf6',
+              color: 'white',
+              padding: isTiny ? '2px 4px' : '4px 8px',
+              borderRadius: isTiny ? '6px' : '12px',
+              fontSize: `${Math.max(6, uiScale.fontSizeBase * 0.8)}px`,
+              fontWeight: '700',
+              textTransform: 'uppercase',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+            }}>
+              {isMobile ? currentRole[0].toUpperCase() : `🎭 ${currentRole}`}
+            </div>
+          )}
+        </>
+      )}
 
-      {/* Compteur de camions */}
+      {/* Compteur de camions - Toujours visible mais adaptatif */}
       <div style={{
         position: 'fixed',
-        top: '50px',
-        right: '10px',
+        top: isMicro ? '2px' : isTiny ? '20px' : needsMinimalUI ? '30px' : '50px',
+        right: isMicro ? '2px' : isTiny ? '4px' : '10px',
         zIndex: 3000,
         background: 'rgba(255,255,255,0.95)',
         color: '#1f2937',
-        padding: '8px 12px',
-        borderRadius: '8px',
-        fontSize: '12px',
+        padding: isMicro ? '2px 4px' : isTiny ? '4px 6px' : '8px 12px',
+        borderRadius: isMicro ? '4px' : isTiny ? '6px' : '8px',
+        fontSize: `${Math.max(8, uiScale.fontSizeBase)}px`,
         fontWeight: '600',
         boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
         backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255,255,255,0.2)'
+        border: '1px solid rgba(255,255,255,0.2)',
+        minWidth: isMicro ? '40px' : 'auto'
       }}>
-        🚛 {visibleTrucks.length} camion{visibleTrucks.length > 1 ? 's' : ''}
-        {lastUpdate && (
-          <div style={{ fontSize: '8px', color: '#6b7280', marginTop: '2px' }}>
-            MAJ: {lastUpdate.toLocaleTimeString('fr-FR', { 
-              hour: '2-digit', 
+        {isMicro ? `${visibleTrucks.length}🚛` :
+         isTiny ? `${visibleTrucks.length} 🚛` :
+         `🚛 ${visibleTrucks.length} camion${visibleTrucks.length > 1 ? 's' : ''}`}
+
+        {lastUpdate && !needsMinimalUI && (
+          <div style={{
+            fontSize: `${Math.max(6, uiScale.fontSizeBase * 0.7)}px`,
+            color: '#6b7280',
+            marginTop: '2px'
+          }}>
+            MAJ: {lastUpdate.toLocaleTimeString('fr-FR', {
+              hour: '2-digit',
               minute: '2-digit',
-              second: '2-digit'
+              ...(supportsFullFeatures && { second: '2-digit' })
             })}
           </div>
         )}
