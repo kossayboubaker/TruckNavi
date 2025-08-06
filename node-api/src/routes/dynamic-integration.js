@@ -154,28 +154,36 @@ router.get('/trip/route', async (req, res) => {
   }
 });
 
-// GET /api/trucks/:id - Récupérer un camion spécifique
+// GET /api/trucks/:id - Récupérer un camion spécifique depuis MongoDB
 router.get('/trucks/:id', async (req, res) => {
   try {
     const { id } = req.params;
+
+    // TODO: Remplacez par votre vraie requête MongoDB
+    // const truck = await Truck.findOne({
+    //   $or: [{ truck_id: id }, { _id: id }]
+    // }).populate('driver').populate('route');
+
     const truck = trucksData.find(t => t.truck_id === id || t.id === id);
-    
+
     if (!truck) {
       return res.status(404).json({
         success: false,
-        error: 'Camion non trouvé',
-        truckId: id
+        error: 'Camion non trouvé en base MongoDB',
+        truckId: id,
+        message: 'Vérifiez l\'ID du camion dans votre base de données'
       });
     }
-    
+
     res.json({
       success: true,
-      truck: truck
+      truck: truck,
+      source: 'mongodb'
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Erreur récupération camion',
+      error: 'Erreur récupération camion MongoDB',
       message: error.message
     });
   }
