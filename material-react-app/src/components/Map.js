@@ -231,6 +231,96 @@ const Map = () => {
     setFollowTruck(follow);
   };
 
+  // ** NOUVELLES FONCTIONS POUR PAUSES OBLIGATOIRES **
+
+  const handleTruckSelect = (truck) => {
+    setSelectedTruck(truck);
+    setShowMandatoryBreaks(true);
+
+    // Centrer la carte sur le camion sélectionné
+    if (mapInstance && truck.position) {
+      mapInstance.flyTo(truck.position, 14, {
+        animate: true,
+        duration: 1.0
+      });
+    }
+  };
+
+  const handleToggleMandatoryBreaks = () => {
+    setShowMandatoryBreaks(!showMandatoryBreaks);
+  };
+
+  const handleStartMandatoryBreak = async (truckId, breakId) => {
+    try {
+      const result = await startMandatoryBreak(truckId, breakId);
+
+      if (result.success) {
+        // Afficher notification de succès
+        setBreakNotifications(prev => [...prev, {
+          id: `break_start_${Date.now()}`,
+          type: 'success',
+          title: 'Pause démarrée',
+          message: `Pause obligatoire démarrée pour ${truckId}`,
+          duration: result.minimumDuration
+        }]);
+
+        // Actualiser les données
+        refresh();
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Erreur démarrage pause:', error);
+      setBreakNotifications(prev => [...prev, {
+        id: `break_error_${Date.now()}`,
+        type: 'error',
+        title: 'Erreur pause',
+        message: error.message
+      }]);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const handleEndMandatoryBreak = async (truckId, breakId) => {
+    try {
+      const result = await endMandatoryBreak(truckId, breakId);
+
+      if (result.success) {
+        // Afficher notification de succès
+        setBreakNotifications(prev => [...prev, {
+          id: `break_end_${Date.now()}`,
+          type: 'success',
+          title: 'Pause terminée',
+          message: `Pause terminée après ${result.duration}min`,
+          canResume: result.canResumeDriving
+        }]);
+
+        // Actualiser les données
+        refresh();
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Erreur fin pause:', error);
+      setBreakNotifications(prev => [...prev, {
+        id: `break_error_${Date.now()}`,
+        type: 'error',
+        title: 'Erreur fin pause',
+        message: error.message
+      }]);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const handleCheckBreakRequirement = (truckId) => {
+    try {
+      return checkBreakRequirement(truckId);
+    } catch (error) {
+      console.error('Erreur vérification pause:', error);
+      return { required: false, error: error.message };
+    }
+  };
+
   const handleAlertClick = (alert) => {
     if (mapInstance && alert.position) {
       const zoomLevel = isUltraCompact ? 13 : 15;
@@ -257,7 +347,7 @@ const Map = () => {
     try {
       const success = await realtimeService.emit('close_alert', { alertId });
       if (success) {
-        console.log(`✅ Alerte ${alertId} fermée`);
+        console.log(`�� Alerte ${alertId} fermée`);
       }
     } catch (error) {
       console.error(`❌ Erreur fermeture alerte ${alertId}:`, error);
