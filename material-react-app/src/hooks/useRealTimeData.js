@@ -83,11 +83,8 @@ export const useRealTimeData = (options = {}) => {
     } catch (err) {
       console.error('❌ Erreur initialisation temps réel:', err);
 
-      // Ne pas échouer complètement, utiliser mode dégradé
-      const fallbackData = getFallbackData();
-      setTrucks(fallbackData.trucks);
-      setAlerts(fallbackData.alerts);
-      setError('Mode démo - Backend non accessible');
+      // Échec critique - Backend MongoDB requis
+      handleAPIFailure('Initialisation échouée - Vérifiez la connexion MongoDB');
     } finally {
       setIsLoading(false);
     }
@@ -319,7 +316,7 @@ export const useRealTimeData = (options = {}) => {
         try {
           dynamicRoutesService.clearExpiredCache();
         } catch (cacheError) {
-          console.warn('⚠��� Nettoyage cache échoué');
+          console.warn('⚠️ Nettoyage cache échoué');
         }
 
       } catch (err) {
@@ -458,7 +455,7 @@ export const useRealTimeData = (options = {}) => {
   };
 };
 
-// Hook spécialis�� pour un camion spécifique
+// Hook spécialisé pour un camion spécifique
 export const useRealTimeTruck = (truckId) => {
   const [truck, setTruck] = useState(null);
   const [route, setRoute] = useState(null);
