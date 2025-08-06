@@ -125,7 +125,9 @@ const Map = () => {
   // États principaux
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDelivery, setSelectedDelivery] = useState(null);
-  const [isAsideOpen, setIsAsideOpen] = useState(!isUltraCompact);
+  const [isAsideOpen, setIsAsideOpen] = useState(
+    !needsMinimalUI && !needsCompactLayout && dimensions.width > 1024
+  );
   const [mapStyle, setMapStyle] = useState('standard');
   const [showAlerts, setShowAlerts] = useState(false);
   const [alerts, setAlerts] = useState([]);
@@ -437,7 +439,7 @@ const Map = () => {
     return () => window.removeEventListener('roleChanged', handleRoleChange);
   }, [visibleTrucks]);
 
-  // Gestionnaires d'év��nements
+  // Gestionnaires d'événements
   const handleZoomIn = () => mapInstance?.zoomIn();
   const handleZoomOut = () => mapInstance?.zoomOut();
   const handleMapStyleChange = (style) => setMapStyle(style);
