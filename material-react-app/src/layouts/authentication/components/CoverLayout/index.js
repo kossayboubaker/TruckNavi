@@ -44,7 +44,7 @@ function CoverLayout({ coverHeight = "35vh", image, children }) {
   };
 
   return (
-    <PageLayout sx={layoutStyles}>
+    <PageLayout sx={layoutStyles} className="auth-page">
       <DefaultNavbar
         // action={{
         //   type: "external",
