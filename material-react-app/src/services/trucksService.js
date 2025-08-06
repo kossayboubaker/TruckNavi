@@ -24,6 +24,12 @@ class TrucksService {
 
   // Initialisation avec vérification
   async initializeConnection() {
+    // En mode sécurisé, ne pas faire de vérifications
+    if (this.environmentService.safeMode) {
+      console.log('🛡️ TrucksService en mode sécurisé - Vérifications désactivées');
+      return;
+    }
+
     // Ne pas tenter de connexion si pas de backend configuré
     if (!this.baseURL) {
       console.log('ℹ️ TrucksService en mode frontend seul - Pas de backend configuré');
