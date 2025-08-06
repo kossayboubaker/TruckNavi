@@ -453,7 +453,7 @@ class DynamicRoutesService {
         progress: currentProgress,
         position: currentPosition
       });
-      
+
       if (success) {
         this.pausedTrucks.set(truckId, {
           pausedAt: Date.now(),
@@ -463,11 +463,117 @@ class DynamicRoutesService {
         });
         console.log(`🚦 Camion ${truckId} mis en pause à ${currentProgress}%`);
       }
-      
+
       return success;
     } catch (error) {
       console.error(`❌ Erreur pause camion ${truckId}:`, error);
       return false;
+    }
+  }
+
+  // ** NOUVEAU : Démarrer une pause obligatoire **
+  async startMandatoryBreak(truckId, breakId) {
+    try {
+      // Récupérer les infos du break
+      const breakSchedule = mandatoryBreaksService.getScheduledBreaks(truckId);
+      const breakInfo = breakSchedule.find(b => b.id === breakId);
+
+      if (!breakInfo) {
+        throw new Error(`Pause ${breakId} non trouvée pour ${truckId}`);
+      }
+
+      // Démarrer la pause via le service des pauses
+      const result = await mandatoryBreaksService.startBreak(breakSchedule.driverId, breakInfo);
+
+      if (result.success) {
+        // Mettre en pause le camion
+        const pauseSuccess = await trucksService.sendTruckCommand(truckId, 'start_break', {
+          breakId: breakId,
+          breakType: breakInfo.type,
+          minimumDuration: breakInfo.duration
+        });
+
+        if (pauseSuccess) {
+          console.log(`⏸️ Pause obligatoire démarrée pour ${truckId}: ${breakInfo.reason}`);
+          return {
+            success: true,
+            message: `Pause obligatoire démarrée`,
+            breakInfo: breakInfo,
+            minimumDuration: result.minimumDuration
+          };
+        }
+      }
+
+      return result;
+    } catch (error) {
+      console.error(`❌ Erreur démarrage pause obligatoire ${truckId}:`, error);
+      return {
+        success: false,
+        error: error.message
+      };
+    }
+  }
+
+  // ** NOUVEAU : Terminer une pause obligatoire **
+  async endMandatoryBreak(truckId, breakId) {
+    try {
+      // Récupérer les infos du break
+      const breakSchedule = mandatoryBreaksService.getScheduledBreaks(truckId);
+      const breakInfo = breakSchedule.find(b => b.id === breakId);
+
+      if (!breakInfo) {
+        throw new Error(`Pause ${breakId} non trouvée pour ${truckId}`);
+      }
+
+      // Terminer la pause via le service des pauses
+      const result = await mandatoryBreaksService.endBreak(breakSchedule.driverId, breakInfo);
+
+      if (result.success && result.canResumeDriving) {
+        // Reprendre la route
+        const resumeSuccess = await trucksService.sendTruckCommand(truckId, 'end_break', {
+          breakId: breakId,
+          actualDuration: result.duration
+        });
+
+        if (resumeSuccess) {
+          console.log(`▶️ Pause obligatoire terminée pour ${truckId} après ${result.duration}min`);
+          return {
+            success: true,
+            message: `Pause terminée après ${result.duration}min`,
+            canResumeDriving: true,
+            duration: result.duration
+          };
+        }
+      }
+
+      return result;
+    } catch (error) {
+      console.error(`❌ Erreur fin pause obligatoire ${truckId}:`, error);
+      return {
+        success: false,
+        error: error.message,
+        canResumeDriving: false
+      };
+    }
+  }
+
+  // ** NOUVEAU : Vérifier si une pause est requise **
+  checkBreakRequirement(truckId) {
+    try {
+      const schedule = mandatoryBreaksService.getScheduledBreaks(truckId);
+      if (!schedule) return { required: false };
+
+      const driverId = schedule.driverId;
+      const breakCheck = mandatoryBreaksService.isBreakRequired(driverId);
+
+      return {
+        ...breakCheck,
+        nextBreak: mandatoryBreaksService.getNextBreak(truckId, 0), // À adapter selon la progression actuelle
+        statistics: mandatoryBreaksService.getBreakStatistics(driverId)
+      };
+    } catch (error) {
+      console.error(`❌ Erreur vérification pause ${truckId}:`, error);
+      return { required: false, error: error.message };
     }
   }
 
