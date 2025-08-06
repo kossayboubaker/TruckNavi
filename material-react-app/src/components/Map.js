@@ -7,6 +7,7 @@ import DriverChat from '../components/DriverChat/DriverChat.js';
 import BreakNotification from '../components/BreakNotification/BreakNotification.js';
 import PreventiveAlert from '../components/PreventiveAlert/PreventiveAlert.js';
 import MandatoryBreaksPanel from '../components/MandatoryBreaksPanel/MandatoryBreaksPanel.js';
+import BackendErrorDisplay from '../components/BackendErrorDisplay/BackendErrorDisplay.js';
 
 // Services dynamiques - AUCUNE donnée statique
 import useRealTimeData from '../hooks/useRealTimeData';
@@ -425,7 +426,7 @@ const Map = () => {
               🔧 Actions requises :
             </h3>
             <ul className="text-sm text-yellow-700 space-y-1">
-              <li>• Vérifiez que MongoDB est démarr��</li>
+              <li>• Vérifiez que MongoDB est démarré</li>
               <li>• Ajoutez des camions à la collection "trucks"</li>
               <li>• Testez: <code>GET /trip/details</code></li>
               <li>• Consultez: MONGODB_INTEGRATION.md</li>
