@@ -84,7 +84,7 @@ export const useRealTimeData = (options = {}) => {
       console.error('❌ Erreur initialisation temps réel:', err);
 
       // Échec critique - Backend MongoDB requis
-      handleAPIFailure('Initialisation échouée - Vérifiez la connexion MongoDB');
+      handleAPIFailure('Initialisation échou��e - Vérifiez la connexion MongoDB');
     } finally {
       setIsLoading(false);
     }
@@ -162,8 +162,8 @@ export const useRealTimeData = (options = {}) => {
         if (results[resultIndex]?.status === 'fulfilled') {
           setAlerts(results[resultIndex].value);
         } else {
-          console.warn('⚠️ API alertes échouée, utilisation fallback');
-          setAlerts(getFallbackData().alerts);
+          console.error('❌ API alertes échouée - Backend MongoDB requis');
+          setAlerts([]);
         }
       }
 
