@@ -138,7 +138,7 @@ const MapCanvas = ({
 
       // Forcer sur terre si dans la mer
       if (!isOnLand(lat, lng)) {
-        // Ramener vers l'intérieur des terres
+        // Ramener vers l'int��rieur des terres
         lat = Math.max(30.8, Math.min(37.2, lat));
         lng = Math.max(8.2, Math.min(11.5, lng));
       }
@@ -740,7 +740,6 @@ const MapCanvas = ({
         }
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, trucksData, selectedDelivery, showRoutes, alerts, showAlerts, createTruckIcon, onSelectDelivery]);
 
   // Couche météo
