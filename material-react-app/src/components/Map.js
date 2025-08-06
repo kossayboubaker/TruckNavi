@@ -236,47 +236,7 @@ const Map = () => {
     }
   };
 
-  // Fonction pour charger des données de démonstration en cas d'erreur API
-  const loadDemoData = () => {
-    const demoTrucks = [
-      {
-        id: 'demo-1',
-        truck_id: 'TN-DEMO-001',
-        position: [36.8, 10.18],
-        speed: 45,
-        bearing: 90,
-        route_progress: 25,
-        state: 'En Route',
-        route: [[36.8, 10.18], [36.85, 10.25], [36.9, 10.3]],
-        pickup: {
-          address: 'Tunis Centre',
-          city: 'Tunis',
-          coordinates: [36.8, 10.18]
-        },
-        destination: 'Sfax',
-        destinationCoords: [34.74, 10.76],
-        driver: {
-          id: 'demo-driver-1',
-          name: 'Chauffeur Demo',
-          company: 'Transport Demo',
-          contact: '+216 XX XXX XXX',
-          avatar: '👨‍💼'
-        },
-        vehicle: 'Camion Demo',
-        cargo: 'Marchandises',
-        last_update: new Date().toISOString(),
-        estimatedArrival: new Date(Date.now() + 2 * 3600000).toISOString(),
-        fuel_level: 75,
-        temperature: 22
-      }
-    ];
-
-    setVisibleTrucks(demoTrucks);
-    setSelectedDelivery(demoTrucks[0]);
-    setLastUpdate(new Date());
-
-    console.log('📋 Données de démonstration chargées');
-  };
+  // Service 100% dynamique - Aucune donnée de démonstration statique
 
   // Configuration Socket.IO pour temps réel
   useEffect(() => {
