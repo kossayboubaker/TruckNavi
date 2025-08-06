@@ -93,11 +93,22 @@ const changeLanguage = (lng) => {
       try {
         const res = await fetch("http://localhost:8080/user/notifications", {
           credentials: "include",
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: AbortSignal.timeout(10000) // Timeout de 10 secondes
         });
-        const data = await res.json();
-        setNotifications(data);
+
+        if (res.ok) {
+          const data = await res.json();
+          setNotifications(data);
+        } else {
+          console.warn("Échec récupération notifications, status:", res.status);
+          setNotifications([]); // Fallback sur tableau vide
+        }
       } catch (err) {
-        console.error("Erreur lors du chargement des notifications", err);
+        console.warn("Notifications non disponibles (normal si backend arrêté):", err.message);
+        setNotifications([]); // Fallback sur tableau vide pour éviter crash
       }
     };
 
