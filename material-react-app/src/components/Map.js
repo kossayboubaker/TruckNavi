@@ -309,18 +309,23 @@ const Map = () => {
 
   const buttonSize = getButtonSize();
 
-  // Affichage conditionnel en cas d'erreur
-  if (error) {
+  // Affichage conditionnel en cas d'erreur critique (pas de données du tout)
+  if (error && trucks.length === 0 && !isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-red-50">
-        <div className="text-center p-6">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">❌ Erreur de Connexion</h2>
-          <p className="text-red-500 mb-4">{error}</p>
-          <button 
+      <div className="flex items-center justify-center min-h-screen bg-yellow-50">
+        <div className="text-center p-6 max-w-md">
+          <h2 className="text-2xl font-bold text-yellow-600 mb-4">⚠️ Mode Démo</h2>
+          <p className="text-yellow-700 mb-4">{error}</p>
+          <div className="space-y-2 text-sm text-yellow-600 mb-4">
+            <p>• Le backend n'est pas accessible</p>
+            <p>• Utilisation des données de démonstration</p>
+            <p>• Fonctionnalités limitées</p>
+          </div>
+          <button
             onClick={refresh}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
           >
-            🔄 Réessayer
+            🔄 Réessayer la Connexion
           </button>
         </div>
       </div>
