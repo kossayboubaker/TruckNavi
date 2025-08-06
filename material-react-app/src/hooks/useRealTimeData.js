@@ -463,16 +463,17 @@ export const useRealTimeData = (options = {}) => {
     weather,
     traffic,
     statistics,
-    
+    mandatoryBreaks,
+
     // États
     connectionStatus,
     lastUpdate,
     isLoading,
     error,
-    
+
     // Actions
     ...actions,
-    
+
     // Données dérivées
     ...derivedData
   };
