@@ -84,7 +84,7 @@ export const useRealTimeData = (options = {}) => {
       console.error('❌ Erreur initialisation temps réel:', err);
 
       // Échec critique - Backend MongoDB requis
-      handleAPIFailure('Initialisation échou��e - Vérifiez la connexion MongoDB');
+      handleAPIFailure('Initialisation échouée - Vérifiez la connexion MongoDB');
     } finally {
       setIsLoading(false);
     }
@@ -173,11 +173,8 @@ export const useRealTimeData = (options = {}) => {
     } catch (err) {
       console.error('❌ Erreur chargement données initiales:', err);
 
-      // Utiliser les données de fallback en cas d'erreur globale
-      const fallbackData = getFallbackData();
-      setTrucks(fallbackData.trucks);
-      setAlerts(fallbackData.alerts);
-      setError('Connexion backend impossible - mode démo');
+      // Échec critique - Aucune donnée statique disponible
+      handleAPIFailure('Erreur globale de chargement des données');
     }
   }, [enableTrucks, enableRoutes, enableAlerts]);
 
