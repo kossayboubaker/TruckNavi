@@ -47,6 +47,11 @@ class TrucksService {
 
   // Récupérer tous les camions depuis votre backend MongoDB
   async getAllTrucks() {
+    // Vérifier si backend configuré
+    if (!this.baseURL) {
+      throw new Error('NO_BACKEND_CONFIGURED: Mode frontend seul - Configurez REACT_APP_API_URL');
+    }
+
     try {
       console.log('🔄 Récupération camions depuis MongoDB...');
 
@@ -54,7 +59,7 @@ class TrucksService {
       const isBackendAvailable = await this.environmentService.checkBackendAvailability();
       if (!isBackendAvailable) {
         const errorInfo = this.environmentService.generateUserErrorMessage();
-        throw new Error(errorInfo.technical);
+        throw new Error(errorInfo.technical || 'Backend non accessible');
       }
 
       // Utilise votre endpoint existant avec gestion d'erreur améliorée
