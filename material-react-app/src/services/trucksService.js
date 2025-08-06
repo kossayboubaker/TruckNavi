@@ -41,38 +41,87 @@ class TrucksService {
     try {
       console.log('🔄 Récupération camions depuis MongoDB...');
 
-      // Test de connectivité d'abord
-      await this.testConnection();
-
-      // Utilise votre endpoint existant
-      const response = await axios.get(`${this.baseURL}/trip/details`, this.axiosConfig);
-
-      if (!response.data.success) {
-        throw new Error(response.data.message || 'Erreur API backend');
+      // Vérification préalable de la disponibilité
+      const isBackendAvailable = await this.environmentService.checkBackendAvailability();
+      if (!isBackendAvailable) {
+        const errorInfo = this.environmentService.generateUserErrorMessage();
+        throw new Error(errorInfo.technical);
       }
 
-      const trucks = response.data.trucks || [];
+      // Utilise votre endpoint existant avec gestion d'erreur améliorée
+      const response = await axios.get(`${this.baseURL}/trip/details`, {
+        ...this.axiosConfig,
+        validateStatus: (status) => status < 500 // Accepter les 4xx pour gestion fine
+      });
+
+      // Gestion des différents codes de réponse
+      if (response.status === 404) {
+        throw new Error('ENDPOINT_NOT_FOUND: /trip/details non configuré sur le serveur');
+      }
+
+      if (response.status === 400) {
+        throw new Error('BAD_REQUEST: Paramètres de requête incorrects');
+      }
+
+      if (!response.data?.success && response.status === 200) {
+        throw new Error(response.data?.message || 'API backend retourne success: false');
+      }
+
+      const trucks = response.data?.trucks || [];
       console.log(`✅ ${trucks.length} camions récupérés depuis MongoDB`);
 
       return trucks;
     } catch (error) {
-      console.error('❌ Erreur récupération camions:', error.message);
+      console.error('❌ Erreur récupération camions:', error);
 
-      // Gestion spécifique des erreurs réseau
-      if (error.code === 'NETWORK_ERROR' || error.message.includes('fetch')) {
-        throw new Error('Backend non accessible - Vérifiez que le serveur est démarré sur ' + this.baseURL);
-      }
-
-      if (error.response?.status === 404) {
-        throw new Error('Endpoint /trip/details non trouvé - Vérifiez la configuration de votre API');
-      }
-
-      if (error.response?.status === 500) {
-        throw new Error('Erreur serveur backend - Vérifiez les logs du serveur MongoDB');
-      }
-
-      throw new Error(`Backend MongoDB inaccessible: ${error.message}`);
+      // Catégorisation détaillée des erreurs
+      return this.handleAPIError(error, 'getAllTrucks');
     }
+  }
+
+  // Gestion centralisée des erreurs API
+  handleAPIError(error, methodName) {
+    // Erreurs réseau (fetch failed, timeout, etc.)
+    if (error.code === 'ECONNREFUSED' || error.message.includes('ECONNREFUSED')) {
+      throw new Error('BACKEND_DOWN: Serveur backend non démarré sur ' + this.baseURL);
+    }
+
+    if (error.code === 'ENOTFOUND' || error.message.includes('ENOTFOUND')) {
+      throw new Error('DNS_ERROR: Impossible de résoudre l\'adresse ' + this.baseURL);
+    }
+
+    if (error.message.includes('timeout')) {
+      throw new Error('TIMEOUT: Serveur backend trop lent à répondre');
+    }
+
+    if (error.message.includes('Network Error')) {
+      throw new Error('NETWORK_ERROR: Problème de connectivité réseau');
+    }
+
+    // Erreurs HTTP spécifiques
+    if (error.response) {
+      const status = error.response.status;
+      const url = error.config?.url || 'unknown';
+
+      switch (status) {
+        case 404:
+          throw new Error(`ENDPOINT_404: ${url} non trouvé sur le serveur`);
+        case 500:
+          throw new Error(`SERVER_ERROR: Erreur interne du serveur (vérifiez les logs MongoDB)`);
+        case 503:
+          throw new Error(`SERVICE_UNAVAILABLE: Serveur temporairement indisponible`);
+        default:
+          throw new Error(`HTTP_${status}: ${error.response.data?.message || 'Erreur serveur'}`);
+      }
+    }
+
+    // Erreurs de parsing ou autres
+    if (error.message.includes('ENDPOINT_NOT_FOUND')) {
+      throw new Error('CONFIG_ERROR: Endpoint /trip/details non configuré dans votre backend');
+    }
+
+    // Erreur générique
+    throw new Error(`API_ERROR: ${error.message} (méthode: ${methodName})`);
   }
 
   // Test de connectivité backend
@@ -136,7 +185,7 @@ class TrucksService {
   // Récupérer itinéraire complet depuis votre backend
   async getTruckRoute(startCoords, endCoords) {
     try {
-      console.log('🗺️ Récupération itinéraire depuis backend...');
+      console.log('🗺️ Récup��ration itinéraire depuis backend...');
       
       // Utilise votre endpoint existant de routes
       const response = await axios.get(
