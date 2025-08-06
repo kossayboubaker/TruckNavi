@@ -53,21 +53,37 @@ const fetchFromMongoDB = async () => {
   }
 })();
 
-// GET /api/trucks - Récupérer tous les camions
-router.get('/trucks', (req, res) => {
+// GET /api/trucks - Récupérer tous les camions depuis MongoDB
+router.get('/trucks', async (req, res) => {
   try {
+    // TODO: Remplacez par votre vraie requête MongoDB
+    // const trucks = await Truck.find({}).populate('driver').populate('route');
+
+    // Pour l'instant, on force la récupération depuis votre API existante
+    // Vous devez adapter cette partie selon votre structure
+
+    if (trucksData.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Aucun camion trouvé en base de données',
+        message: 'La collection trucks de MongoDB est vide',
+        source: 'mongodb_required'
+      });
+    }
+
     const response = {
       success: true,
       trucks: trucksData,
       total: trucksData.length,
-      lastUpdate: new Date().toISOString()
+      lastUpdate: new Date().toISOString(),
+      source: 'mongodb'
     };
-    
+
     res.json(response);
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: 'Erreur récupération camions',
+      error: 'Erreur récupération camions MongoDB',
       message: error.message
     });
   }
