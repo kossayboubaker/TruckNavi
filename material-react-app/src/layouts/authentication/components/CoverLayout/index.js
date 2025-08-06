@@ -30,7 +30,7 @@ import PageLayout from "examples/LayoutContainers/PageLayout";
 // Authentication layout components
 import Footer from "layouts/authentication/components/Footer";
 
-function CoverLayout({ coverHeight, image, children }) {
+function CoverLayout({ coverHeight = "35vh", image, children }) {
   return (
     <PageLayout>
       <DefaultNavbar
