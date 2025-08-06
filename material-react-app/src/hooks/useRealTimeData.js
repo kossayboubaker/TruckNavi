@@ -78,45 +78,110 @@ export const useRealTimeData = (options = {}) => {
     }
   }, [updateInterval]);
 
-  // Charger les données initiales depuis l'API
+  // Données de fallback en cas d'erreur backend
+  const getFallbackData = () => ({
+    trucks: [
+      {
+        id: 'demo-001',
+        truck_id: 'DEMO-001',
+        position: [36.8065, 10.1815],
+        speed: 45,
+        state: 'En Route',
+        vehicle: 'Demo Truck',
+        cargo: 'Demo Cargo',
+        status: 'demo-mode',
+        route_progress: 35,
+        driver: { name: 'Demo Driver' },
+        last_update: new Date().toISOString(),
+        fuel_level: 75
+      }
+    ],
+    alerts: [
+      {
+        id: 'demo-alert',
+        type: 'info',
+        title: 'Mode Démo',
+        description: 'Backend non connecté - données de démonstration',
+        severity: 'info',
+        position: [36.8065, 10.1815],
+        timestamp: new Date().toISOString()
+      }
+    ]
+  });
+
+  // Charger les données initiales depuis l'API avec fallback
   const loadInitialData = useCallback(async () => {
     try {
       const promises = [];
-      
+
       if (enableTrucks) {
         promises.push(trucksService.getAllTrucks());
       }
-      
+
       if (enableAlerts) {
         promises.push(trucksService.getDynamicAlerts());
       }
 
       const results = await Promise.allSettled(promises);
-      
+
+      // Vérifier si au moins une API fonctionne
+      const hasSuccessfulCall = results.some(result => result.status === 'fulfilled');
+
+      if (!hasSuccessfulCall) {
+        console.warn('⚠️ Aucune API accessible - utilisation des données de fallback');
+        const fallbackData = getFallbackData();
+        setTrucks(fallbackData.trucks);
+        setAlerts(fallbackData.alerts);
+        setError('Backend non accessible - mode démo activé');
+        setLastUpdate(new Date().toISOString());
+        return;
+      }
+
       // Traiter les résultats
       let resultIndex = 0;
-      
-      if (enableTrucks && results[resultIndex]?.status === 'fulfilled') {
-        const trucksData = results[resultIndex].value;
-        setTrucks(trucksData);
-        
-        // Générer les routes pour ces camions
-        if (enableRoutes && trucksData.length > 0) {
-          const routesData = await dynamicRoutesService.generateAllRoutes(trucksData);
-          setRoutes(routesData);
+
+      if (enableTrucks) {
+        if (results[resultIndex]?.status === 'fulfilled') {
+          const trucksData = results[resultIndex].value;
+          setTrucks(trucksData);
+
+          // Générer les routes pour ces camions
+          if (enableRoutes && trucksData.length > 0) {
+            try {
+              const routesData = await dynamicRoutesService.generateAllRoutes(trucksData);
+              setRoutes(routesData);
+            } catch (routeError) {
+              console.warn('⚠️ Erreur génération routes:', routeError);
+              setRoutes({});
+            }
+          }
+        } else {
+          console.warn('⚠️ API camions échouée, utilisation fallback');
+          setTrucks(getFallbackData().trucks);
         }
+        resultIndex++;
       }
-      resultIndex++;
-      
-      if (enableAlerts && results[resultIndex]?.status === 'fulfilled') {
-        setAlerts(results[resultIndex].value);
+
+      if (enableAlerts) {
+        if (results[resultIndex]?.status === 'fulfilled') {
+          setAlerts(results[resultIndex].value);
+        } else {
+          console.warn('⚠️ API alertes échouée, utilisation fallback');
+          setAlerts(getFallbackData().alerts);
+        }
       }
 
       setLastUpdate(new Date().toISOString());
+      setError(null); // Réinitialiser l'erreur si succès
       console.log('✅ Données initiales chargées');
     } catch (err) {
       console.error('❌ Erreur chargement données initiales:', err);
-      setError(err.message);
+
+      // Utiliser les données de fallback en cas d'erreur globale
+      const fallbackData = getFallbackData();
+      setTrucks(fallbackData.trucks);
+      setAlerts(fallbackData.alerts);
+      setError('Connexion backend impossible - mode démo');
     }
   }, [enableTrucks, enableRoutes, enableAlerts]);
 
