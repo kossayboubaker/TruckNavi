@@ -73,6 +73,7 @@ export default function App() {
   const [loadingRoutes, setLoadingRoutes] = useState(true);
   const [rtlCache, setRtlCache] = useState(null);
   const [isDemo, setIsDemo] = useState(false);
+  const [backendError, setBackendError] = useState(null);
 
   const { pathname } = useLocation();
   const navigate = useNavigate();
