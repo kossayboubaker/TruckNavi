@@ -114,14 +114,16 @@ export default function App() {
       }
     };
 
-    // Test initial du backend seulement si configuré
-    if (environmentService.config.apiUrl) {
+    // Test initial du backend seulement si pas en mode sécurisé
+    if (!environmentService.safeMode && environmentService.config.apiUrl) {
       environmentService.checkBackendAvailability().then(isAvailable => {
         if (!isAvailable) {
           const errorInfo = environmentService.generateUserErrorMessage();
           console.warn('⚠️ Backend logistics non accessible:', errorInfo.technical);
         }
       });
+    } else if (environmentService.safeMode) {
+      console.log('🛡️ Mode production sécurisé - Aucune vérification backend');
     } else {
       console.log('ℹ️ Backend non configuré - Mode démonstration frontend');
     }
