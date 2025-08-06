@@ -90,14 +90,27 @@ export const useRealTimeData = (options = {}) => {
     }
   }, [updateInterval, loadInitialData]);
 
-  // AUCUNE donnée de fallback - Tout doit provenir du backend MongoDB
+  // Gestion gracieuse des erreurs - Backend MongoDB requis mais interface fonctionnelle
   const handleAPIFailure = (errorMessage) => {
     console.error('❌ API Backend inaccessible:', errorMessage);
-    setError(`Backend MongoDB inaccessible: ${errorMessage}`);
+
+    // Déterminer le type d'erreur pour un message plus précis
+    let userMessage = errorMessage;
+    if (errorMessage.includes('NETWORK_ERROR')) {
+      userMessage = 'Serveur backend non démarré';
+    } else if (errorMessage.includes('TIMEOUT')) {
+      userMessage = 'Serveur backend ne répond pas';
+    } else if (errorMessage.includes('404')) {
+      userMessage = 'Configuration API incorrecte';
+    }
+
+    setError(userMessage);
     setTrucks([]);
     setAlerts([]);
     setRoutes({});
     setMandatoryBreaks({});
+    setConnectionStatus('disconnected');
+    setIsLoading(false);
   };
 
   // Charger les données initiales depuis l'API avec fallback
