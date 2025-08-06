@@ -53,6 +53,11 @@ class TrucksService {
 
   // Récupérer tous les camions depuis votre backend MongoDB
   async getAllTrucks() {
+    // En mode sécurisé, retourner immédiatement une erreur propre
+    if (this.environmentService.safeMode) {
+      throw new Error('SAFE_MODE_ACTIVE: Mode production sécurisé - Pas de backend configuré');
+    }
+
     // Vérifier si backend configuré
     if (!this.baseURL) {
       throw new Error('NO_BACKEND_CONFIGURED: Mode frontend seul - Configurez REACT_APP_API_URL');
