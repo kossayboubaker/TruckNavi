@@ -117,7 +117,7 @@ console.log("📤 Envoi à", receiverSocket.socketId, "pour receiverId =", recei
 
 
     socket.on("disconnect", () => {
-      console.log("❌ D��connexion du client :", socket.id);
+      console.log("❌ Déconnexion du client :", socket.id);
       onlineUsers = onlineUsers.filter((u) => u.socketId !== socket.id);
       console.log("🧹 onlineUsers après déconnexion :", onlineUsers);
     });
@@ -128,7 +128,159 @@ console.log("📤 Envoi à", receiverSocket.socketId, "pour receiverId =", recei
       console.log("📡 Récupération des onlineUsers :", onlineUsers);
       return onlineUsers;
     },
+    kafkaService: kafkaService, // Exposer Kafka service pour utilisation externe
+    publishToKafka: (topic, message) => kafkaService.publishMessage(topic, message)
   };
 }
+
+// Configurer l'intégration Kafka → Socket.IO
+const setupKafkaSocketIntegration = (io) => {
+  console.log('🔗 Configuration intégration Kafka ↔ Socket.IO...');
+
+  // Rediffuser les positions de camions
+  kafkaService.onMessage('truck_positions', (data, metadata) => {
+    // Diffusion générale
+    io.to('logistics').emit('truck_positions', {
+      ...data,
+      source: 'kafka',
+      metadata
+    });
+
+    // Diffuser dans les rooms spécifiques aux camions
+    if (data.trucks) {
+      data.trucks.forEach(truck => {
+        io.to(`truck_${truck.truck_id}`).emit('truck_position_update', {
+          truck,
+          timestamp: metadata.timestamp
+        });
+      });
+    }
+
+    console.log(`📡 Positions diffusées: ${data.trucks?.length || 0} camions`);
+  });
+
+  // Rediffuser les routes
+  kafkaService.onMessage('routes', (data, metadata) => {
+    io.to('logistics').emit('routes', {
+      ...data,
+      source: 'kafka',
+      metadata
+    });
+
+    if (data.truckId) {
+      io.to(`truck_${data.truckId}`).emit('route_update', {
+        ...data,
+        timestamp: metadata.timestamp
+      });
+    }
+
+    console.log(`🗺️ Route diffusée: ${data.truckId || 'N/A'}`);
+  });
+
+  // Rediffuser les alertes avec rooms ciblées
+  kafkaService.onMessage('alerts', (data, metadata) => {
+    // Diffusion générale
+    io.to('logistics').emit('alerts', {
+      ...data,
+      source: 'kafka',
+      metadata
+    });
+
+    // Diffusion par sévérité
+    if (data.severity) {
+      io.to(`alerts_${data.severity}`).emit('alert_by_severity', {
+        ...data,
+        timestamp: metadata.timestamp
+      });
+    }
+
+    // Diffusion générale des alertes
+    io.to('alerts_all').emit('new_alert', {
+      ...data,
+      timestamp: metadata.timestamp
+    });
+
+    // Si alerte critique, notification push spéciale
+    if (data.severity === 'critical' || data.severity === 'danger') {
+      io.emit('critical_alert', {
+        ...data,
+        urgent: true,
+        timestamp: metadata.timestamp
+      });
+
+      console.log(`🚨 ALERTE CRITIQUE diffusée: ${data.title || data.message}`);
+    }
+
+    console.log(`🚨 Alerte diffusée: ${data.type || 'unknown'} (${data.severity || 'info'})`);
+  });
+
+  // Rediffuser les données de trafic
+  kafkaService.onMessage('traffic', (data, metadata) => {
+    io.to('logistics').emit('traffic', {
+      ...data,
+      source: 'kafka',
+      metadata
+    });
+
+    console.log(`🚦 Données trafic diffusées: ${data.incidents?.length || 0} incidents`);
+  });
+
+  // Rediffuser les données météo
+  kafkaService.onMessage('weather', (data, metadata) => {
+    io.to('logistics').emit('weather', {
+      ...data,
+      source: 'kafka',
+      metadata
+    });
+
+    console.log(`🌤️ Données météo diffusées`);
+  });
+
+  // Rediffuser les données de pauses obligatoires
+  kafkaService.onMessage('mandatory_breaks', (data, metadata) => {
+    io.to('logistics').emit('mandatory_breaks', {
+      ...data,
+      source: 'kafka',
+      metadata
+    });
+
+    if (data.truckId) {
+      io.to(`truck_${data.truckId}`).emit('mandatory_break_update', {
+        ...data,
+        timestamp: metadata.timestamp
+      });
+    }
+
+    console.log(`⏸️ Données pauses diffusées: ${data.driverId || 'N/A'}`);
+  });
+
+  // Gérer les changements de statut du simulateur
+  kafkaService.onMessage('simulator_status', (data, metadata) => {
+    io.to('logistics').emit('simulator_status', {
+      ...data,
+      source: 'kafka',
+      metadata
+    });
+
+    console.log(`🔄 Statut simulateur diffusé: ${data.status || 'unknown'}`);
+  });
+
+  // Gérer les événements de connexion Kafka
+  kafkaService.onConnection((status, error) => {
+    io.emit('kafka_connection_status', {
+      status,
+      error,
+      timestamp: new Date().toISOString()
+    });
+
+    if (status === 'connected') {
+      console.log('✅ Kafka connecté - Socket.IO notifié');
+    } else if (status === 'error') {
+      console.error('❌ Kafka erreur - Socket.IO notifié:', error);
+    }
+  });
+
+  console.log('✅ Intégration Kafka ↔ Socket.IO configurée');
+};
 
 export default socketServer;
