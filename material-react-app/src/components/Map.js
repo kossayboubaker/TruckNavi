@@ -628,38 +628,70 @@ const Map = () => {
         onToggle={handleToggleAlertPanel}
       />
 
-      <div className="flex w-full" style={{
-        height: isUltraCompact ? '100vh' : 'calc(100vh - 1px)',
-        maxHeight: isUltraCompact ? '100vh' : 'calc(100vh - 1px)',
-        overflow: 'hidden'
-      }}>
-        <aside
-          className="transition-all duration-300 bg-background border-r border-border flex-shrink-0 overflow-hidden"
+      <div
+        className={needsMinimalUI ? "block" : "flex"}
+        style={{
+          height: '100vh',
+          maxHeight: '100vh',
+          overflow: 'hidden',
+          width: '100%',
+          position: 'relative'
+        }}
+      >
+        {/* Panneau latéral ultra-adaptatif */}
+        {!needsMinimalUI && (
+          <aside
+            className="transition-all duration-300 bg-background border-r border-border flex-shrink-0 overflow-hidden"
+            style={{
+              width: isAsideOpen ? (
+                isMicro ? '90%' :
+                isTiny ? '85%' :
+                isCompact ? '75%' :
+                isSmallMobile ? uiScale.panelWidth :
+                isMobile ? '320px' :
+                isTabletPortrait ? '380px' :
+                isDesktop ? '420px' :
+                isLargeDesktop ? '480px' :
+                is4K ? '600px' : '420px'
+              ) : '0px',
+              display: 'block',
+              borderWidth: needsCompactLayout ? '0.5px' : '1px',
+              // Position absolue sur micro-écrans pour overlay
+              ...(isMicro || isTiny) && isAsideOpen && {
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                height: '100vh',
+                zIndex: 2000,
+                boxShadow: '2px 0 10px rgba(0,0,0,0.3)'
+              }
+            }}
+          >
+            <DeliveryList
+              deliveries={visibleTrucks}
+              searchTerm={searchTerm}
+              onSearchChange={handleSearchChange}
+              onSelectDelivery={handleDeliverySelect}
+              selectedDelivery={selectedDelivery}
+              alerts={roleManager.filterAlerts(allAlerts, visibleTrucks)}
+              loading={loading}
+              error={error}
+              onRefresh={fetchTrucksFromAPI}
+              // Props pour adaptation UI
+              isCompactMode={needsCompactLayout}
+              isMicroMode={needsMinimalUI}
+              uiScale={uiScale}
+            />
+          </aside>
+        )}
+
+        <main
+          className={`${needsMinimalUI || !isAsideOpen ? 'w-full' : 'flex-1'} min-w-0 overflow-hidden`}
           style={{
-            width: isAsideOpen ? (
-              isUltraCompact ? '200px' :
-              isSmallMobile ? '240px' :
-              isMobile ? '280px' :
-              '320px'
-            ) : '0px',
-            display: 'block',
-            borderWidth: '1px'
+            height: '100vh',
+            position: 'relative'
           }}
         >
-          <DeliveryList
-            deliveries={visibleTrucks}
-            searchTerm={searchTerm}
-            onSearchChange={handleSearchChange}
-            onSelectDelivery={handleDeliverySelect}
-            selectedDelivery={selectedDelivery}
-            alerts={roleManager.filterAlerts(allAlerts, visibleTrucks)}
-            loading={loading}
-            error={error}
-            onRefresh={fetchTrucksFromAPI}
-          />
-        </aside>
-
-        <main className={`flex-1 min-w-0 overflow-hidden ${isAsideOpen ? '' : 'w-full'}`}>
           <MapCanvas
             deliveries={visibleTrucks}
             selectedDelivery={selectedDelivery}
@@ -676,6 +708,19 @@ const Map = () => {
             onAlertClick={handleAlertClick}
             useDynamicRoutes={true}
             isRealTime={!error}
+            // Props pour adaptation UI
+            dimensions={dimensions}
+            isCompactMode={needsCompactLayout}
+            isMicroMode={needsMinimalUI}
+            uiScale={uiScale}
+            responsiveBreakpoints={{
+              isMicro,
+              isTiny,
+              isCompact,
+              isMobile,
+              isDesktop,
+              is4K
+            }}
           />
         </main>
 
