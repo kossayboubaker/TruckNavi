@@ -26,19 +26,19 @@ class EnvironmentService {
     if (process.env.REACT_APP_API_URL) {
       return process.env.REACT_APP_API_URL;
     }
-    
+
     // Détection basée sur l'URL actuelle
     const currentHost = window.location.hostname;
-    const currentPort = window.location.port;
-    
+
     // Si on est sur localhost, essayer le backend local
     if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
       return 'http://localhost:8080';
     }
-    
-    // Si on est en production, essayer le même domaine
-    const protocol = window.location.protocol;
-    return `${protocol}//${currentHost}:8080`;
+
+    // En production, ne pas essayer de deviner l'URL du backend
+    // Retourner null pour indiquer qu'aucun backend n'est configuré
+    console.warn('🚨 Production détectée - Backend URL non configurée via REACT_APP_API_URL');
+    return null;
   }
 
   // Vérifier si le backend est accessible
