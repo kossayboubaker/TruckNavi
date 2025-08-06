@@ -1,246 +1,297 @@
-// Service pour récupérer les données de camions depuis le backend Node.js
+// Service API pour camions - 100% dynamique depuis votre backend MongoDB
+// Compatible avec vos endpoints existants
+
 import axios from 'axios';
 
 class TrucksService {
   constructor() {
+    // Configuration de votre API backend
     this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
-    this.socket = null;
-    this.updateCallbacks = [];
-  }
-
-  // Configuration axios avec intercepteurs
-  getAxiosConfig() {
-    return {
-      baseURL: this.baseURL,
-      timeout: 10000,
+    
+    // Configuration axios avec credentials pour votre backend
+    this.axiosConfig = {
+      withCredentials: true,
+      timeout: 30000,
       headers: {
         'Content-Type': 'application/json',
-      },
-      withCredentials: true
+        'Accept': 'application/json'
+      }
     };
+
+    console.log('🚚 TrucksService initialisé - Backend:', this.baseURL);
   }
 
-  // Récupérer tous les camions depuis la base de données
+  // Récupérer tous les camions depuis votre backend MongoDB
   async getAllTrucks() {
     try {
-      const response = await axios.get('/api/trucks', this.getAxiosConfig());
-      return response.data.trucks || [];
-    } catch (error) {
-      console.error('❌ Erreur récupération camions:', error);
-
-      // Vérifier si c'est une erreur de réseau
-      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        console.warn('⚠️ Backend non accessible - mode hors ligne');
+      console.log('🔄 Récupération camions depuis MongoDB...');
+      
+      // Utilise votre endpoint existant
+      const response = await axios.get(`${this.baseURL}/trip/details`, this.axiosConfig);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Erreur API backend');
       }
 
-      // Rejeter l'erreur pour permettre la gestion par le hook
-      throw new Error('Backend non accessible');
+      const trucks = response.data.trucks || [];
+      console.log(`✅ ${trucks.length} camions récupérés depuis MongoDB`);
+      
+      return trucks;
+    } catch (error) {
+      console.error('❌ Erreur récupération camions:', error.message);
+      
+      if (error.response?.status === 404) {
+        throw new Error('Aucun camion trouvé en base MongoDB - Ajoutez des données');
+      }
+      
+      throw new Error(`Backend MongoDB inaccessible: ${error.message}`);
     }
   }
 
-  // Récupérer un camion spécifique par ID
+  // Récupérer un camion spécifique
   async getTruckById(truckId) {
     try {
-      const response = await axios.get(`/api/trucks/${truckId}`, this.getAxiosConfig());
-      return response.data.truck || null;
+      console.log(`🔍 Recherche camion ${truckId} dans MongoDB...`);
+      
+      const response = await axios.get(`${this.baseURL}/api/trucks/${truckId}`, this.axiosConfig);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Camion non trouvé');
+      }
+
+      console.log(`✅ Camion ${truckId} trouvé dans MongoDB`);
+      return response.data.truck;
     } catch (error) {
-      console.error(`❌ Erreur récupération camion ${truckId}:`, error);
-      return null;
+      console.error(`❌ Erreur récupération camion ${truckId}:`, error.message);
+      
+      if (error.response?.status === 404) {
+        return null; // Camion non trouvé
+      }
+      
+      throw error;
     }
   }
 
-  // Récupérer les données temps réel du simulateur Python
-  async getRealTimeData() {
+  // Récupérer itinéraire complet depuis votre backend
+  async getTruckRoute(startCoords, endCoords) {
     try {
-      const response = await axios.get('/api/trucks/real-time', this.getAxiosConfig());
-      return response.data;
+      console.log('🗺️ Récupération itinéraire depuis backend...');
+      
+      // Utilise votre endpoint existant de routes
+      const response = await axios.get(
+        `${this.baseURL}/trip/route?start=${endCoords[1]},${endCoords[0]}&end=${startCoords[1]},${startCoords[0]}`,
+        this.axiosConfig
+      );
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Erreur calcul itinéraire');
+      }
+
+      console.log('✅ Itinéraire récupéré depuis backend');
+      return response.data.route || [];
     } catch (error) {
-      console.error('❌ Erreur données temps réel:', error);
-      return {
-        trucks: [],
-        lastUpdate: new Date().toISOString(),
-        simulatorStatus: 'disconnected'
-      };
+      console.error('❌ Erreur récupération itinéraire:', error.message);
+      throw new Error(`Impossible de récupérer l'itinéraire: ${error.message}`);
     }
   }
 
-  // Récupérer les routes dynamiques depuis OSRM/Backend
+  // Récupérer routes optimisées OSRM
+  async getOptimizedRoute(truckId, startCoords, endCoords, waypoints = []) {
+    try {
+      console.log(`🛣️ Optimisation route OSRM pour ${truckId}...`);
+      
+      const response = await axios.post(`${this.baseURL}/api/routes/optimize`, {
+        truckId: truckId,
+        start: startCoords,
+        end: endCoords,
+        waypoints: waypoints,
+        options: {
+          profile: 'truck',
+          steps: true,
+          geometries: 'geojson'
+        }
+      }, this.axiosConfig);
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Erreur optimisation OSRM');
+      }
+
+      console.log(`✅ Route OSRM optimisée pour ${truckId}`);
+      return response.data.route;
+    } catch (error) {
+      console.error(`❌ Erreur optimisation OSRM ${truckId}:`, error.message);
+      throw error;
+    }
+  }
+
+  // Récupérer routes pour plusieurs camions
   async getTruckRoutes(truckIds = []) {
     try {
-      const params = truckIds.length > 0 ? { trucks: truckIds.join(',') } : {};
-      const response = await axios.get('/api/routes', {
-        ...this.getAxiosConfig(),
-        params
+      console.log('🗺️ Récupération routes multiples...');
+      
+      const response = await axios.get(`${this.baseURL}/api/routes`, {
+        ...this.axiosConfig,
+        params: { trucks: truckIds.join(',') }
       });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Erreur récupération routes');
+      }
+
+      console.log(`✅ Routes récupérées pour ${truckIds.length} camions`);
       return response.data.routes || {};
     } catch (error) {
-      console.error('❌ Erreur récupération routes:', error);
+      console.error('❌ Erreur récupération routes multiples:', error.message);
       return {};
     }
   }
 
-  // Récupérer route optimisée pour un camion spécifique
-  async getOptimizedRoute(truckId, startCoords, endCoords, waypoints = []) {
+  // Récupérer alertes dynamiques depuis MongoDB
+  async getDynamicAlerts() {
     try {
-      const response = await axios.post('/api/routes/optimize', {
-        truckId,
-        start: startCoords,
-        end: endCoords,
-        waypoints
-      }, this.getAxiosConfig());
+      console.log('🚨 Récupération alertes depuis MongoDB...');
       
-      return response.data.route || null;
-    } catch (error) {
-      console.error(`❌ Erreur route optimisée ${truckId}:`, error);
-      return null;
-    }
-  }
-
-  // Récupérer les alertes dynamiques
-  async getDynamicAlerts(filters = {}) {
-    try {
-      const response = await axios.get('/api/alerts', {
-        ...this.getAxiosConfig(),
-        params: filters
-      });
-      return response.data.alerts || [];
-    } catch (error) {
-      console.error('❌ Erreur récupération alertes:', error);
-      throw new Error('API alertes non accessible');
-    }
-  }
-
-  // Récupérer les données météo temps réel
-  async getWeatherData(coordinates = []) {
-    try {
-      const response = await axios.post('/api/weather', {
-        locations: coordinates
-      }, this.getAxiosConfig());
-      return response.data.weather || [];
-    } catch (error) {
-      console.error('❌ Erreur données météo:', error);
-      return [];
-    }
-  }
-
-  // Récupérer les informations de trafic
-  async getTrafficData(routes = []) {
-    try {
-      const response = await axios.post('/api/traffic', {
-        routes
-      }, this.getAxiosConfig());
-      return response.data.traffic || [];
-    } catch (error) {
-      console.error('❌ Erreur données trafic:', error);
-      return [];
-    }
-  }
-
-  // Récupérer les statistiques de flotte
-  async getFleetStatistics() {
-    try {
-      const response = await axios.get('/api/fleet/statistics', this.getAxiosConfig());
-      return response.data.statistics || {
-        totalTrucks: 0,
-        activeTrucks: 0,
-        completedDeliveries: 0,
-        averageSpeed: 0,
-        fuelConsumption: 0
-      };
-    } catch (error) {
-      console.error('❌ Erreur statistiques flotte:', error);
-      return {
-        totalTrucks: 0,
-        activeTrucks: 0,
-        completedDeliveries: 0,
-        averageSpeed: 0,
-        fuelConsumption: 0
-      };
-    }
-  }
-
-  // Enregistrer callback pour mises à jour temps réel
-  onTrucksUpdate(callback) {
-    this.updateCallbacks.push(callback);
-    return () => {
-      this.updateCallbacks = this.updateCallbacks.filter(cb => cb !== callback);
-    };
-  }
-
-  // Notifier les callbacks des mises à jour
-  notifyUpdate(data) {
-    this.updateCallbacks.forEach(callback => {
-      try {
-        callback(data);
-      } catch (error) {
-        console.error('❌ Erreur callback mise à jour:', error);
+      const response = await axios.get(`${this.baseURL}/api/alerts`, this.axiosConfig);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Erreur récupération alertes');
       }
-    });
-  }
 
-  // Vérifier la connexion au simulateur Python
-  async checkSimulatorConnection() {
-    try {
-      const response = await axios.get('/api/simulator/status', this.getAxiosConfig());
-      return response.data.connected || false;
+      const alerts = response.data.alerts || [];
+      console.log(`✅ ${alerts.length} alertes récupérées depuis MongoDB`);
+      
+      return alerts;
     } catch (error) {
-      console.error('❌ Erreur vérification simulateur:', error);
-      return false;
+      console.error('❌ Erreur récupération alertes:', error.message);
+      throw new Error(`Alertes MongoDB inaccessibles: ${error.message}`);
     }
   }
 
-  // Démarrer le simulateur Python
-  async startSimulator() {
+  // Récupérer données temps réel (positions actuelles)
+  async getRealTimeData() {
     try {
-      const response = await axios.post('/api/simulator/start', {}, this.getAxiosConfig());
-      return response.data.success || false;
+      console.log('⚡ Récupération données temps réel...');
+      
+      const response = await axios.get(`${this.baseURL}/api/trucks/real-time`, this.axiosConfig);
+      
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Erreur données temps réel');
+      }
+
+      console.log('✅ Données temps réel récupérées');
+      return {
+        trucks: response.data.trucks || [],
+        lastUpdate: response.data.lastUpdate,
+        simulatorStatus: response.data.simulatorStatus
+      };
     } catch (error) {
-      console.error('❌ Erreur démarrage simulateur:', error);
-      return false;
+      console.error('❌ Erreur données temps réel:', error.message);
+      throw error;
     }
   }
 
-  // Arrêter le simulateur Python
-  async stopSimulator() {
-    try {
-      const response = await axios.post('/api/simulator/stop', {}, this.getAxiosConfig());
-      return response.data.success || false;
-    } catch (error) {
-      console.error('❌ Erreur arrêt simulateur:', error);
-      return false;
-    }
-  }
-
-  // Récupérer l'historique des positions
-  async getTruckHistory(truckId, timeRange = '24h') {
-    try {
-      const response = await axios.get(`/api/trucks/${truckId}/history`, {
-        ...this.getAxiosConfig(),
-        params: { range: timeRange }
-      });
-      return response.data.history || [];
-    } catch (error) {
-      console.error(`❌ Erreur historique ${truckId}:`, error);
-      return [];
-    }
-  }
-
-  // Effectuer une commande au camion (pause, reprise, etc.)
+  // Envoyer commande à un camion via backend
   async sendTruckCommand(truckId, command, params = {}) {
     try {
-      const response = await axios.post(`/api/trucks/${truckId}/command`, {
-        command,
+      console.log(`📤 Envoi commande ${command} vers ${truckId}...`);
+      
+      const response = await axios.post(`${this.baseURL}/api/trucks/${truckId}/command`, {
+        command: command,
         ...params
-      }, this.getAxiosConfig());
-      return response.data.success || false;
+      }, this.axiosConfig);
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Erreur commande camion');
+      }
+
+      console.log(`✅ Commande ${command} envoyée vers ${truckId}`);
+      return response.data;
     } catch (error) {
-      console.error(`❌ Erreur commande ${command} pour ${truckId}:`, error);
-      return false;
+      console.error(`❌ Erreur commande ${command} vers ${truckId}:`, error.message);
+      throw error;
     }
+  }
+
+  // Récupérer historique d'un camion
+  async getTruckHistory(truckId, range = '24h') {
+    try {
+      console.log(`📊 Récupération historique ${truckId}...`);
+      
+      const response = await axios.get(`${this.baseURL}/api/trucks/${truckId}/history`, {
+        ...this.axiosConfig,
+        params: { range }
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Erreur historique');
+      }
+
+      console.log(`✅ Historique ${truckId} récupéré`);
+      return response.data.history || [];
+    } catch (error) {
+      console.error(`❌ Erreur historique ${truckId}:`, error.message);
+      throw error;
+    }
+  }
+
+  // Vérifier l'état du backend MongoDB
+  async checkBackendHealth() {
+    try {
+      const response = await axios.get(`${this.baseURL}/api/health`, this.axiosConfig);
+      
+      return {
+        healthy: response.data.success || false,
+        database: response.data.services?.database || 'unknown',
+        api: response.data.services?.api || 'unknown',
+        simulator: response.data.services?.simulator || 'unknown'
+      };
+    } catch (error) {
+      return {
+        healthy: false,
+        error: error.message,
+        url: this.baseURL
+      };
+    }
+  }
+
+  // Vérifier connectivité MongoDB spécifiquement
+  async checkMongoConnection() {
+    try {
+      const response = await axios.get(`${this.baseURL}/api/health/database`, this.axiosConfig);
+      
+      return {
+        connected: response.data.success || false,
+        type: response.data.type || 'unknown',
+        status: response.data.status || 'unknown'
+      };
+    } catch (error) {
+      return {
+        connected: false,
+        error: error.message
+      };
+    }
+  }
+
+  // Obtenir configuration du service
+  getConfiguration() {
+    return {
+      baseURL: this.baseURL,
+      withCredentials: this.axiosConfig.withCredentials,
+      timeout: this.axiosConfig.timeout
+    };
   }
 }
 
 // Instance singleton
 const trucksService = new TrucksService();
+
+// Test initial de connexion backend
+trucksService.checkBackendHealth().then(health => {
+  if (health.healthy) {
+    console.log('✅ Backend MongoDB accessible');
+  } else {
+    console.error('❌ Backend MongoDB inaccessible:', health.error);
+  }
+});
 
 export default trucksService;
