@@ -95,18 +95,11 @@ export default function App() {
   useEffect(() => {
       console.log("Début vérification de l'utilisateur");
 
-    fetch("http://localhost:8080/user/auto-login", {
-      credentials: "include",
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    })
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error("Not authenticated");
-      })
-      .then((data) => {
-        const { user, company, mustChangePassword, profileIncomplete, companyIncomplete } = data;
+    const checkAutoLogin = async () => {
+      const result = await apiService.autoLogin();
+
+      if (result.success && result.data) {
+        const { user, company, mustChangePassword, profileIncomplete, companyIncomplete } = result.data;
         setUser(user);
         setIsAuthenticated(true);
         setCompanyInfo(company);
@@ -139,9 +132,8 @@ export default function App() {
         }
 
         setLoadingRoutes(false);
-      })
-      .catch((error) => {
-        console.log("Erreur auto-login (normal si pas connecté):", error.message);
+      } else {
+        console.log("Auto-login échoué (normal si pas connecté):", result.error || "Non authentifié");
         const path = window.location.pathname;
         const isPublic = ["/auth/reset-password", "/auth/register", "/auth/forgot-password"].some((p) => path.startsWith(p));
         setUser(null);
@@ -149,7 +141,10 @@ export default function App() {
         setIsAuthenticated(false);
         setLoadingRoutes(false);
         if (!isPublic) navigate("/auth/login");
-      });
+      }
+    };
+
+    checkAutoLogin();
   }, [setUser, setIsAuthenticated, navigate]);
 
   useEffect(() => {
