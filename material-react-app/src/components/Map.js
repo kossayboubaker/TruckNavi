@@ -203,12 +203,15 @@ const Map = () => {
         }
 
         setLastUpdate(new Date());
+        console.log(`🎯 ${validTrucks.length} camions dynamiques validés et affichés`);
+
       } else {
-        throw new Error('Format de réponse invalide');
+        console.log('ℹ️ Aucun camion actif trouvé');
+        setVisibleTrucks([]);
       }
 
     } catch (err) {
-      console.error('❌ Erreur récupération:', err);
+      console.error('��� Erreur récupération:', err);
 
       let errorMessage = 'Erreur de connexion à l\'API';
 
