@@ -258,25 +258,30 @@ const MapCanvas = ({
         } catch (error) {
           console.warn(`🔄 Fallback route pour ${truck.truck_id}:`, error.message);
 
-          // 🔥 Récupération dynamique des waypoints depuis l'API au lieu de données statiques
+          // 🔥 Tentative récupération dynamique des waypoints avec fallback
           try {
             const waypointsResponse = await fetch(`http://localhost:8080/api/trucks/waypoints/${truck.truck_id}`, {
               credentials: 'include',
               headers: {
                 'Content-Type': 'application/json',
-              }
+              },
+              timeout: 5000 // Timeout de 5 secondes
             });
 
             if (waypointsResponse.ok) {
               const waypointsData = await waypointsResponse.json();
-              waypoints = waypointsData.waypoints || [];
-              console.log(`✅ Waypoints dynamiques récupérés pour ${truck.truck_id}`);
+              if (waypointsData.success) {
+                waypoints = waypointsData.waypoints || [];
+                console.log(`✅ Waypoints dynamiques récupérés pour ${truck.truck_id} (${waypoints.length} points)`);
+              } else {
+                throw new Error('API waypoints response not successful');
+              }
             } else {
-              throw new Error('Waypoints non disponibles');
+              throw new Error(`Waypoints API responded with status ${waypointsResponse.status}`);
             }
           } catch (waypointError) {
-            console.warn(`⚠️ Waypoints dynamiques non disponibles pour ${truck.truck_id}, route directe utilisée`);
-            waypoints = [];
+            console.warn(`⚠️ API waypoints non disponible pour ${truck.truck_id}, route directe utilisée:`, waypointError.message);
+            waypoints = []; // Route directe sans waypoints
           }
 
           const fallbackRoute = getRealRoute(startCoord, endCoord, waypoints);
@@ -933,7 +938,7 @@ const MapCanvas = ({
                     <strong style={{ color: '#1f2937' }}>{hoveredItem.data.destination}</strong>
                   </div>
                   <div>
-                    <span style={{ color: '#6b7280' }}>⚡ Vitesse:</span><br/>
+                    <span style={{ color: '#6b7280' }}>��� Vitesse:</span><br/>
                     <strong style={{ color: '#1f2937' }}>{Math.round(hoveredItem.data.speed)} km/h</strong>
                   </div>
                   <div>
