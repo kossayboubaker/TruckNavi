@@ -34,7 +34,34 @@ import { useLocation } from "react-router-dom";
 
 function BasicLayout({ image, children }) {
   const { pathname } = useLocation();
-    const { t } = useTranslation();
+  const { t } = useTranslation();
+
+  // Styles ultra-responsifs pour toutes les tailles d'écran
+  const responsiveStyles = {
+    height: "100vh",
+    minHeight: "100vh",
+    maxHeight: "100vh",
+    overflow: "hidden", // Supprimer le scroll
+    position: "fixed",
+    width: "100%",
+    top: 0,
+    left: 0,
+    // Adaptation pour micro-écrans
+    '@media (max-width: 100px)': {
+      fontSize: '8px',
+      padding: '2px',
+    },
+    // Adaptation pour très petits écrans
+    '@media (max-width: 250px)': {
+      fontSize: '10px',
+      padding: '4px',
+    },
+    // Adaptation pour 4K et plus
+    '@media (min-width: 2560px)': {
+      fontSize: '18px',
+      padding: '32px',
+    },
+  };
 
   return (
     <PageLayout>
@@ -46,7 +73,7 @@ function BasicLayout({ image, children }) {
         //   color: "dark",
         // }}
       />
-      <MDBox sx={{ height: "auto", minHeight: "100vh" }} display="flex" flexDirection="column">
+      <MDBox sx={responsiveStyles} display="flex" flexDirection="column">
         <MDBox
           position="absolute"
           width="100%"
