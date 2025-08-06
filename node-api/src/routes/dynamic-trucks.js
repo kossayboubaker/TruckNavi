@@ -456,6 +456,126 @@ function generateFallbackRoute(start, end, waypoints = 10) {
   return route;
 }
 
+// 📍 Récupérer les coordonnées dynamiques d'un camion
+router.get("/coordinates/:truckId", authenticate, async (req, res) => {
+  try {
+    const { truckId } = req.params;
+
+    // Récupérer les données du camion depuis la base
+    const truck = await Camion.findOne({ truckId: truckId }).lean();
+    if (!truck) {
+      return res.status(404).json({
+        success: false,
+        message: "Camion non trouvé"
+      });
+    }
+
+    // Récupérer le trajet actif pour obtenir les coordonnées
+    const activeTrip = await Trip.findOne({
+      truck: truck._id,
+      statusTrip: "in_progress",
+      isCompleted: false
+    }).lean();
+
+    let startCoord, endCoord;
+
+    if (activeTrip) {
+      // Utiliser les coordonnées du trajet
+      startCoord = LOCATIONS[activeTrip.startPoint] || truck.location || [36.8, 10.18];
+      endCoord = LOCATIONS[activeTrip.destination] || truck.location || [36.8, 10.18];
+    } else {
+      // Utiliser la position actuelle comme fallback
+      startCoord = truck.location ? [truck.location.lat, truck.location.lon] : [36.8, 10.18];
+      endCoord = startCoord; // Même position si pas de trajet
+    }
+
+    res.json({
+      success: true,
+      truckId: truckId,
+      startCoord: startCoord,
+      endCoord: endCoord,
+      source: activeTrip ? 'trip' : 'current_location'
+    });
+
+  } catch (error) {
+    console.error(`Erreur récupération coordonnées ${req.params.truckId}:`, error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur serveur",
+      error: error.message
+    });
+  }
+});
+
+// 🛣️ Récupérer les waypoints dynamiques d'un camion
+router.get("/waypoints/:truckId", authenticate, async (req, res) => {
+  try {
+    const { truckId } = req.params;
+
+    // Récupérer les données du camion
+    const truck = await Camion.findOne({ truckId: truckId }).lean();
+    if (!truck) {
+      return res.status(404).json({
+        success: false,
+        message: "Camion non trouvé"
+      });
+    }
+
+    // Utiliser les waypoints stockés dans la base ou générer dynamiquement
+    let waypoints = [];
+
+    if (truck.route && Array.isArray(truck.route) && truck.route.length > 2) {
+      // Utiliser la route existante comme waypoints
+      waypoints = truck.route.slice(1, -1); // Exclure start et end
+    } else {
+      // Générer des waypoints dynamiques basés sur la géographie tunisienne
+      const startCoord = truck.location ? [truck.location.lat, truck.location.lon] : [36.8, 10.18];
+
+      // Récupérer le trajet pour la destination
+      const activeTrip = await Trip.findOne({
+        truck: truck._id,
+        statusTrip: "in_progress"
+      }).lean();
+
+      if (activeTrip) {
+        const endCoord = LOCATIONS[activeTrip.destination] || startCoord;
+
+        // Générer waypoints intermédiaires
+        const numWaypoints = Math.floor(calculateDistance(startCoord, endCoord) / 50); // Un waypoint tous les 50km
+
+        for (let i = 1; i < numWaypoints; i++) {
+          const ratio = i / numWaypoints;
+          const waypointLat = startCoord[0] + (endCoord[0] - startCoord[0]) * ratio;
+          const waypointLon = startCoord[1] + (endCoord[1] - startCoord[1]) * ratio;
+
+          // Ajouter légère variation pour suivre les routes
+          const variation = 0.01;
+          waypoints.push([
+            waypointLat + (Math.random() - 0.5) * variation,
+            waypointLon + (Math.random() - 0.5) * variation
+          ]);
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      truckId: truckId,
+      waypoints: waypoints,
+      count: waypoints.length,
+      source: truck.route ? 'stored' : 'generated'
+    });
+
+  } catch (error) {
+    console.error(`Erreur récupération waypoints ${req.params.truckId}:`, error);
+    res.status(500).json({
+      success: false,
+      message: "Erreur serveur",
+      error: error.message
+    });
+  }
+});
+
 // Fonction utilitaire pour calculer distance
 function calculateDistance(point1, point2) {
   const R = 6371; // Rayon de la Terre en km
