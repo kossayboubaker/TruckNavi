@@ -603,6 +603,55 @@ const Map = () => {
           />
         </main>
 
+        {/* Panneau des pauses obligatoires */}
+        {showMandatoryBreaks && (
+          <aside
+            className="fixed right-0 top-0 h-full bg-white border-l border-gray-200 z-2000 overflow-hidden"
+            style={{
+              width: isMobile ? '100vw' : isSmallMobile ? '100vw' : '400px',
+              boxShadow: '-4px 0 20px rgba(0,0,0,0.1)'
+            }}
+          >
+            {/* Header du panneau */}
+            <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gray-50">
+              <h3 className="font-semibold text-lg">Pauses Obligatoires</h3>
+              <button
+                onClick={handleToggleMandatoryBreaks}
+                className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+                style={{ fontSize: '18px' }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Contenu du panneau */}
+            <div className="h-full overflow-auto pb-20">
+              <MandatoryBreaksPanel
+                selectedTruck={selectedTruck}
+                mandatoryBreaks={mandatoryBreaks}
+                onStartBreak={handleStartMandatoryBreak}
+                onEndBreak={handleEndMandatoryBreak}
+                onCheckRequirement={handleCheckBreakRequirement}
+              />
+            </div>
+          </aside>
+        )}
+
+        {/* Bouton pour ouvrir panneau pauses obligatoires */}
+        {!showMandatoryBreaks && (
+          <button
+            onClick={handleToggleMandatoryBreaks}
+            className="fixed right-4 top-1/2 transform -translate-y-1/2 z-1500 bg-orange-500 hover:bg-orange-600 text-white p-3 rounded-full shadow-lg transition-all duration-200"
+            style={{
+              fontSize: isUltraCompact ? '16px' : '20px',
+              boxShadow: '0 4px 20px rgba(251, 146, 60, 0.4)'
+            }}
+            title="Pauses Obligatoires"
+          >
+            ⏸️
+          </button>
+        )}
+
         {/* Chat Conducteurs - Rôle conditionnel */}
         {currentRole === 'conducteur' && (
           <button
