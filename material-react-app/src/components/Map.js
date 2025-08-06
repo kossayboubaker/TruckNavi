@@ -724,22 +724,22 @@ const Map = () => {
           />
         </main>
 
-        {/* Chat pour conducteurs */}
-        {currentRole === 'conducteur' && (
+        {/* Chat pour conducteurs - Adaptatif */}
+        {currentRole === 'conducteur' && supportsFullFeatures && (
           <button
             className="chat-toggle-btn"
             onClick={() => setChatOpen(true)}
             style={{
               position: 'fixed',
-              bottom: '20px',
-              right: '20px',
-              width: '60px',
-              height: '60px',
+              bottom: isMicro ? '4px' : isTiny ? '8px' : isCompact ? '12px' : '20px',
+              right: isMicro ? '4px' : isTiny ? '8px' : isCompact ? '12px' : '20px',
+              width: `${Math.max(32, uiScale.buttonSize)}px`,
+              height: `${Math.max(32, uiScale.buttonSize)}px`,
               borderRadius: '50%',
               border: 'none',
               background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
               color: 'white',
-              fontSize: '24px',
+              fontSize: `${Math.max(16, uiScale.iconSize)}px`,
               cursor: 'pointer',
               boxShadow: '0 8px 25px rgba(16, 185, 129, 0.4)',
               zIndex: 1500,
