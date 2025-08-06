@@ -18,23 +18,30 @@ class RealtimeService {
       return this.socket;
     }
 
-    console.log('🔌 Connexion Socket.IO au backend...');
-    
-    this.socket = io(this.baseURL, {
-      transports: ['websocket', 'polling'],
-      timeout: 5000,
-      autoConnect: true,
-      reconnection: true,
-      reconnectionAttempts: this.maxReconnectAttempts,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-      maxHttpBufferSize: 1e6,
-      pingTimeout: 60000,
-      pingInterval: 25000
-    });
+    try {
+      console.log('🔌 Connexion Socket.IO au backend...');
 
-    this.setupEventHandlers();
-    return this.socket;
+      this.socket = io(this.baseURL, {
+        transports: ['websocket', 'polling'],
+        timeout: 5000,
+        autoConnect: true,
+        reconnection: true,
+        reconnectionAttempts: this.maxReconnectAttempts,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        maxHttpBufferSize: 1e6,
+        pingTimeout: 60000,
+        pingInterval: 25000,
+        forceNew: false
+      });
+
+      this.setupEventHandlers();
+      return this.socket;
+    } catch (error) {
+      console.error('❌ Erreur création Socket.IO:', error);
+      this.isConnected = false;
+      return null;
+    }
   }
 
   // Configuration des gestionnaires d'événements
