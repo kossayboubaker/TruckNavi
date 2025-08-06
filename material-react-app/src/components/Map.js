@@ -6,6 +6,7 @@ import AlertNotifications from '../components/AlertNotifications/AlertNotificati
 import DriverChat from '../components/DriverChat/DriverChat.js';
 import BreakNotification from '../components/BreakNotification/BreakNotification.js';
 import PreventiveAlert from '../components/PreventiveAlert/PreventiveAlert.js';
+import MandatoryBreaksPanel from '../components/MandatoryBreaksPanel/MandatoryBreaksPanel.js';
 
 // Services dynamiques - AUCUNE donnée statique
 import useRealTimeData from '../hooks/useRealTimeData';
