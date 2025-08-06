@@ -2,23 +2,38 @@
 // Compatible avec vos endpoints existants
 
 import axios from 'axios';
+import environmentService from './environmentService';
 
 class TrucksService {
   constructor() {
-    // Configuration de votre API backend
-    this.baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
-    
-    // Configuration axios avec credentials pour votre backend
+    // Configuration dynamique via environmentService
+    this.environmentService = environmentService;
+    this.baseURL = environmentService.config.apiUrl;
+
+    // Configuration axios optimisée
     this.axiosConfig = {
-      withCredentials: true,
-      timeout: 30000,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
+      ...environmentService.getRequestConfig(),
+      timeout: 15000 // Timeout réduit pour une détection plus rapide
     };
 
     console.log('🚚 TrucksService initialisé - Backend:', this.baseURL);
+
+    // Vérification immédiate du backend
+    this.initializeConnection();
+  }
+
+  // Initialisation avec vérification
+  async initializeConnection() {
+    try {
+      const isAvailable = await this.environmentService.checkBackendAvailability();
+      if (isAvailable) {
+        console.log('✅ Backend MongoDB accessible au démarrage');
+      } else {
+        console.warn('⚠️ Backend MongoDB non accessible au démarrage');
+      }
+    } catch (error) {
+      console.warn('⚠️ Erreur vérification backend:', error.message);
+    }
   }
 
   // Récupérer tous les camions depuis votre backend MongoDB
@@ -231,7 +246,7 @@ class TrucksService {
         simulatorStatus: response.data.simulatorStatus
       };
     } catch (error) {
-      console.error('❌ Erreur donn��es temps réel:', error.message);
+      console.error('❌ Erreur données temps réel:', error.message);
       throw error;
     }
   }
