@@ -18,7 +18,7 @@ import Breadcrumbs from "examples/Breadcrumbs";
 import NotificationItem from "examples/Items/NotificationItem";
 
 import axios from "axios";
-import apiService from "../../services/apiService";
+import apiService from "../../../services/apiService";
 import Avatar from "@mui/material/Avatar"; 
 
 import {
