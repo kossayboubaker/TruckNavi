@@ -302,18 +302,22 @@ class EnvironmentService {
 // Instance singleton
 const environmentService = new EnvironmentService();
 
-// Démarrage automatique de la vérification
+// Démarrage automatique UNIQUEMENT en développement
 if (typeof window !== 'undefined') {
-  // Démarrer seulement si on est en développement ou si backend configuré
-  if (environmentService.isDevelopmentEnvironment() || environmentService.config.apiUrl) {
-    environmentService.startPeriodicCheck();
-  }
+  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const isDev = process.env.NODE_ENV === 'development';
 
-  // Diagnostic initial seulement en mode développement
-  if (environmentService.isDevelopmentEnvironment()) {
+  // AUCUNE vérification en production pour éviter les erreurs fetch
+  if (isLocalhost && isDev) {
+    console.log('🔧 Mode développement détecté - EnvironmentService activé');
+    if (environmentService.config.apiUrl) {
+      environmentService.startPeriodicCheck();
+    }
     setTimeout(() => {
       environmentService.runDiagnostic();
     }, 1000);
+  } else {
+    console.log('🌐 Mode production détecté - EnvironmentService désactivé');
   }
 }
 
