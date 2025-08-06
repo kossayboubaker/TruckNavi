@@ -152,8 +152,8 @@ export const useRealTimeData = (options = {}) => {
             }
           }
         } else {
-          console.warn('⚠️ API camions échouée, utilisation fallback');
-          setTrucks(getFallbackData().trucks);
+          console.error('❌ API camions échouée - Backend MongoDB requis');
+          setTrucks([]);
         }
         resultIndex++;
       }
