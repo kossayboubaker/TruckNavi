@@ -165,6 +165,16 @@ export const useRealTimeData = (options = {}) => {
             try {
               const routesData = await dynamicRoutesService.generateAllRoutes(trucksData);
               setRoutes(routesData);
+
+              // ** NOUVEAU : Récupérer les pauses obligatoires programmées **
+              const breaksData = {};
+              for (const truck of trucksData) {
+                const scheduledBreaks = mandatoryBreaksService.getScheduledBreaks(truck.truck_id);
+                if (scheduledBreaks) {
+                  breaksData[truck.truck_id] = scheduledBreaks;
+                }
+              }
+              setMandatoryBreaks(breaksData);
             } catch (routeError) {
               console.warn('⚠️ Erreur génération routes:', routeError);
               setRoutes({});
