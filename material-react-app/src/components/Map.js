@@ -782,45 +782,47 @@ const Map = () => {
           />
         ))}
 
-        {/* Bouton panneau */}
-        <div style={{
-          position: 'fixed',
-          top: isUltraCompact ? '2px' : '8px',
-          left: isUltraCompact ? '2px' : '8px',
-          zIndex: 3000
-        }}>
-          <button
-            onClick={() => setIsAsideOpen(!isAsideOpen)}
-            style={{
-              background: isAsideOpen ?
-                'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)' :
-                'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-              border: '2px solid rgba(255,255,255,0.3)',
-              borderRadius: '50%',
-              width: isUltraCompact ? '20px' : isMobile ? '32px' : '38px',
-              height: isUltraCompact ? '20px' : isMobile ? '32px' : '38px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              color: 'white'
-            }}
-            title={`${isAsideOpen ? 'Masquer' : 'Afficher'} le panneau`}
-          >
-            <svg
-              width={isUltraCompact ? '10' : '14'}
-              height={isUltraCompact ? '10' : '14'}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
+        {/* Bouton panneau ultra-adaptatif */}
+        {!needsMinimalUI && (
+          <div style={{
+            position: 'fixed',
+            top: isMicro ? '2px' : isTiny ? '4px' : isCompact ? '6px' : '8px',
+            left: isMicro ? '2px' : isTiny ? '4px' : isCompact ? '6px' : '8px',
+            zIndex: 3000
+          }}>
+            <button
+              onClick={() => setIsAsideOpen(!isAsideOpen)}
+              style={{
+                background: isAsideOpen ?
+                  'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)' :
+                  'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                border: isMicro ? '1px solid rgba(255,255,255,0.3)' : '2px solid rgba(255,255,255,0.3)',
+                borderRadius: '50%',
+                width: `${Math.max(20, uiScale.buttonSize)}px`,
+                height: `${Math.max(20, uiScale.buttonSize)}px`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 15px rgba(59, 130, 246, 0.3)',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                color: 'white'
+              }}
+              title={`${isAsideOpen ? 'Masquer' : 'Afficher'} le panneau`}
             >
-              <path d={isAsideOpen ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'} />
-            </svg>
-          </button>
-        </div>
+              <svg
+                width={Math.max(8, uiScale.iconSize * 0.7)}
+                height={Math.max(8, uiScale.iconSize * 0.7)}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d={isAsideOpen ? 'M15 18l-6-6 6-6' : 'M9 18l6-6-6-6'} />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
 
       <style>
