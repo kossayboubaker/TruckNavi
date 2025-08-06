@@ -20,6 +20,11 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Mode production */
+.production-mode .notice-content {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
 .notice-icon {
   font-size: 1.5rem;
   flex-shrink: 0;
