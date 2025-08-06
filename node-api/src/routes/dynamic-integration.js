@@ -587,13 +587,151 @@ router.get('/health/database', (req, res) => {
   });
 });
 
-router.get('/health/kafka', (req, res) => {
-  res.json({
-    success: true,
-    connected: true,
-    topics: ['truck_positions', 'alerts', 'routes'],
-    status: 'healthy'
-  });
+router.get('/health/kafka', async (req, res) => {
+  try {
+    const health = await kafkaService.healthCheck();
+    const stats = kafkaService.getStatistics();
+
+    res.json({
+      success: true,
+      kafka: {
+        ...health,
+        statistics: stats
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Erreur vérification Kafka',
+      message: error.message
+    });
+  }
+});
+
+// ** NOUVELLES ROUTES KAFKA **
+
+// POST /api/kafka/publish - Publier message vers Kafka
+router.post('/kafka/publish', async (req, res) => {
+  try {
+    const { topic, message, options = {} } = req.body;
+
+    if (!topic || !message) {
+      return res.status(400).json({
+        success: false,
+        error: 'Topic et message requis'
+      });
+    }
+
+    const success = await kafkaService.publishMessage(topic, message, options);
+
+    res.json({
+      success,
+      topic,
+      published: success,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Erreur publication Kafka',
+      message: error.message
+    });
+  }
+});
+
+// POST /api/kafka/truck-command - Envoyer commande camion via Kafka
+router.post('/kafka/truck-command', async (req, res) => {
+  try {
+    const { truckId, command, params = {} } = req.body;
+
+    if (!truckId || !command) {
+      return res.status(400).json({
+        success: false,
+        error: 'TruckId et commande requis'
+      });
+    }
+
+    const success = await kafkaService.sendTruckCommand(truckId, command, params);
+
+    res.json({
+      success,
+      truckId,
+      command,
+      sent: success,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Erreur commande Kafka',
+      message: error.message
+    });
+  }
+});
+
+// POST /api/kafka/alert - Publier alerte via Kafka
+router.post('/kafka/alert', async (req, res) => {
+  try {
+    const alertData = {
+      id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: new Date().toISOString(),
+      source: 'api',
+      ...req.body
+    };
+
+    const success = await kafkaService.publishAlert(alertData);
+
+    res.json({
+      success,
+      alert: alertData,
+      published: success
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Erreur publication alerte',
+      message: error.message
+    });
+  }
+});
+
+// GET /api/kafka/topics - Lister les topics disponibles
+router.get('/kafka/topics', (req, res) => {
+  try {
+    const topics = kafkaService.TOPICS;
+    const stats = kafkaService.getStatistics();
+
+    res.json({
+      success: true,
+      topics,
+      statistics: stats
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Erreur récupération topics',
+      message: error.message
+    });
+  }
+});
+
+// POST /api/kafka/create-topics - Créer les topics Kafka
+router.post('/kafka/create-topics', async (req, res) => {
+  try {
+    await kafkaService.createTopics();
+
+    res.json({
+      success: true,
+      message: 'Topics Kafka créés',
+      topics: Object.values(kafkaService.TOPICS)
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: 'Erreur création topics',
+      message: error.message
+    });
+  }
 });
 
 // Middleware pour mettre à jour les données périodiquement
