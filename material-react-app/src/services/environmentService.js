@@ -242,27 +242,34 @@ class EnvironmentService {
   // Mode diagnostic pour debugging
   async runDiagnostic() {
     console.log('🔧 === DIAGNOSTIC ENVIRONNEMENT ===');
-    
+
     const status = this.getStatus();
     console.log('Configuration:', status.config);
     console.log('Environnement:', status.environment);
-    
-    // Test de connectivité
+
+    // Éviter le test de connectivité si pas de backend configuré
+    if (!this.config.apiUrl) {
+      console.log('Backend: Non configuré (mode frontend seul)');
+      console.log('🔧 === FIN DIAGNOSTIC ===');
+      return status;
+    }
+
+    // Test de connectivité seulement si backend configuré
     const isAvailable = await this.checkBackendAvailability();
     console.log('Backend disponible:', isAvailable);
-    
+
     if (!isAvailable) {
       const errorMessage = this.generateUserErrorMessage();
       console.log('Erreur détaillée:', errorMessage);
     }
-    
+
     // Test endpoints spécifiques
     if (isAvailable) {
       await this.testSpecificEndpoints();
     }
-    
+
     console.log('🔧 === FIN DIAGNOSTIC ===');
-    
+
     return status;
   }
 
