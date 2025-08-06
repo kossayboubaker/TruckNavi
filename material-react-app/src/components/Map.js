@@ -8,6 +8,7 @@ import BreakNotification from '../components/BreakNotification/BreakNotification
 import PreventiveAlert from '../components/PreventiveAlert/PreventiveAlert.js';
 import MandatoryBreaksPanel from '../components/MandatoryBreaksPanel/MandatoryBreaksPanel.js';
 import BackendErrorDisplay from '../components/BackendErrorDisplay/BackendErrorDisplay.js';
+import DemoModeNotice from '../components/DemoModeNotice/DemoModeNotice.js';
 
 // Services dynamiques - AUCUNE donnée statique
 import useRealTimeData from '../hooks/useRealTimeData';
@@ -634,7 +635,7 @@ const Map = () => {
             }}
             title="Pauses Obligatoires"
           >
-            ⏸��
+            ⏸️
           </button>
         )}
 
