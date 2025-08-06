@@ -113,12 +113,31 @@ function BasicLayout({ image, children }) {
           <MDBox
             position="relative"
             height="100%"
+            maxHeight="100vh"
             display="flex"
             flexDirection="column"
             width="100%"
             justifyContent="center"
-            paddingTop="7em"
-            paddingBottom="5em"
+            overflow="hidden"
+            paddingTop={{ xs: "2em", sm: "4em", md: "6em", lg: "7em" }}
+            paddingBottom={{ xs: "1em", sm: "2em", md: "3em", lg: "5em" }}
+            sx={{
+              // Micro-écrans (<100px)
+              '@media (max-width: 100px)': {
+                paddingTop: '8px',
+                paddingBottom: '4px',
+              },
+              // Tiny écrans (100-250px)
+              '@media (min-width: 100px) and (max-width: 250px)': {
+                paddingTop: '16px',
+                paddingBottom: '8px',
+              },
+              // 4K et plus
+              '@media (min-width: 2560px)': {
+                paddingTop: '10em',
+                paddingBottom: '8em',
+              },
+            }}
           >
             <MDBox paddingBottom="3rem" sx={{ textAlign: "center" }}>
               {pathname === "/auth/login" && (
