@@ -1,6 +1,7 @@
 // Routes pour l'intégration dynamique avec le simulateur Python
 import express from 'express';
 import osrmService from '../services/osrmService.js';
+import kafkaService from '../services/kafkaService.js';
 
 const router = express.Router();
 
