@@ -1,0 +1,170 @@
+/* Styles pour le panneau des pauses obligatoires */
+
+.mandatory-breaks-panel {
+  max-height: 80vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+}
+
+.mandatory-breaks-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mandatory-breaks-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mandatory-breaks-panel::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 3px;
+}
+
+.mandatory-breaks-panel::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+}
+
+/* Cartes de pause */
+.break-card {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: #fafafa;
+  transition: all 0.2s ease;
+}
+
+.break-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Pause active */
+.active-break {
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border-color: #ffc107;
+  animation: pulse-warning 2s infinite;
+}
+
+@keyframes pulse-warning {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255, 193, 7, 0.1);
+  }
+}
+
+/* Pause à venir */
+.upcoming-break {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border-color: #2196f3;
+}
+
+/* Pause terminée */
+.completed-break {
+  background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+  border-color: #4caf50;
+  opacity: 0.8;
+}
+
+/* Section pause active */
+.active-break-section {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  border-radius: 12px;
+  padding: 16px;
+  border-left: 4px solid #ff9800;
+}
+
+/* Statistiques du chauffeur */
+.driver-statistics {
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  border-radius: 8px;
+  border-left: 4px solid #9c27b0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .break-card {
+    padding: 12px !important;
+  }
+  
+  .break-card .MuiBox-root {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 8px;
+  }
+  
+  .driver-statistics .MuiBox-root[style*="flex-wrap"] {
+    flex-direction: column;
+    gap: 8px !important;
+  }
+}
+
+/* Animation d'entrée pour les nouvelles pauses */
+.break-card {
+  animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Marqueurs de priorité */
+.break-card[data-priority="critical"] {
+  border-left: 6px solid #f44336;
+  background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+}
+
+.break-card[data-priority="high"] {
+  border-left: 4px solid #ff9800;
+}
+
+.break-card[data-priority="medium"] {
+  border-left: 3px solid #2196f3;
+}
+
+/* Boutons d'action */
+.mandatory-breaks-panel button {
+  font-weight: 600;
+  text-transform: none;
+  border-radius: 6px;
+}
+
+/* Alertes */
+.mandatory-breaks-panel .MuiAlert-root {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Icônes d'état */
+.status-icon {
+  font-size: 1.2em;
+  margin-right: 4px;
+}
+
+/* Mode sombre (si supporté) */
+@media (prefers-color-scheme: dark) {
+  .break-card {
+    background: #2d2d2d;
+    border-color: #404040;
+    color: #f0f0f0;
+  }
+  
+  .active-break {
+    background: linear-gradient(135deg, #3d3424 0%, #4a3f2b 100%);
+  }
+  
+  .upcoming-break {
+    background: linear-gradient(135deg, #1e2a3d 0%, #2a3847 100%);
+  }
+  
+  .completed-break {
+    background: linear-gradient(135deg, #1e2d1e 0%, #2d3f2d 100%);
+  }
+}
