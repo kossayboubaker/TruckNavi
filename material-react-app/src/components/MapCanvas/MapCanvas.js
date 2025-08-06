@@ -242,30 +242,16 @@ const MapCanvas = ({
         } catch (error) {
           console.warn(`🔄 Fallback route pour ${truck.truck_id}:`, error.message);
 
-          // 🔥 Tentative récupération dynamique des waypoints avec fallback
-          try {
-            const waypointsResponse = await fetch(`http://localhost:8080/api/trucks/waypoints/${truck.truck_id}`, {
-              credentials: 'include',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              timeout: 5000 // Timeout de 5 secondes
-            });
+          // 🔥 Récupération dynamique des waypoints avec service API sécurisé
+          const waypointsResult = await apiService.getTruckWaypoints(truck.truck_id);
 
-            if (waypointsResponse.ok) {
-              const waypointsData = await waypointsResponse.json();
-              if (waypointsData.success) {
-                waypoints = waypointsData.waypoints || [];
-                console.log(`✅ Waypoints dynamiques récupérés pour ${truck.truck_id} (${waypoints.length} points)`);
-              } else {
-                throw new Error('API waypoints response not successful');
-              }
-            } else {
-              throw new Error(`Waypoints API responded with status ${waypointsResponse.status}`);
-            }
-          } catch (waypointError) {
-            console.warn(`⚠️ API waypoints non disponible pour ${truck.truck_id}, route directe utilisée:`, waypointError.message);
-            waypoints = []; // Route directe sans waypoints
+          if (waypointsResult.success && waypointsResult.data) {
+            waypoints = waypointsResult.data.waypoints || [];
+            console.log(`✅ Waypoints dynamiques récupérés pour ${truck.truck_id} (${waypoints.length} points)`);
+          } else {
+            // Fallback automatique géré par le service
+            waypoints = waypointsResult.data?.waypoints || [];
+            console.warn(`⚠️ Waypoints fallback utilisés pour ${truck.truck_id} (route directe)`);
           }
 
           const fallbackRoute = getRealRoute(startCoord, endCoord, waypoints);
