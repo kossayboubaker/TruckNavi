@@ -409,6 +409,45 @@ const Map = () => {
         onToggleFollowTruck={handleToggleFollowTruck}
       />
 
+      {/* Notification d'erreur non bloquante */}
+      {error && trucks.length > 0 && (
+        <div style={{
+          position: 'fixed',
+          top: '60px',
+          right: '20px',
+          zIndex: 2500,
+          background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+          color: 'white',
+          padding: '12px 16px',
+          borderRadius: '12px',
+          boxShadow: '0 4px 20px rgba(245, 158, 11, 0.4)',
+          maxWidth: '300px',
+          fontSize: '12px'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>⚠️</span>
+            <div>
+              <div style={{ fontWeight: '600' }}>Mode Démo Actif</div>
+              <div style={{ fontSize: '10px', opacity: '0.9' }}>
+                Backend non accessible - données limitées
+              </div>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'white',
+                cursor: 'pointer',
+                marginLeft: '8px'
+              }}
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Système AlertNotifications 100% dynamique */}
       <AlertNotifications
         alerts={alerts}
