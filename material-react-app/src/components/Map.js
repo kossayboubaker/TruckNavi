@@ -272,6 +272,15 @@ const Map = () => {
     newSocket.on('truckUpdate', (truckData) => {
       console.log('🚛 Mise à jour camion reçue:', truckData.id);
 
+      // Valider que les données reçues sont dynamiques
+      if (!dynamicDataService.validateDynamicData(truckData)) {
+        console.warn('⚠️ Données statiques reçues via Socket.IO, ignorées:', truckData.id);
+        return;
+      }
+
+      // Mettre à jour le service de données dynamiques
+      dynamicDataService.updateRealTimeData('truck', truckData);
+
       setVisibleTrucks(prevTrucks => {
         const updatedTrucks = prevTrucks.map(truck => {
           if (truck.id === truckData.id || truck.truck_id === truckData.id) {
@@ -283,7 +292,8 @@ const Map = () => {
               route_progress: truckData.route_progress || truck.route_progress,
               state: truckData.state || truck.state,
               route: truckData.route || truck.route,
-              last_update: new Date().toISOString()
+              last_update: new Date().toISOString(),
+              dataSource: 'realtime'
             };
           }
           return truck;
