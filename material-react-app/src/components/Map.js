@@ -409,48 +409,9 @@ const Map = () => {
 
   const buttonSize = getButtonSize();
 
-  // Affichage critique si MongoDB non accessible - AUCUNE donnée statique
+  // Affichage critique si MongoDB non accessible - Interface d'erreur améliorée
   if (error && trucks.length === 0 && !isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-red-50">
-        <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-lg">
-          <div className="text-6xl mb-4">🗄️</div>
-          <h2 className="text-2xl font-bold text-red-800 mb-4">
-            Base de Données MongoDB Requise
-          </h2>
-          <p className="text-gray-700 mb-4">
-            <strong>Erreur :</strong> {error}
-          </p>
-          <div className="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-6 text-left">
-            <h3 className="font-semibold text-yellow-800 mb-2">
-              🔧 Actions requises :
-            </h3>
-            <ul className="text-sm text-yellow-700 space-y-1">
-              <li>• Vérifiez que MongoDB est démarré</li>
-              <li>• Ajoutez des camions à la collection "trucks"</li>
-              <li>• Testez: <code>GET /trip/details</code></li>
-              <li>• Consultez: MONGODB_INTEGRATION.md</li>
-            </ul>
-          </div>
-          <div className="flex gap-3 justify-center">
-            <button
-              onClick={refresh}
-              className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-            >
-              🔄 Réessayer Connexion
-            </button>
-            <a
-              href={`${process.env.REACT_APP_API_URL || 'http://localhost:8080'}/trip/details`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-            >
-              🔗 Tester API
-            </a>
-          </div>
-        </div>
-      </div>
-    );
+    return <BackendErrorDisplay error={error} onRetry={refresh} />;
   }
 
   return (
@@ -673,7 +634,7 @@ const Map = () => {
             }}
             title="Pauses Obligatoires"
           >
-            ⏸️
+            ⏸��
           </button>
         )}
 
