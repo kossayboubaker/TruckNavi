@@ -361,7 +361,7 @@ const Map = () => {
 
         {/* Indicateur de connexion */}
         <div style={{
-          background: isConnected ? '#10b981' : '#ef4444',
+          background: error ? '#f59e0b' : isConnected ? '#10b981' : '#ef4444',
           color: 'white',
           padding: isUltraCompact ? '2px 4px' : '3px 6px',
           borderRadius: '8px',
@@ -369,7 +369,7 @@ const Map = () => {
           fontWeight: '600',
           boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
         }}>
-          {isConnected ? '🟢 LIVE' : '🔴 OFFLINE'}
+          {error ? '🟡 DEMO' : isConnected ? '🟢 LIVE' : '🔴 OFFLINE'}
         </div>
 
         {/* Indicateur de dernière mise à jour */}
