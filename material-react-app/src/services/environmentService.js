@@ -1,23 +1,35 @@
 // Service de détection automatique de l'environnement et configuration
 class EnvironmentService {
   constructor() {
+    // Détection d'environnement sécurisé
+    const isLocalhost = typeof window !== 'undefined' &&
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const isDev = process.env.NODE_ENV === 'development';
+
+    this.safeMode = !(isLocalhost && isDev); // Mode sécurisé si pas en dev local
+
     this.config = {
-      isDevelopment: process.env.NODE_ENV === 'development',
+      isDevelopment: isDev,
       isProduction: process.env.NODE_ENV === 'production',
-      apiUrl: this.detectAPIUrl(),
+      apiUrl: this.safeMode ? null : this.detectAPIUrl(), // Pas d'URL en mode sécurisé
       timeouts: {
         connection: 5000,
         request: 10000
-      }
+      },
+      safeMode: this.safeMode
     };
-    
+
     this.backendStatus = {
       isAvailable: false,
       lastCheck: null,
-      error: null
+      error: this.safeMode ? 'SAFE_MODE_ENABLED' : null
     };
-    
-    console.log('🔧 EnvironmentService initialisé:', this.config);
+
+    if (this.safeMode) {
+      console.log('🛡️ EnvironmentService en mode sécurisé (production)');
+    } else {
+      console.log('🔧 EnvironmentService en mode développement');
+    }
   }
 
   // Détection automatique de l'URL API
