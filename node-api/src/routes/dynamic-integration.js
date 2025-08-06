@@ -181,27 +181,54 @@ router.get('/routes', (req, res) => {
 });
 
 // POST /api/routes/optimize - Optimiser une route via OSRM
-router.post('/routes/optimize', (req, res) => {
+router.post('/routes/optimize', async (req, res) => {
   try {
-    const { truckId, start, end, waypoints = [] } = req.body;
-    
-    // Simuler réponse OSRM
-    const mockRoute = {
+    const { truckId, start, end, waypoints = [], options = {} } = req.body;
+
+    if (!start || !end) {
+      return res.status(400).json({
+        success: false,
+        error: 'Coordonnées de départ et d\'arrivée requises'
+      });
+    }
+
+    console.log(`🛣️ Optimisation route OSRM pour ${truckId}: ${start} → ${end}`);
+
+    // Calculer la route via OSRM avec profil poids-lourd
+    const routeData = await osrmService.calculateRoute(start, end, {
+      ...options,
+      profile: 'truck', // Forcer le profil poids-lourd
+      waypoints: waypoints
+    });
+
+    if (!routeData) {
+      return res.status(500).json({
+        success: false,
+        error: 'Impossible de calculer la route'
+      });
+    }
+
+    // Enrichir avec les données du camion
+    const optimizedRoute = {
       truckId,
-      waypoints: [start, ...waypoints, end],
-      distance: Math.random() * 100 + 50, // km
-      duration: Math.random() * 3600 + 1800, // secondes
+      ...routeData,
       status: 'optimized',
-      created: new Date().toISOString()
+      created: new Date().toISOString(),
+      osrmAvailable: !routeData.isFallback
     };
-    
-    routesData[truckId] = mockRoute;
-    
+
+    // Stocker la route optimisée
+    routesData[truckId] = optimizedRoute;
+
+    console.log(`✅ Route OSRM optimisée pour ${truckId}: ${routeData.distance}km, ${routeData.duration}min`);
+
     res.json({
       success: true,
-      route: mockRoute
+      route: optimizedRoute,
+      osrmStatus: routeData.isFallback ? 'fallback' : 'optimal'
     });
   } catch (error) {
+    console.error('❌ Erreur optimisation route OSRM:', error);
     res.status(500).json({
       success: false,
       error: 'Erreur optimisation route',
