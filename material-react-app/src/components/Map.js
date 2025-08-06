@@ -163,22 +163,10 @@ const Map = () => {
     try {
       console.log('📡 Récupération 100% dynamique des camions...');
 
-      // Vérifier si l'API_BASE_URL est définie
-      if (!API_BASE_URL || API_BASE_URL === 'undefined') {
-        throw new Error('URL de l\'API non configurée. Vérifiez REACT_APP_API_URL dans .env');
-      }
+      // Utiliser le service de données dynamiques
+      const trucks = await dynamicDataService.getActiveTrucks();
 
-      const response = await axios.get(`${API_BASE_URL}/api/trucks/active-trucks`, {
-        withCredentials: true,
-        timeout: 10000,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      });
-
-      if (response.data.success && response.data.trucks) {
-        const trucks = response.data.trucks;
+      if (trucks.length > 0) {
         console.log(`✅ ${trucks.length} camions récupérés`);
 
         // Valider et nettoyer les données
