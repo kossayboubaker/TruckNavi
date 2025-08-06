@@ -107,20 +107,27 @@ class EnvironmentService {
     if (error.name === 'AbortError') {
       return 'TIMEOUT - Serveur ne répond pas dans les 5 secondes';
     }
-    
+
     if (error.message.includes('fetch')) {
       return 'NETWORK_ERROR - Impossible de joindre le serveur';
     }
-    
+
     if (error.message.includes('ECONNREFUSED')) {
       return 'CONNECTION_REFUSED - Serveur non démarré';
     }
-    
+
     if (error.message.includes('CORS')) {
       return 'CORS_ERROR - Configuration CORS incorrecte';
     }
-    
+
     return `UNKNOWN_ERROR - ${error.message}`;
+  }
+
+  // Vérifier si on est en environnement de développement
+  isDevelopmentEnvironment() {
+    return this.config.isDevelopment ||
+           window.location.hostname === 'localhost' ||
+           window.location.hostname === '127.0.0.1';
   }
 
   // Obtenir la configuration optimale pour les requêtes
