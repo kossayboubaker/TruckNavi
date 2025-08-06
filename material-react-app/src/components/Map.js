@@ -167,19 +167,29 @@ const Map = () => {
       const trucks = await dynamicDataService.getActiveTrucks();
 
       if (trucks.length > 0) {
-        console.log(`✅ ${trucks.length} camions récupérés`);
+        console.log(`✅ ${trucks.length} camions dynamiques récupérés`);
 
-        // Valider et nettoyer les données
-        const validTrucks = trucks.map(truck => ({
+        // Valider que toutes les données sont dynamiques
+        const validatedTrucks = trucks.filter(truck => {
+          const isValid = dynamicDataService.validateDynamicData(truck);
+          if (!isValid) {
+            console.warn('⚠️ Camion avec données statiques exclu:', truck.id);
+          }
+          return isValid;
+        });
+
+        // Traitement des données 100% dynamiques
+        const validTrucks = validatedTrucks.map(truck => ({
           ...truck,
-          position: Array.isArray(truck.position) ? truck.position : [36.8, 10.18],
+          position: Array.isArray(truck.position) ? truck.position : null,
           speed: truck.speed || 0,
           bearing: truck.bearing || 0,
           route_progress: truck.route_progress || 0,
-          state: truck.state || 'Arrêté',
+          state: truck.state || 'Inconnu',
           route: Array.isArray(truck.route) ? truck.route : [],
-          last_update: truck.last_update || new Date().toISOString()
-        }));
+          last_update: truck.last_update || new Date().toISOString(),
+          dataSource: 'dynamic'
+        })).filter(truck => truck.position !== null);
 
         // Mettre à jour le générateur de routes avec les nouvelles donn��es
         validTrucks.forEach(truck => {
