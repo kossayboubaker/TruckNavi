@@ -52,16 +52,24 @@ export const useRealTimeData = (options = {}) => {
       setIsLoading(true);
       setError(null);
 
-      // Connexion Socket.IO
-      realtimeService.connect();
-      
-      // Initialiser le service de routes dynamiques
-      dynamicRoutesService.initialize();
+      // Connexion Socket.IO (non bloquante)
+      try {
+        realtimeService.connect();
+      } catch (socketError) {
+        console.warn('⚠️ Socket.IO non disponible:', socketError.message);
+      }
 
-      // Charger les données initiales
+      // Initialiser le service de routes dynamiques
+      try {
+        dynamicRoutesService.initialize();
+      } catch (routesError) {
+        console.warn('⚠️ Service routes non disponible:', routesError.message);
+      }
+
+      // Charger les données initiales (avec fallback intégré)
       await loadInitialData();
 
-      // Configurer les abonnements temps réel
+      // Configurer les abonnements temps réel (si socket disponible)
       setupRealtimeSubscriptions();
 
       // Démarrer les mises à jour périodiques
@@ -72,11 +80,16 @@ export const useRealTimeData = (options = {}) => {
       console.log('✅ Connexion temps réel initialisée');
     } catch (err) {
       console.error('❌ Erreur initialisation temps réel:', err);
-      setError(err.message);
+
+      // Ne pas échouer complètement, utiliser mode dégradé
+      const fallbackData = getFallbackData();
+      setTrucks(fallbackData.trucks);
+      setAlerts(fallbackData.alerts);
+      setError('Mode démo - Backend non accessible');
     } finally {
       setIsLoading(false);
     }
-  }, [updateInterval]);
+  }, [updateInterval, loadInitialData]);
 
   // Données de fallback en cas d'erreur backend
   const getFallbackData = () => ({
