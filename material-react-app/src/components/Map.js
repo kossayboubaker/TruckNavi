@@ -103,7 +103,24 @@ const useResponsive = () => {
 };
 
 const Map = () => {
-  const { dimensions, isUltraCompact, isMobile, isSmallMobile } = useResponsive();
+  const {
+    dimensions,
+    isMicro,
+    isTiny,
+    isCompact,
+    isSmallMobile,
+    isMobile,
+    isTabletPortrait,
+    isDesktop,
+    isLargeDesktop,
+    is4K,
+    isUltraCompact,
+    isPortrait,
+    needsMinimalUI,
+    needsCompactLayout,
+    supportsFullFeatures,
+    uiScale
+  } = useResponsive();
   
   // États principaux
   const [searchTerm, setSearchTerm] = useState('');
@@ -420,7 +437,7 @@ const Map = () => {
     return () => window.removeEventListener('roleChanged', handleRoleChange);
   }, [visibleTrucks]);
 
-  // Gestionnaires d'év��nements
+  // Gestionnaires d'événements
   const handleZoomIn = () => mapInstance?.zoomIn();
   const handleZoomOut = () => mapInstance?.zoomOut();
   const handleMapStyleChange = (style) => setMapStyle(style);
