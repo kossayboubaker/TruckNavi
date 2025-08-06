@@ -106,7 +106,7 @@ class TrucksService {
       return response.data.alerts || [];
     } catch (error) {
       console.error('❌ Erreur récupération alertes:', error);
-      return [];
+      throw new Error('API alertes non accessible');
     }
   }
 
