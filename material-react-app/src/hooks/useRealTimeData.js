@@ -93,36 +93,15 @@ export const useRealTimeData = (options = {}) => {
     }
   }, [updateInterval, loadInitialData]);
 
-  // Données de fallback en cas d'erreur backend
-  const getFallbackData = () => ({
-    trucks: [
-      {
-        id: 'demo-001',
-        truck_id: 'DEMO-001',
-        position: [36.8065, 10.1815],
-        speed: 45,
-        state: 'En Route',
-        vehicle: 'Demo Truck',
-        cargo: 'Demo Cargo',
-        status: 'demo-mode',
-        route_progress: 35,
-        driver: { name: 'Demo Driver' },
-        last_update: new Date().toISOString(),
-        fuel_level: 75
-      }
-    ],
-    alerts: [
-      {
-        id: 'demo-alert',
-        type: 'info',
-        title: 'Mode Démo',
-        description: 'Backend non connecté - données de démonstration',
-        severity: 'info',
-        position: [36.8065, 10.1815],
-        timestamp: new Date().toISOString()
-      }
-    ]
-  });
+  // AUCUNE donnée de fallback - Tout doit provenir du backend MongoDB
+  const handleAPIFailure = (errorMessage) => {
+    console.error('❌ API Backend inaccessible:', errorMessage);
+    setError(`Backend MongoDB inaccessible: ${errorMessage}`);
+    setTrucks([]);
+    setAlerts([]);
+    setRoutes({});
+    setMandatoryBreaks({});
+  };
 
   // Charger les données initiales depuis l'API avec fallback
   const loadInitialData = useCallback(async () => {
@@ -340,7 +319,7 @@ export const useRealTimeData = (options = {}) => {
         try {
           dynamicRoutesService.clearExpiredCache();
         } catch (cacheError) {
-          console.warn('⚠️ Nettoyage cache échoué');
+          console.warn('⚠��� Nettoyage cache échoué');
         }
 
       } catch (err) {
@@ -479,7 +458,7 @@ export const useRealTimeData = (options = {}) => {
   };
 };
 
-// Hook spécialisé pour un camion spécifique
+// Hook spécialis�� pour un camion spécifique
 export const useRealTimeTruck = (truckId) => {
   const [truck, setTruck] = useState(null);
   const [route, setRoute] = useState(null);
